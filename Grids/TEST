@@ -1,0 +1,7 @@
+#!/bin/sh
+
+./BUILDLINKEDLISTS
+
+./linkedlists > DUMP
+
+./memchecker.py DUMP

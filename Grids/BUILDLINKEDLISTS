@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+
+case "$1" in
+	debug)
+		gcc -c -fmudflap linkedlists.c -o linkedlists.o
+		gcc -fmudflap -lmudflap linkedlists.o -o linkedlists
+		;;
+	*)
+		gcc -c linkedlists.c -o linkedlists.o
+		gcc linkedlists.o -o linkedlists
+		;;
+esac
+
+exit 0
