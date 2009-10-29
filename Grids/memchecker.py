@@ -90,7 +90,8 @@ matcher = grammar(inlines)
 # Try to find a dump in the input
 grid = matcher.apply('grid')
 
-# Now we should have a dictionary of the program internals, so run some tests
+## Now we should have a dictionary of the program internals, so run some
+## tests
 
 # If there are cells, do checks on them
 if 'CELLS' in grid.keys():
@@ -163,6 +164,11 @@ if 'CELLS' in grid.keys():
 				y = (((start - z) % (grid['Y']*grid['Z'])) / grid['Z'])
 				x = (((start - z) - (grid['Z']*y)) / (grid['Y']*grid['Z']))
 
+				# Make sure we're in the grid
+				if x < 0 or x >= grid['X'] or y < 0 or y >= grid['Y'] or z < 0 or z >= grid['Z']:
+					print "Cell "+str(cell['ADDRESS'])+" is at position "+str((x,y,z))+" but grid size is "+str((grid['X'],grid['Y'],grid['Z']))
+					sys.exit()
+
 				# These are the total neighbours we predict
 				predicted_n = ['self', 'left', 'right', 'leftforward', 'rightforward', 'leftback', 'rightback', 'forward', 'back',
 					'up','upleft','upright','upforward','upleftforward','uprightforward','upback','upleftback','uprightback',
@@ -231,12 +237,37 @@ if 'CELLS' in grid.keys():
 						if n is not None:
 							print "Cell "+str(cell['ADDRESS'])+" has unexpected "+all_n[index]+" neighbour!"
 							sys.exit()
+					
 					# If we don't have a neighbour we should have then report it
 					else:
 						if n is None:
 							print "Cell "+str(cell['ADDRESS'])+" doesn't have expected "+all_n[index]+" neighbour!"
 							sys.exit()
-
+						
+						# Otherwise make sure that it's the correct neighbour
+						else:
+							# Work out the  relative position of this neighbour
+							z_rel = ((index % 9) % 3) - 1
+							y_rel = (((index - z_rel) % 9)/3) - 1
+							x_rel = (((index - z_rel) - (3*y_rel)) / 9) - 1
+							
+							# And from that the absolute position
+							n_x = x + x_rel
+							n_y = y + y_rel
+							n_z = z + z_rel
+							
+							# Make sure the current neighbour points to the address of the neighbour
+							if n != (((n_x*grid['Y']*grid['Z'])+(n_y*grid['Z'])+n_z)*cell_spacing)+grid['CELLSSTART']:
+								print "Expected cell "+str(((n_x*(grid['Y']*grid['Z'])+n_y*(grid['Z'])+n_z)*cell_spacing)+grid['CELLSSTART'])+" but got neighbour "+str(n)
+								
+								nstart = (n - grid['CELLSSTART']) / cell_spacing
+								nz = ((nstart % (grid['Y']*grid['Z'])) % grid['Z'])
+								ny = (((nstart - nz) % (grid['Y']*grid['Z'])) / grid['Z'])
+								nx = (((nstart - nz) - (grid['Z']*ny)) / (grid['Y']*grid['Z']))
+								
+								print "Cell is "+str(cell['ADDRESS'])+' ( '+str((x,y,z))+" ) and neighbour should be "+str((n_x,n_y,n_z))+" at relative position "+str((x_rel,y_rel,z_rel))+", but found "+str((nx,ny,nz))
+								#sys.exit()
+								
 # If there are no cells then make sure there really aren't any
 else:
 	
