@@ -344,8 +344,8 @@ int check_particles(grid* current_grid, int particle_number) {
 void put_particle_in_cell(particle* current_particle, cell* intended_cell) {
 	/*
 	 * This checks whether the given cell already contains a particle.
-	 * If so then the list is traversed to the end and the given
-	 * particle is appended. If not then the given particle is turned
+	 * If so then the list pointed to by the given particle and then the
+	 * cell points to it. If not then the given particle is turned
 	 * into the head of the list.
 	 */
 	
@@ -362,18 +362,11 @@ void put_particle_in_cell(particle* current_particle, cell* intended_cell) {
 		intended_cell->first_particle = current_particle;
 		return;
 	}
-	// Otherwise we'll need to traverse the list, so keep track of
-	// where we are
-	particle* current_list_particle = intended_cell->first_particle;
+	// Otherwise we'll need to point to the list
+	current_particle->next = intended_cell->first_particle;
 	
-	// Loop until we're at the end
-	while (current_list_particle->next != NULL) {
-		// Go along one particle
-		current_list_particle = current_list_particle->next;
-	}
-	
-	// Now append the given particle
-	current_list_particle->next = current_particle;
+	// Now add replace the previous start with ourselves
+	intended_cell->first_particle = current_particle;
 	
 	// POSTCONDITIONS
 	assert(intended_cell->first_particle != NULL);
@@ -690,14 +683,14 @@ int check_for_dupes(particle** particles, int length) {
 
 int main() {
 	// These are the dimensions of our volume elements
-	double dx = 1.0;
-	double dy = 1.0;
-	double dz = 1.0;
+	double dx = 5.0;
+	double dy = 5.0;
+	double dz = 5.0;
 	
 	// These are the dimensions of our space as multiples of dx, dy & dz
-	int x = 5;
-	int y = 5;
-	int z = 5;
+	int x = 8;
+	int y = 8;
+	int z = 8;
 	
 	// This is the total number of particles to simulate
 	int particle_number = 1000;
@@ -730,6 +723,8 @@ int main() {
 	assert(current_grid.particles[0].container != NULL);
 	assert(count_all_particles(&current_grid, x, y, z) == particle_number);
 
+	dump_grid(&(current_grid), 1, 1, 1, 1);
+
 	// Choose a particle from the group
 	particle* test_particle = &(current_grid.particles[0]);
 
@@ -738,19 +733,19 @@ int main() {
 	assert(test_particle->container != NULL);
 
 	// Print out its position
-	fprintf(stderr, "Chosen particle position: %G, %G, %G\n", test_particle->position.x, test_particle->position.y, test_particle->position.z);
+	//fprintf(stderr, "Chosen particle position: %G, %G, %G\n", test_particle->position.x, test_particle->position.y, test_particle->position.z);
 
-	fprintf(stderr, "Getting neighbours: ");
+	//fprintf(stderr, "Getting neighbours: ");
 
 	// Find its neighbours through the grid
 	particle** neighbour_array;		// This will point too an array of neighbours
 	int neighbour_number;		// This will tell us how long the array is
 	get_neighbours_for_particle(test_particle, &neighbour_array, &neighbour_number);
 	
-	fprintf(stderr, "DEBUG:(%G, %G, %G) has %i potential neighbours\n", test_particle->position.x, test_particle->position.y, test_particle->position.z, neighbour_number);
+	//fprintf(stderr, "DEBUG:(%G, %G, %G) has %i potential neighbours\n", test_particle->position.x, test_particle->position.y, test_particle->position.z, neighbour_number);
 	
 	// DEBUGGING
-	fprintf(stderr, "NN:%i ", neighbour_number);
+	//fprintf(stderr, "NN:%i ", neighbour_number);
 	assert(neighbour_number >= 0);
 	
 	assert(check_for_dupes(neighbour_array, neighbour_number) == 0);
@@ -762,7 +757,7 @@ int main() {
 	int true_neighbour_number;
 	find_neighbours_by_brute_force(test_particle, dx, &true_neighbour_array, &true_neighbour_number, neighbour_array, neighbour_number); 
 	
-	fprintf(stderr, "True neighbours through grid: %i\n", true_neighbour_number);
+	//fprintf(stderr, "True neighbours through grid: %i\n", true_neighbour_number);
 	
 	
 	
@@ -775,7 +770,7 @@ int main() {
 	int total_neighbours = count_neighbours(test_particle, dx, all_pointers, particle_number);
 	
 	assert(neighbours_in_grid == true_neighbour_number);
-	fprintf(stderr, "T:%i, N:%i ", total_neighbours, neighbours_in_grid);
+	//fprintf(stderr, "T:%i, N:%i ", total_neighbours, neighbours_in_grid);
 	assert(total_neighbours == neighbours_in_grid);
 	
 	particle** brute_force_array;
@@ -784,22 +779,22 @@ int main() {
 	
 	find_neighbours_by_brute_force(test_particle, dx, &brute_force_array, &total_neighbours2, all_pointers, particle_number);
 	
-	fprintf(stderr, "grid1: %i, grid2: %i, total1: %i, total2: %i\n", neighbours_in_grid, true_neighbour_number, total_neighbours, total_neighbours2); 
+	//fprintf(stderr, "grid1: %i, grid2: %i, total1: %i, total2: %i\n", neighbours_in_grid, true_neighbour_number, total_neighbours, total_neighbours2); 
 	
 	assert(total_neighbours == neighbours_in_grid);
 	
 	// Now "true_neighbour_array" should contain "true_neighbour_number"
 	// neighbours
-	printf("%i\n", true_neighbour_number);
+	//printf("%i\n", true_neighbour_number);
 	
-	printf("Getting neighbours through brute force: ");
+	//printf("Getting neighbours through brute force: ");
 	
 	
 	int brute_force_number;
 	brute_force_all(test_particle, &current_grid, particle_number, dx, &brute_force_array, &brute_force_number);
 	
 	// Now "brute_force_array" should contain "brute_force_number"
-	printf("%i\n", total_neighbours);
+	//printf("%i\n", total_neighbours);
 	
 	// Compare the two
 	assert(total_neighbours == true_neighbour_number);
@@ -830,13 +825,13 @@ int main() {
 			}
 		}
 		if (found == 0) {
-			fprintf(stderr, "Particle in 'true' array not found through brute force!\n");
+			//fprintf(stderr, "Particle in 'true' array not found through brute force!\n");
 			diff_count++;
 			return 1;
 		}
 	}
 	
-	fprintf(stderr, "\nDIFF: %i\n", diff_count);
+	//fprintf(stderr, "\nDIFF: %i\n", diff_count);
 	
 	diff_count = 0;
 	
@@ -865,10 +860,10 @@ int main() {
 		}
 	}
 	
-	fprintf(stderr, "Difference of %i\n", diff_count);
+	//fprintf(stderr, "Difference of %i\n", diff_count);
 	
 	// Comment this out until it's true :P
-	printf("Success!\n");
+	//printf("Success!\n");
 	
 	return 0;
 }

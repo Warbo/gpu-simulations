@@ -85,13 +85,17 @@ inlines = ''.join(infile.readlines())
 infile.close()
 
 # Instantiate the dump grammar with the input
+print "Making grammar"
 matcher = grammar(inlines)
 
 # Try to find a dump in the input
+print "Reading contents"
 grid = matcher.apply('grid')
 
 ## Now we should have a dictionary of the program internals, so run some
 ## tests
+
+print "Testing"
 
 # If there are cells, do checks on them
 if 'CELLS' in grid.keys():
@@ -275,4 +279,37 @@ else:
 	if 'CELLSSTART' in grid.keys():
 		print "Grid has cell start address, but no cells!"
 		sys.exit()
-				
+
+# Now run tests on the particles
+if 'PARTICLES' in grid.keys():
+	
+	# Make sure that we have a start address if we do have particles
+	if 'PARTICLESSTART' not in grid.keys():
+		print "We have particles, but no start address"
+		sys.exit()
+	
+	if len(grid['PARTICLES']) > 1:
+		particle_length = grid['PARTICLES'][1] - grid['PARTICLES'][0]
+	else:
+		particle_length = None
+
+	# Traverse the particle
+	for p in grid['PARTICLES']:
+
+		# Make sure this particle is not stored before the particles array
+		if p['ADDRESS'] < grid['PARTICLESSTART']:
+			print "Particle found at "+str(p['ADDRESS'])+" but particles start at "+str(grid['PARTICLESSTART'])
+
+		# Make sure this particle is an integer number of particle_lengths away from PARTICLESSTART
+		if particle_length is not None:
+			if (p['ADDRESS'] - grid['PARTICLESSTART']) % particle_length != 0:
+				print "Particle not an integer number of particle lengths away from start!"
+		
+		# Make sure this particle has a container
+		#if 'CONTAINER' not in p.keys() or 
+		
+else:
+	if 'PARTICLESSTART' in grid.keys():
+		print "We have a particles start address, but no particles!"
+		sys.exit()
+
