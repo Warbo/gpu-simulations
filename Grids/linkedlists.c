@@ -206,6 +206,33 @@ int get_index(double position, double interval_size) {
 	return count;
 }
 
+/*int get_subscript_for_position(int x, int y, int z) {
+	/*
+	 * Given an x, y and z coordinate, calculate the index with which to
+	 * subscript the cell array.
+	 */
+	
+	/*// To get the address we must first find the layer it's in, which
+	// depends on the magnitude of the coordinate abs(x)+abs(y)+abs(z)
+	int start = 0;		// Indexing starts at zero
+	int inc = 8;		// We initially go up by 8
+	int inc_inc = 16;		// We initially increase the increment by 16
+	count = 0;
+	// Loop as long as we haven't found the right layer yet
+	while ((abs(x)+abs(y)+abs(z))-count > 0) {
+		inc_inc += 8;		// The increment's increase goes up by 8
+		inc += inc_inc;		// Increase the increment
+		start += inc;		// Increment the start address
+		count += 1;			// Increment the loop
+	}
+	// Now start should be the beginning of the layer containing the
+	// given coordinates
+	
+	//FIXME: Not implemented yet
+}
+*/
+	
+
 void initialise_grid(grid* current_grid, int x, int y, int z, int particles) {
 	/*
 	 * Set up a grid at the given pointer, assigning it memory for its
@@ -438,7 +465,7 @@ void get_neighbours_for_particle(grid* current_grid, particle* current_particle,
 	for (n_x = -1 * (current_grid->y_size*current_grid->z_size); n_x <= (current_grid->y_size*current_grid->z_size); n_x += (current_grid->y_size*current_grid->z_size)) {
 		
 		// Loop through the rows at y-1, y and y+1
-		for (n_y = -1 * (current_grid->z_size); n_y <= (current_grid->size_z); n_y += (current_grid->size_z)) {
+		for (n_y = -1 * (current_grid->z_size); n_y <= (current_grid->z_size); n_y += (current_grid->z_size)) {
 			
 			// Loop through the cells at z-1, z and z+1 
 			for (n_z = -1; n_z <= 1; n_z += 1) {
@@ -450,25 +477,25 @@ void get_neighbours_for_particle(grid* current_grid, particle* current_particle,
 				
 				// Get the coordinates of the current particle's cell
 				
-				// First get z by throwing away multiples of size_y*size_z (x coordinates) then size_z (y coordinates)
-				int z = (((current_particle->container - current_grid->cells) / sizeof(cell)) % (current_grid->size_y * current_grid->size_z)) % (current_grid->size_z);
+				// First get z by throwing away multiples of y_size*z_size (x coordinates) then z_size (y coordinates)
+				int z = (((current_particle->container - current_grid->cells) / sizeof(cell)) % (current_grid->y_size * current_grid->z_size)) % (current_grid->z_size);
 				
 				// Now get y by taking off z and throwing away x coordinates
-				int y = ((((current_particle->container - current_grid->cells) / sizeof(cell)) - z) % (current_grid->size_y * current_grid->size_z)) / current_grid->size_z;
+				int y = ((((current_particle->container - current_grid->cells) / sizeof(cell)) - z) % (current_grid->y_size * current_grid->z_size)) / current_grid->z_size;
 
-				// Now get x by taking off z and size_z*y then divide by size_y*size_z to get x
-				int x = (((current_particle->container - current_grid->cells) / sizeof(cell)) - z - (current_grid->size_z * y)) / (current_grid->size_y * current_grid->size_z);
+				// Now get x by taking off z and z_size*y then divide by y_size*z_size to get x
+				int x = (((current_particle->container - current_grid->cells) / sizeof(cell)) - z - (current_grid->z_size * y)) / (current_grid->y_size * current_grid->z_size);
 
 				// Only act if this neighbour is actually in the grid
-				if ((x+n_x >= 0) && (x+n_x < current_grid->size_x) &&
-					(y+n_y >= 0) && (y+n_y < current_grid->size_y) &&
-					(z+n_z >= 0) && (z+n_z < current_grid->size_z)) {
+				if ((x+n_x >= 0) && (x+n_x < current_grid->x_size) &&
+					(y+n_y >= 0) && (y+n_y < current_grid->y_size) &&
+					(z+n_z >= 0) && (z+n_z < current_grid->z_size)) {
 					
 					assert(current_particle != NULL);
 					assert(current_particle->container != NULL);
 		
 					// Get this neighbour's first particle
-					found_particle = current_grid->cells[(current_grid->size_y * current_grid->size_z)*(x+n_x) + (current_grid->size_z)*(y+n_y) + (z+n_z)]->first_particle;
+					found_particle = current_grid->cells[(current_grid->y_size * current_grid->z_size)*(x+n_x) + (current_grid->z_size)*(y+n_y) + (z+n_z)].first_particle;
 		
 					// As long as there are still particles in this cell, loop
 					while (found_particle != NULL) {
@@ -496,7 +523,7 @@ void get_neighbours_for_particle(grid* current_grid, particle* current_particle,
 	for (n_x = -1 * (current_grid->y_size*current_grid->z_size); n_x <= (current_grid->y_size*current_grid->z_size); n_x += (current_grid->y_size*current_grid->z_size)) {
 		
 		// Loop through the rows at y-1, y and y+1
-		for (n_y = -1 * (current_grid->z_size); n_y <= (current_grid->size_z); n_y += (current_grid->size_z)) {
+		for (n_y = -1 * (current_grid->z_size); n_y <= (current_grid->z_size); n_y += (current_grid->z_size)) {
 			
 			// Loop through the cells at z-1, z and z+1 
 			for (n_z = -1; n_z <= 1; n_z += 1) {
@@ -508,21 +535,21 @@ void get_neighbours_for_particle(grid* current_grid, particle* current_particle,
 				
 				// Get the coordinates of the current particle's cell
 				
-				// First get z by throwing away multiples of size_y*size_z (x coordinates) then size_z (y coordinates)
-				int z = (((current_particle->container - current_grid->cells) / sizeof(cell)) % (current_grid->size_y * current_grid->size_z)) % (current_grid->size_z);
+				// First get z by throwing away multiples of y_size*z_size (x coordinates) then z_size (y coordinates)
+				int z = (((current_particle->container - current_grid->cells) / sizeof(cell)) % (current_grid->y_size * current_grid->z_size)) % (current_grid->z_size);
 				
 				// Now get y by taking off z and throwing away x coordinates
-				int y = ((((current_particle->container - current_grid->cells) / sizeof(cell)) - z) % (current_grid->size_y * current_grid->size_z)) / current_grid->size_z;
+				int y = ((((current_particle->container - current_grid->cells) / sizeof(cell)) - z) % (current_grid->y_size * current_grid->z_size)) / current_grid->z_size;
 
-				// Now get x by taking off z and size_z*y then divide by size_y*size_z to get x
-				int x = (((current_particle->container - current_grid->cells) / sizeof(cell)) - z - (current_grid->size_z * y)) / (current_grid->size_y * current_grid->size_z);
+				// Now get x by taking off z and z_size*y then divide by y_size*z_size to get x
+				int x = (((current_particle->container - current_grid->cells) / sizeof(cell)) - z - (current_grid->z_size * y)) / (current_grid->y_size * current_grid->z_size);
 
 				// Only act if this neighbour is actually in the grid
-				if ((x+n_x >= 0) && (x+n_x < current_grid->size_x) &&
-					(y+n_y >= 0) && (y+n_y < current_grid->size_y) &&
-					(z+n_z >= 0) && (z+n_z < current_grid->size_z)) {
+				if ((x+n_x >= 0) && (x+n_x < current_grid->x_size) &&
+					(y+n_y >= 0) && (y+n_y < current_grid->y_size) &&
+					(z+n_z >= 0) && (z+n_z < current_grid->z_size)) {
 	
-					found_particle = current_particle->container->neighbours[neighbour_index]->first_particle;
+					found_particle = current_grid->cells[(x+n_x)*(current_grid->y_size)*(current_grid->z_size)+(y+n_y)*(current_grid->z_size)+(z+n_z)].first_particle;
 					while (found_particle != NULL) {
 						if (found_particle != current_particle) {
 							(neighbour_particles[0])[(*length)] = found_particle;
