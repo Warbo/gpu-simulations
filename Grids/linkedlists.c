@@ -829,7 +829,7 @@ int main() {
 	// Find its neighbours through the grid
 	particle** neighbour_array;		// This will point too an array of neighbours
 	int neighbour_number;		// This will tell us how long the array is
-	get_neighbours_for_particle(test_particle, &neighbour_array, &neighbour_number);
+	get_neighbours_for_particle(&current_grid, test_particle, &neighbour_array, &neighbour_number);
 	
 	//fprintf(stderr, "DEBUG:(%G, %G, %G) has %i potential neighbours\n", test_particle->position.x, test_particle->position.y, test_particle->position.z, neighbour_number);
 	
