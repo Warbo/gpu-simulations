@@ -280,7 +280,7 @@ void put_particle_in_cell(particle* the_particle, cell* intended_cell) {
 	
 	// POSTCONDITIONS
 	assert(intended_cell->first_particle != NULL);
-	assert(current_particle->container != NULL);
+	assert(the_particle->container != NULL);
 	
 }
 
@@ -388,8 +388,8 @@ void get_neighbours_for_particle(grid* the_grid, particle* the_particle,
 						(the_particle->container - the_grid->cells) 
 						/ sizeof(cell)
 					) 
-					% (current_grid->y_size * current_grid->z_size)
-				) % (current_grid->z_size);
+					% (the_grid->y_size * the_grid->z_size)
+				) % (the_grid->z_size);
 				
 				// Now get y by taking off z and throwing away x
 				// coordinates
@@ -526,7 +526,7 @@ void get_neighbours_for_particle(grid* the_grid, particle* the_particle,
 	// which are the neighbouring particles, and length should point to
 	// the length, so we're done
 	
-	// POSTCONDITIONS
+	// POSTCONDITIONS3
 	//assert();
 	
 }
