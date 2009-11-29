@@ -8,13 +8,13 @@ case "$1" in
 		;;
 	
 	tests)
+		gcc -c linkedlists.c -o linkedlists.o
 		gcc -c tests.c -o tests.o
 		gcc tests.o -o tests
 		;;
 
 	*)
 		gcc -c linkedlists.c -o linkedlists.o
-		#gcc linkedlists.o -o linkedlists
 		;;
 
 esac

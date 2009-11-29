@@ -412,6 +412,10 @@ void get_neighbours_for_particle(grid* the_grid, particle* the_particle,
 				) / (the_grid->y_size * the_grid->z_size);
 
 				// Only act if this neighbour is actually in the grid
+				////////////////////////////////////////////////////////
+				// FIXME: This is a completely broken way of working if
+				// we want to support negative positions!
+				////////////////////////////////////////////////////////
 				if ((x+n_x >= 0) && (x+n_x < the_grid->x_size) &&
 					(y+n_y >= 0) && (y+n_y < the_grid->y_size) &&
 					(z+n_z >= 0) && (z+n_z < the_grid->z_size)) {
@@ -446,22 +450,19 @@ void get_neighbours_for_particle(grid* the_grid, particle* the_particle,
 	);
 
 	// Now loop through the neighbours again, storing pointers to them
+	// in the array we just allocated
 	*length = 0;		// We can re-use this as our index
 	
 	found_particle = NULL;
 	
 	// Loop through the planes at x-1, x and x+1
-	for (n_x = -1 * (the_grid->y_size*the_grid->z_size);
-		n_x <= (the_grid->y_size*the_grid->z_size);
-		n_x += (the_grid->y_size*the_grid->z_size)) {
+	for (n_x = -1; n_x < 2; n_x++) {
 		
 		// Loop through the rows at y-1, y and y+1
-		for (n_y = -1 * (the_grid->z_size);
-			n_y <= (the_grid->z_size);
-			n_y += (the_grid->z_size)) {
+		for (n_y = -1; n_y < 2; n_y++) {
 			
 			// Loop through the cells at z-1, z and z+1 
-			for (n_z = -1; n_z <= 1; n_z += 1) {
+			for (n_z = -1; n_z < 2; n_z++) {
 				
 				// TODO: We can compact a lot of this calculation
 				// together since it involves converting pointers to
@@ -503,6 +504,10 @@ void get_neighbours_for_particle(grid* the_grid, particle* the_particle,
 				) / (the_grid->y_size * the_grid->z_size);
 
 				// Only act if this neighbour is actually in the grid
+				////////////////////////////////////////////////////////
+				// FIXME: This is completely broken if we allow negative
+				// particle positions!
+				////////////////////////////////////////////////////////
 				if ((x+n_x >= 0) && (x+n_x < the_grid->x_size) &&
 					(y+n_y >= 0) && (y+n_y < the_grid->y_size) &&
 					(z+n_z >= 0) && (z+n_z < the_grid->z_size)) {

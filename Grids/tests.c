@@ -469,7 +469,7 @@ int main() {
 	assert(the_grid.particles[0].container != NULL);
 	assert(count_all_particles(&the_grid, x, y, z) == particle_number);
 
-	dump_grid(&(the_grid), 1, 1, 1, 1);
+	//dump_grid(&(the_grid), 1, 1, 1, 1);
 
 	// Choose a particle from the group
 	particle* test_particle = &(the_grid.particles[0]);
