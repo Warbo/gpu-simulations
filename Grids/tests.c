@@ -32,22 +32,35 @@ void dump_grid(grid* the_grid, int print_cells, int print_particles,
 		printf(",CELLS:STARTINGAT:%u{", the_grid->cells);
 		// Go through the memory which we assume is devoted to cells
 		int cell_count;
-		for (cell_count = 0; cell_count < (the_grid->x_size)*(the_grid->y_size)*(the_grid->z_size); cell_count++) {
+		for (cell_count = 0; 
+			cell_count < 
+				(the_grid->x_size)
+				*(the_grid->y_size)
+				*(the_grid->z_size); 
+			cell_count++) {
 			printf("CELL:%u{", &(the_grid->cells[cell_count]));
 			// Branch if we've been told to print neighbours
 			if (print_neighbours != 0) {
 				// Go through the neighbours
-				printf("NEIGHBOURS:STARTINGAT:%u{", the_grid->cells[cell_count].neighbours);
+				printf("NEIGHBOURS:STARTINGAT:%u{", 
+					the_grid->cells[cell_count].neighbours);
 				int neighbour_index;
-				for (neighbour_index = 0; neighbour_index < 27; neighbour_index++) {
+				for (neighbour_index = 0;
+					neighbour_index < 27; 
+					neighbour_index++) {
 					// Print this neighbour
-					// If there is not a neighbour at this location then we will have a NULL pointer
-					if (the_grid->cells[cell_count].neighbours[neighbour_index] == NULL) {
+					// If there is not a neighbour at this location then
+					// we will have a NULL pointer
+					if (the_grid->cells[cell_count].neighbours[
+						neighbour_index
+					] == NULL) {
 						printf("LOCATION:NULL");
 					}
 					// Otherwise print the cell location
 					else {
-						printf("LOCATION:%u", the_grid->cells[cell_count].neighbours[neighbour_index]);
+						printf("LOCATION:%u", the_grid->cells[
+							cell_count
+						].neighbours[neighbour_index]);
 					}
 					// We need a comma on all but the final neighbour
 					if (neighbour_index < 26) {
@@ -56,22 +69,26 @@ void dump_grid(grid* the_grid, int print_cells, int print_particles,
 				}
 				printf("}");
 			}
-			// If we just printed the neighbours and we're going to print something else then we need a comma
+			// If we just printed the neighbours and we're going to 
+			// print something else then we need a comma
 			if ((print_neighbours != 0) && (print_particles != 0)) {
 				printf(",");
 			}
 			// Branch if we have been told to print our particles
 			if (print_particles != 0) {
-				if (the_grid->cells[cell_count].first_particle == NULL) {
+				if (the_grid->cells[cell_count].first_particle == NULL){
 					printf("FIRSTPARTICLE:NULL");
 				}
 				else {
-					printf("FIRSTPARTICLE:%u", the_grid->cells[cell_count].first_particle);
+					printf("FIRSTPARTICLE:%u",
+						the_grid->cells[cell_count].first_particle);
 				}
 			}
 			printf("}");
 			// For all but the last cell we need to insert a comma here
-			if (cell_count < ((the_grid->x_size)*(the_grid->y_size)*(the_grid->z_size))-1) {
+			if (cell_count < (
+				(the_grid->x_size)*(the_grid->y_size)*(the_grid->z_size)
+			)-1) {
 				printf(",");
 			}
 		}
@@ -82,15 +99,23 @@ void dump_grid(grid* the_grid, int print_cells, int print_particles,
 	if (print_particles != 0) {
 		printf(",PARTICLES:STARTINGAT:%u{", the_grid->particles);
 		int particle_count;
-		for (particle_count = 0; particle_count < the_grid->particle_number; particle_count++) {
-			printf("PARTICLE:%u{", &(the_grid->particles[particle_count]));
-			printf("X:%G", the_grid->particles[particle_count].position.x);
-			printf(",Y:%G", the_grid->particles[particle_count].position.y);
-			printf(",Z:%G", the_grid->particles[particle_count].position.z);
-			printf(",CONTAINER:%u", the_grid->particles[particle_count].container);
+		for (particle_count = 0; 
+			particle_count < the_grid->particle_number; 
+			particle_count++) {
+			printf("PARTICLE:%u{", 
+				&(the_grid->particles[particle_count]));
+			printf("X:%G", 
+				the_grid->particles[particle_count].position.x);
+			printf(",Y:%G", 
+				the_grid->particles[particle_count].position.y);
+			printf(",Z:%G", 
+				the_grid->particles[particle_count].position.z);
+			printf(",CONTAINER:%u", 
+				the_grid->particles[particle_count].container);
 			// Branch if we've been told to print particle lists
 			if (print_lists != 0) {
-				printf(",NEXT:%u", the_grid->particles[particle_count].next);
+				printf(",NEXT:%u", 
+					the_grid->particles[particle_count].next);
 			}
 			printf("}");
 			if (particle_count < (the_grid->particle_number) - 1) {
@@ -111,7 +136,8 @@ double new_random() {
 	 return rand()/(double)(RAND_MAX);
 }
 
-void populate_random(grid* the_grid, int particles, int x, int y, int z, double dx, double dy, double dz) {
+void populate_random(grid* the_grid, int particles, int x, int y, int z,
+	double dx, double dy, double dz) {
 	/*
 	 * This populates the given grid with particles, determining their
 	 * positions using the standard rand() function.
@@ -135,13 +161,19 @@ void populate_random(grid* the_grid, int particles, int x, int y, int z, double 
 	
 	// Loop through the particle memory
 	int particle_index;
-	for (particle_index = 0; particle_index < particles; particle_index++) {
+	for (particle_index = 0;
+		particle_index < particles;
+		particle_index++) {
 		// Assign the position
-		the_grid->particles[particle_index].position.x = new_random()*space.x;
-		the_grid->particles[particle_index].position.y = new_random()*space.y;
-		the_grid->particles[particle_index].position.z = new_random()*space.z;
+		the_grid->particles[particle_index].position.x =
+			new_random()*space.x;
+		the_grid->particles[particle_index].position.y = 
+			new_random()*space.y;
+		the_grid->particles[particle_index].position.z = 
+			new_random()*space.z;
 		
-		// Ensure that the particle's linked list pointer doesn't start in the particle memory
+		// Ensure that the particle's linked list pointer doesn't start
+		// in the particle memory
 		the_grid->particles[particle_index].next = NULL;
 	}
 	
@@ -158,6 +190,10 @@ int check_particles(grid* the_grid, int particle_number) {
 	int counter;
 	for (counter = 0; counter < particle_number; counter++) {
 		//assert(the_grid->particles[counter] != NULL);
+		////////////////////////////////////////////////////////////////
+		// FIXME: These tests are completely broken if we allow
+		// negative positions!
+		////////////////////////////////////////////////////////////////
 		assert(the_grid->particles[counter].position.x >= 0);
 		assert(the_grid->particles[counter].position.y >= 0);
 		assert(the_grid->particles[counter].position.z >= 0);
@@ -165,7 +201,9 @@ int check_particles(grid* the_grid, int particle_number) {
 	return 0;
 }
 
-void find_neighbours_by_brute_force(particle* current_particle, double radius, particle*** neighbour_particles, int* length, particle** set_to_check, int length_of_set) {
+void find_neighbours_by_brute_force(particle* current_particle, 
+	double radius, particle*** neighbour_particles, int* length, 
+	particle** set_to_check, int length_of_set) {
 	/*
 	 * This function will go through all "length_of_set" particles in
 	 * the array "set_to_check", comparing their distance to the given
@@ -185,9 +223,11 @@ void find_neighbours_by_brute_force(particle* current_particle, double radius, p
 	assert(length != NULL);
 	assert(length_of_set >= 0);
 	
-	*length = count_neighbours(current_particle, radius, set_to_check, length_of_set);
-	//fprintf(stderr, "LLLL %i LLLL\n", no);
-	neighbour_particles[0] = (particle**) malloc( *length*sizeof(particle*) );
+	*length = count_neighbours(current_particle, radius, set_to_check, 
+		length_of_set);
+	neighbour_particles[0] = (particle**) malloc(
+		*length*sizeof(particle*)
+	);
 	
 	int position = 0;
 	
@@ -205,8 +245,6 @@ void find_neighbours_by_brute_force(particle* current_particle, double radius, p
 		// Get the next particle
 		particle_being_checked = set_to_check[index];
 		
-		//fprintf(stderr, " %i ", particle_being_checked);
-		
 		// Make sure it exists
 		assert(particle_being_checked != NULL);
 		
@@ -214,13 +252,17 @@ void find_neighbours_by_brute_force(particle* current_particle, double radius, p
 		// otherwise...
 		if (particle_being_checked != current_particle) {
 			// Get the difference in their positions
-			delta_x = particle_being_checked->position.x - current_particle->position.x;
-			delta_y = particle_being_checked->position.y - current_particle->position.y;
-			delta_z = particle_being_checked->position.z - current_particle->position.z;
+			delta_x = particle_being_checked->position.x 
+				- current_particle->position.x;
+			delta_y = particle_being_checked->position.y 
+				- current_particle->position.y;
+			delta_z = particle_being_checked->position.z 
+				- current_particle->position.z;
 			// See whether they're within one radius of each other
-			if (delta_x*delta_x + delta_y*delta_y + delta_z*delta_z <= radius*radius) {
+			if (delta_x*delta_x + delta_y*delta_y + delta_z*delta_z <= 
+				radius*radius) {
 				// If so then don't discard it, and increment the length
-				neighbour_particles[0][position] = particle_being_checked;
+				neighbour_particles[0][position]=particle_being_checked;
 				//fprintf(stderr, " %i ", particle_being_checked);
 				position++;
 				
@@ -231,14 +273,17 @@ void find_neighbours_by_brute_force(particle* current_particle, double radius, p
 	// Now our array is populated, so we can return
 	
 	// POSTCONDITIONS
-	assert(neighbour_particles != NULL);		// We should have a valid output array
-	assert(*length <= length_of_set);		// We shouldn't output more particles than we were given
+	// We should have a valid output array
+	assert(neighbour_particles != NULL);
+	// We shouldn't output more particles than we were given
+	assert(*length <= length_of_set);
 	
 }
 
 
 
-void brute_force_all(particle* current_particle, grid* the_grid, int number, double radius, particle*** found, int* length) {
+void brute_force_all(particle* current_particle, grid* the_grid, 
+	int number, double radius, particle*** found, int* length) {
 	int index;
 	double delta_x;
 	double delta_y;
@@ -248,11 +293,15 @@ void brute_force_all(particle* current_particle, grid* the_grid, int number, dou
 		// Don't bother comparing the current_particle to itself
 		if (&(the_grid->particles[index]) != current_particle) {
 			// Get the difference in positions
-			delta_x = the_grid->particles[index].position.x - current_particle->position.x;
-			delta_y = the_grid->particles[index].position.y - current_particle->position.y;
-			delta_z = the_grid->particles[index].position.z - current_particle->position.z;
+			delta_x = the_grid->particles[index].position.x 
+				- current_particle->position.x;
+			delta_y = the_grid->particles[index].position.y 
+				- current_particle->position.y;
+			delta_z = the_grid->particles[index].position.z 
+				- current_particle->position.z;
 			// If they're within the radius then remember this pointer
-			if (delta_x*delta_x + delta_y*delta_y + delta_z*delta_z <= radius*radius) {
+			if (delta_x*delta_x + delta_y*delta_y + delta_z*delta_z <= 
+				radius*radius) {
 				counter++;
 			}
 		}
@@ -266,11 +315,15 @@ void brute_force_all(particle* current_particle, grid* the_grid, int number, dou
 	for (index = 0; index < number; index++) {
 		if ((&the_grid->particles[index]) != current_particle) {
 			// Get the difference in positions
-			delta_x = the_grid->particles[index].position.x - current_particle->position.x;
-			delta_y = the_grid->particles[index].position.y - current_particle->position.y;
-			delta_z = the_grid->particles[index].position.z - current_particle->position.z;
+			delta_x = the_grid->particles[index].position.x 
+				- current_particle->position.x;
+			delta_y = the_grid->particles[index].position.y 
+				- current_particle->position.y;
+			delta_z = the_grid->particles[index].position.z 
+				- current_particle->position.z;
 			// If they're within the radius then remember this pointer
-			if (delta_x*delta_x + delta_y*delta_y + delta_z*delta_z <= radius*radius) {
+			if (delta_x*delta_x + delta_y*delta_y + delta_z*delta_z <= 
+				radius*radius) {
 				found[0][counter] = &(the_grid->particles[index]);
 				counter++;
 			}
@@ -283,7 +336,8 @@ void brute_force_all(particle* current_particle, grid* the_grid, int number, dou
 	
 }
 
-int count_neighbours(particle* current_particle, double radius, particle** to_check, int length) {
+int count_neighbours(particle* current_particle, double radius, 
+	particle** to_check, int length) {
 	
 	// PRECONDITIONS
 	assert(current_particle != NULL);
@@ -296,10 +350,14 @@ int count_neighbours(particle* current_particle, double radius, particle** to_ch
 	int index;
 	for (index = 0; index < length; index++) {
 		if (to_check[index] != current_particle) {
-			delta_x = current_particle->position.x - to_check[index]->position.x;
-			delta_y = current_particle->position.y - to_check[index]->position.y;
-			delta_z = current_particle->position.z - to_check[index]->position.z;
-			if (delta_x*delta_x + delta_y*delta_y + delta_z*delta_z <= radius*radius) {
+			delta_x = current_particle->position.x 
+				- to_check[index]->position.x;
+			delta_y = current_particle->position.y 
+				- to_check[index]->position.y;
+			delta_z = current_particle->position.z 
+				- to_check[index]->position.z;
+			if (delta_x*delta_x + delta_y*delta_y + delta_z*delta_z <= 
+				radius*radius) {
 				count++;
 			}
 		}
@@ -374,17 +432,17 @@ int check_for_dupes(particle** particles, int length) {
 
 int main() {
 	// These are the dimensions of our volume elements
-	double dx = 5.0;
-	double dy = 5.0;
-	double dz = 5.0;
+	double dx = 1.0;
+	double dy = 1.0;
+	double dz = 1.0;
 	
 	// These are the dimensions of our space as multiples of dx, dy & dz
-	int x = 8;
-	int y = 8;
-	int z = 8;
+	int x = 4;
+	int y = 4;
+	int z = 4;
 	
 	// This is the total number of particles to simulate
-	int particle_number = 1000;
+	int particle_number = 200;
 	
 	// Make the space we are simulating
 	grid the_grid;
@@ -421,31 +479,43 @@ int main() {
 	assert(test_particle->container != NULL);
 
 	// Find its neighbours through the grid
-	particle** neighbour_array;		// This will point too an array of neighbours
-	int neighbour_number;		// This will tell us how long the array is
-	get_neighbours_for_particle(&the_grid, test_particle, &neighbour_array, &neighbour_number);
+	// This will point too an array of neighbours
+	particle** neighbour_array;
+	// This will tell us how long the array is
+	int neighbour_number;
+	get_neighbours_for_particle(&the_grid, test_particle,
+		&neighbour_array, &neighbour_number);
 	
 	// DEBUGGING
 	assert(neighbour_number >= 0);
 	
 	assert(check_for_dupes(neighbour_array, neighbour_number) == 0);
 	
-	int neighbours_in_grid = count_neighbours(test_particle, dx, neighbour_array, neighbour_number);
+	int neighbours_in_grid = count_neighbours(test_particle, dx,
+		neighbour_array, neighbour_number);
 	
 	// Now find which of those are true neighbours
 	particle** true_neighbour_array;
 	int true_neighbour_number;
-	find_neighbours_by_brute_force(test_particle, dx, &true_neighbour_array, &true_neighbour_number, neighbour_array, neighbour_number); 
+	find_neighbours_by_brute_force(test_particle, dx,
+		&true_neighbour_array, &true_neighbour_number, neighbour_array,
+		neighbour_number); 
 	
 	
-	
-	particle** all_pointers = (particle**) malloc( particle_number*sizeof(particle*) );
+	particle** all_pointers = (particle**) malloc(
+		particle_number*sizeof(particle*)
+	);
 	int pointer_index;
-	for (pointer_index = 0; pointer_index < particle_number; pointer_index++) {
-		all_pointers[pointer_index] = &(the_grid.particles[pointer_index]);
+	for (pointer_index = 0;
+		pointer_index < particle_number;
+		pointer_index++) {
+		all_pointers[pointer_index] = &(
+			the_grid.particles[pointer_index]
+		);
 	}
 	
-	int total_neighbours = count_neighbours(test_particle, dx, all_pointers, particle_number);
+	int total_neighbours = count_neighbours(test_particle, dx, 
+		all_pointers, particle_number);
 	
 	assert(neighbours_in_grid == true_neighbour_number);
 	
@@ -455,7 +525,9 @@ int main() {
 
 	int total_neighbours2;
 	
-	find_neighbours_by_brute_force(test_particle, dx, &brute_force_array, &total_neighbours2, all_pointers, particle_number);
+	find_neighbours_by_brute_force(test_particle, dx, 
+		&brute_force_array, &total_neighbours2, all_pointers, 
+		particle_number);
 	
 	assert(total_neighbours == neighbours_in_grid);
 	
@@ -464,7 +536,8 @@ int main() {
 	
 	
 	int brute_force_number;
-	brute_force_all(test_particle, &the_grid, particle_number, dx, &brute_force_array, &brute_force_number);
+	brute_force_all(test_particle, &the_grid, particle_number, dx, 
+		&brute_force_array, &brute_force_number);
 	
 	// Now "brute_force_array" should contain "brute_force_number"
 	
@@ -474,7 +547,8 @@ int main() {
 	
 	double delta_x, delta_y, delta_z;
 	
-	// Check that all of the "true neighbours" were found during brute force
+	// Check that all of the "true neighbours" were found during 
+	// brute force
 	int index1;		// Used for indexing the "true" array
 	int index2;		// Used for indexing the "brute" array
 	int found;		// 0 means no match yet, 1 means match found
@@ -483,13 +557,17 @@ int main() {
 	
 	for (index1 = 0; index1 < true_neighbour_number; index1++) {
 		found = 0;
-		delta_x = true_neighbour_array[index1]->position.x - test_particle->position.x;
-		delta_y = true_neighbour_array[index1]->position.y - test_particle->position.y;
-		delta_z = true_neighbour_array[index1]->position.z - test_particle->position.z;
+		delta_x = true_neighbour_array[index1]->position.x 
+			- test_particle->position.x;
+		delta_y = true_neighbour_array[index1]->position.y 
+			- test_particle->position.y;
+		delta_z = true_neighbour_array[index1]->position.z 
+			- test_particle->position.z;
 		
 		for (index2 = 0; index2 < brute_force_number; index2++) {
 			if (found == 0) {
-				if (true_neighbour_array[index1] == brute_force_array[index2]) {
+				if (true_neighbour_array[index1] ==
+					brute_force_array[index2]) {
 					found = 1;
 				}
 			}
@@ -506,13 +584,17 @@ int main() {
 	for (index2 = 0; index2 < brute_force_number; index2++) {
 		found = 0;
 		
-		delta_x = brute_force_array[index2]->position.x - test_particle->position.x;
-		delta_y = brute_force_array[index2]->position.y - test_particle->position.y;
-		delta_z = brute_force_array[index2]->position.z - test_particle->position.z;
+		delta_x = brute_force_array[index2]->position.x 
+			- test_particle->position.x;
+		delta_y = brute_force_array[index2]->position.y 
+			- test_particle->position.y;
+		delta_z = brute_force_array[index2]->position.z 
+			- test_particle->position.z;
 		
 		for (index1 = 0; index1 < true_neighbour_number; index1++) {
 			if (found == 0) {
-				if (true_neighbour_array[index1] == brute_force_array[index2]) {
+				if (true_neighbour_array[index1] ==
+					brute_force_array[index2]) {
 					found = 1;
 				}
 			}

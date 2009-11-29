@@ -289,21 +289,27 @@ if 'PARTICLES' in grid.keys():
 		sys.exit()
 	
 	if len(grid['PARTICLES']) > 1:
-		particle_length = grid['PARTICLES'][1] - grid['PARTICLES'][0]
+		particle_length = grid['PARTICLES'][1]['ADDRESS'] - \
+			grid['PARTICLES'][0]['ADDRESS']
 	else:
 		particle_length = None
 
 	# Traverse the particle
 	for p in grid['PARTICLES']:
 
-		# Make sure this particle is not stored before the particles array
+		# Make sure this particle is not stored before the
+		# particles array
 		if p['ADDRESS'] < grid['PARTICLESSTART']:
-			print "Particle found at "+str(p['ADDRESS'])+" but particles start at "+str(grid['PARTICLESSTART'])
+			print "Particle found at "+str(p['ADDRESS'])+\
+				" but particles start at "+str(grid['PARTICLESSTART'])
 
-		# Make sure this particle is an integer number of particle_lengths away from PARTICLESSTART
+		# Make sure this particle is an integer number of 
+		# particle_lengths away from PARTICLESSTART
 		if particle_length is not None:
-			if (p['ADDRESS'] - grid['PARTICLESSTART']) % particle_length != 0:
-				print "Particle not an integer number of particle lengths away from start!"
+			if (p['ADDRESS'] - grid['PARTICLESSTART']) \
+				% particle_length != 0:
+				print "Particle not an integer number of particle"+\
+					" lengths away from start!"
 		
 		# Make sure this particle has a container
 		#if 'CONTAINER' not in p.keys() or 
