@@ -351,27 +351,27 @@ void get_neighbours_for_particle(grid* the_grid, particle* the_particle,
 	// keeping related operations together
 	
 	// First count the neighbours
-	*length = 0;		// Start our counter at 0
-	particle* found_particle;		// This will store the particle we're up to
+	
+	// Start our counter at 0
+	*length = 0;
+	// This will store the particle we're up to
+	particle* found_particle;
 	
 	// Iterate through the given particle's cell's neighbours
 	// NOTE: This loop includes the particle's cell for us too
 	
-	// These will keep track of the location of the neighbour we're indexing
+	// These will keep track of the location of the neighbour
+	// we're indexing
 	int n_x, n_y, n_z;
 	
 	// Loop through the planes at x-1, x and x+1
-	for (n_x = -1 * (the_grid->y_size*the_grid->z_size); 
-		n_x <= (the_grid->y_size*the_grid->z_size); 
-		n_x += (the_grid->y_size*the_grid->z_size)) {
+	for (n_x = -1; n_x < 2; n_x++) {
 		
 		// Loop through the rows at y-1, y and y+1
-		for (n_y = -1 * (the_grid->z_size); 
-			n_y <= (the_grid->z_size); 
-			n_y += (the_grid->z_size)) {
+		for (n_y = -1; n_y < 2; n_y++) {
 			
 			// Loop through the cells at z-1, z and z+1 
-			for (n_z = -1; n_z <= 1; n_z += 1) {
+			for (n_z = -1; n_z < 2; n_z++) {
 				
 				// TODO: We can compact a lot of this calculation
 				// together since it involves converting pointers to
@@ -441,7 +441,9 @@ void get_neighbours_for_particle(grid* the_grid, particle* the_particle,
 	}
 	
 	// Now we know how many neighbours we have, let's allocate memory
-	neighbour_particles[0] = (particle**) malloc( (*length)*sizeof(particle*) );
+	neighbour_particles[0] = (particle**) malloc(
+		(*length)*sizeof(particle*)
+	);
 
 	// Now loop through the neighbours again, storing pointers to them
 	*length = 0;		// We can re-use this as our index
@@ -512,7 +514,9 @@ void get_neighbours_for_particle(grid* the_grid, particle* the_particle,
 					].first_particle;
 					while (found_particle != NULL) {
 						if (found_particle != the_particle) {
-							(neighbour_particles[0])[(*length)] = found_particle;
+							(neighbour_particles[0])[
+								(*length)
+							] = found_particle;
 							*length = *length + 1;
 						}
 						found_particle = found_particle->next;
@@ -526,7 +530,7 @@ void get_neighbours_for_particle(grid* the_grid, particle* the_particle,
 	// which are the neighbouring particles, and length should point to
 	// the length, so we're done
 	
-	// POSTCONDITIONS3
+	// POSTCONDITIONS
 	//assert();
 	
 }

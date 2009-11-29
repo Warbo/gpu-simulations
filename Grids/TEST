@@ -1,7 +1,13 @@
 #!/bin/sh
 
-./BUILDLINKEDLISTS
+echo "BUILDING"
 
-./linkedlists > DUMP
+./BUILDLINKEDLISTS tests
+
+echo "TESTING EXAMPLE INPUT"
+
+./tests > DUMP
+
+echo "VERIFYING RESULTS"
 
 ./memchecker.py DUMP
