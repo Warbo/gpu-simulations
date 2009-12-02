@@ -14,7 +14,7 @@ dump_grammar = """
 
 grid ::= <token "GRID:"> <address>:grid_address '{' <grid_contents>*:c '}'					=> concatenate_dictionaries({'TYPE':'GRID', 'ADDRESS':grid_address}, c)
 
-grid_contents ::= <x_size> | <y_size> | <z_size> | <population> | <cells> | <particles>
+grid_contents ::= <x_size> | <y_size> | <z_size> | <population> | <cells> | <particles> | <dx> | <dy> | <dz>
 
 x_size ::= <token "X:"> <integer>:size ','*									=> {'X':size}
 
@@ -28,7 +28,13 @@ y_pos ::= <token "Y:"> <decimal>:pos ','*									=> {'Y':pos}
 
 z_pos ::= <token "Z:"> <decimal>:pos ','*									=> {'Z':pos}
 
-population ::= <token "POPULATION:"> <integer>:pop ','*								=> {'POPULATION':pop}
+dx ::= <token "DX:"> <decimal>:val ','*										=> {'DX':val}
+
+dy ::= <token "DY:"> <decimal>:val ','*										=> {'DY':val}
+
+dz ::= <token "DZ:"> <decimal>:val ','*										=> {'DZ':val}
+
+population ::= <token "POPULATION:"> <integer>:pop ','*						=> {'POPULATION':pop}
 
 cells ::= <token "CELLS:STARTINGAT:"> <address>:startaddress '{' <cells_contents>*:c '}' ','*			=> {'CELLS':c, 'CELLSSTART':startaddress}
 
@@ -96,6 +102,13 @@ grid = matcher.apply('grid')
 ## tests
 
 print "Testing"
+
+if 'DX' not in grid.keys() or 'DY' not in grid.keys() or 'DZ' not in grid.keys():
+	print "dx/y/z not found!"
+	sys.exit()
+
+if grid['DX'] != grid['DY'] or grid['DX'] != grid['DZ'] or grid['DY'] != grid['DZ']:
+	print "WARNING: dx, dy and dz aren't the same value."
 
 # If there are cells, do checks on them
 if 'CELLS' in grid.keys():
@@ -188,7 +201,7 @@ if 'CELLS' in grid.keys():
 
 				# and if it is a maximum then we lose right neighbours
 				if x == grid['X']-1:
-					for n in ['right','rightforward','rightback','upright','uprightforward','uprightback','downright','downrightforward','downrightback']:
+/					for n in ['right','rightforward','rightback','upright','uprightforward','uprightback','downright','downrightforward','downrightback']:
 						try:
 							predicted_n.remove(n)
 						except ValueError:
@@ -312,7 +325,19 @@ if 'PARTICLES' in grid.keys():
 					" lengths away from start!"
 		
 		# Make sure this particle has a container
-		#if 'CONTAINER' not in p.keys() or 
+		if 'CONTAINER' not in p.keys():
+			print "Particle has no container!"
+		
+		# Make sure this particle's container is a valid cell
+		valid_container = False
+		for cell in grid['CELLS']:
+			if cell['ADDRESS'] == p['CONTAINER']:
+				valid_container = True
+		if not valid_container:
+			print "Particle's container is not a valid cell address!"
+		
+		# Make sure that this particle's container is the correct one
+		p['CONTAINER']
 		
 else:
 	if 'PARTICLESSTART' in grid.keys():

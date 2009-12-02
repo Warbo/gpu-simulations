@@ -37,7 +37,6 @@ struct cell {
 	 * A cell is a unit volume in the grid. It stores a pointer to a
 	 * linked list of the particles it contains.
 	 */
-	cell** neighbours;
 	
 	// This points to the first particle in our linked list
 	particle* first_particle;
@@ -56,6 +55,11 @@ struct grid {
 	int y_size;
 	int z_size;
 	
+	// These store the dimensions of the cells
+	int dx;
+	int dy;
+	int dz;
+	
 	// This is the total number of particles in this space
 	int particle_number;
 	
@@ -66,6 +70,22 @@ struct grid {
 	particle* particles;
 	
 };
+
+// FIXME: There should be no tests in the core library, so move this
+// after debugging!
+
+int count_cell_contents(cell* the_cell) {
+	/*
+	 * This returns the number of particles in the given cell.
+	 */
+	int count = 0;
+	particle* current_particle = the_cell->first_particle;
+	while (current_particle != NULL) {
+		count++;
+		current_particle = current_particle->next;
+	}
+	return count;
+}
 
 int get_index(double position, double interval_size) {
 	/*
@@ -126,7 +146,8 @@ int get_index(double position, double interval_size) {
 */
 	
 
-void initialise_grid(grid* current_grid, int x, int y, int z, int particles) {
+void initialise_grid(grid* the_grid, int x, int y, int z,
+	double dx, double dy, double dz, int particles) {
 	/*
 	 * Set up a grid at the given pointer, assigning it memory for its
 	 * cells and its particles.
@@ -136,18 +157,28 @@ void initialise_grid(grid* current_grid, int x, int y, int z, int particles) {
 	assert(x > 0);
 	assert(y > 0);
 	assert(z > 0);
+	assert(dx > 0);
+	assert(dy > 0);
+	assert(dz > 0);
 	assert(particles > 0);
 	
+	// Store the given values in the_grid
+	the_grid->x_size = x;
+	the_grid->y_size = y;
+	the_grid->z_size = z;
+	the_grid->particle_number = particles;
+	
 	// Give the grid room for its cells
-	current_grid->cells = (cell*) malloc( (x*y*z)*sizeof(cell) );
+	the_grid->cells = (cell*) malloc( (x*y*z)*sizeof(cell) );
 						
 	// Then the same for its particles
-	current_grid->particles = (particle*) malloc(particles*sizeof(particle));
+	the_grid->particles = (particle*)malloc(particles*sizeof(particle));
 									
 	// Now we can populate the cell array by filling up rows, planes
 	// and eventually the whole space
 	int x_index, y_index, z_index;
 	int x_rel, y_rel, z_rel;
+	
 	
 	// Step through each cell
 	for (x_index = 0; x_index < x; x_index++) {
@@ -157,96 +188,18 @@ void initialise_grid(grid* current_grid, int x, int y, int z, int particles) {
 				// index our grids using them, ie.
 				//current_grid->cells[(x_index*y*z)+(y_index*z)+z_index]
 				
-				////////////////////////////////////////////////////////
-				// FIXME!
-				////////////////////////////////////////////////////////
-				// We want to get rid of these arrays once we've got rid
-				// of every use of them!
-				////////////////////////////////////////////////////////
-				// We need to allocate some memory for each cell's
-				// neighbour pointers
-				current_grid->cells[
-					(y*z)*x_index+(z)*y_index+z_index
-					].neighbours = (cell**) malloc(27*sizeof(cell*));
-			
 				// We need to make sure our particle list pointer is
 				// definitely outside the particle list to begin with
-				current_grid->cells[
+				the_grid->cells[
 					(y*z)*x_index+(z)*y_index+z_index
 					].first_particle = NULL;
-				
-				// Assign our neighbours
-				for (x_rel = -1; x_rel < 2; x_rel++) {
-					for (y_rel = -1; y_rel < 2; y_rel++) {
-						for (z_rel = -1; z_rel < 2; z_rel++) {
-							// Only act if the current x, y and z
-							// positions allow a neighbour
-							if ((x_index + x_rel >= 0) 
-								&& (x_index + x_rel < x) 
-								&& (y_index + y_rel >= 0) 
-								&& (y_index + y_rel < y) 
-								&& (z_index + z_rel >= 0) 
-								&& (z_index + z_rel < z)) {
-
-								// Do some sanity checks
-								
-								// Is the current cell inside the cell
-								// list?
-								assert(
-									y*z*x_index+z*y_index+z_index<x*y*z
-								);
-								
-								// Is the current neighbour position
-								// inside the neighbour list?
-								assert(
-									9*(x_rel+1)+3*(y_rel+1)+z_rel+1 < 27
-								);
-								
-								// Would the neighbouring cell be inside
-								// the cell list?
-								assert(
-									y*z*(x_index+x_rel)
-										+z*(y_index+y_rel)
-										+(z_index+z_rel)
-										<x*y*z
-								);
-	
-								// Assign this neighbour
-								current_grid->cells[
-									(y*z)*x_index+(z)*y_index+z_index
-								].neighbours[
-									(9*(x_rel+1))+(3*(y_rel+1))+z_rel+1
-								] = &(current_grid->cells[
-									(y*z)*(x_index+x_rel)
-										+(z)*(y_index+y_rel)
-										+(z_index+z_rel)
-								]);
-								
-							}
-							else {
-								assert(
-									y*z*x_index+z*y_index+z_index<x*y*z
-								);
-								assert(
-									9*(x_rel+1)+3*(y_rel+1)+z_rel+1 < 27
-								);
-								
-								current_grid->cells[
-									(y*z)*x_index+(z)*y_index+z_index
-								].neighbours[
-									(9*(x_rel+1))+(3*(y_rel+1))+z_rel+1
-								] = NULL;
-							}
-						}
-					}
-				}
 			}
 		}
 	}
 	
 	// POSTCONDITIONS
-	assert(current_grid->particles != NULL);
-	assert(current_grid->cells != NULL);
+	assert(the_grid->particles != NULL);
+	assert(the_grid->cells != NULL);
 	
 }
 	
@@ -284,40 +237,41 @@ void put_particle_in_cell(particle* the_particle, cell* intended_cell) {
 	
 }
 
-void grid_particles(grid* the_grid, int particles, int x, int y, int z, double dx, double dy, double dz) {
+void grid_particles(grid* the_grid) {
 	/*
 	 * Goes through every particle in the given grid and assigns it to
 	 * the relevant cell.
 	 */
 	
 	// PRECONDITIONS
-	assert(x > 0);
-	assert(y > 0);
-	assert(z > 0);
-	assert(dx > 0);
-	assert(dy > 0);
-	assert(dz > 0);
-	assert(particles > 0);
 	assert(the_grid != NULL);
 	
 	int x_position, y_position, z_position;
 	int particle_index;
 	cell* intended_cell;
-	for (particle_index=0; particle_index<particles; particle_index++) {
+	for (particle_index=0; particle_index<the_grid->particle_number;
+		particle_index++) {
 		x_position = get_index(
-			the_grid->particles[particle_index].position.x, dx
+			the_grid->particles[particle_index].position.x,
+			the_grid->dx
 		);
 		
 		y_position = get_index(
-			the_grid->particles[particle_index].position.y, dy
+			the_grid->particles[particle_index].position.y,
+			the_grid->dy
 		);
 		
 		z_position = get_index(
-			the_grid->particles[particle_index].position.z, dz
+			the_grid->particles[particle_index].position.z,
+			the_grid->dz
 		);
 		
 		intended_cell = &(
-			the_grid->cells[(y*z)*x_position+(z)*y_position+z_position]
+			the_grid->cells[
+				((the_grid->y_size)*(the_grid->z_size))*x_position
+					+(the_grid->z_size)*y_position
+					+z_position
+			]
 		);
 		
 		put_particle_in_cell(
@@ -330,8 +284,9 @@ void grid_particles(grid* the_grid, int particles, int x, int y, int z, double d
 	
 }
 
-void get_neighbours_for_particle(grid* the_grid, particle* the_particle,
-	particle*** neighbour_particles, int* length) {
+void get_potential_neighbours_for_particle(grid* the_grid, 
+	particle* the_particle, particle*** neighbour_particles,
+	int* length) {
 	/*
 	 * This function will find every neighbour particle for the given
 	 * particle, checking its cell and its neighbouring cells.
@@ -363,6 +318,9 @@ void get_neighbours_for_particle(grid* the_grid, particle* the_particle,
 	// These will keep track of the location of the neighbour
 	// we're indexing
 	int n_x, n_y, n_z;
+
+	// FIXME: Remove me after debugging
+	int count = 0;
 	
 	// Loop through the planes at x-1, x and x+1
 	for (n_x = -1; n_x < 2; n_x++) {
@@ -372,7 +330,10 @@ void get_neighbours_for_particle(grid* the_grid, particle* the_particle,
 			
 			// Loop through the cells at z-1, z and z+1 
 			for (n_z = -1; n_z < 2; n_z++) {
-				
+			
+				////////////////////////////////////////////////////////
+				// FIXME: THERE IS NO NEED TO RECALCULATE x, y AND z FOR
+				// EVERY NEIGHBOUR!
 				// TODO: We can compact a lot of this calculation
 				// together since it involves converting pointers to
 				// coordinates and back, but for now we'll leave it
@@ -420,6 +381,13 @@ void get_neighbours_for_particle(grid* the_grid, particle* the_particle,
 					(y+n_y >= 0) && (y+n_y < the_grid->y_size) &&
 					(z+n_z >= 0) && (z+n_z < the_grid->z_size)) {
 					
+					// FIXME: Remove me after debugging!
+					count = count_cell_contents(&(the_grid->cells[
+						(the_grid->y_size * the_grid->z_size)*(x+n_x) 
+							+ (the_grid->z_size)*(y+n_y) + (z+n_z)
+					]));
+					//fprintf(stderr, "%i\n", count);
+					
 					assert(the_particle != NULL);
 					assert(the_particle->container != NULL);
 		
@@ -442,6 +410,7 @@ void get_neighbours_for_particle(grid* the_grid, particle* the_particle,
 				}
 			}
 		}
+		//fprintf(stderr, "Neighbours counted: %i\n", count);
 	}
 	
 	// Now we know how many neighbours we have, let's allocate memory
