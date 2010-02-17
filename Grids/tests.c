@@ -435,6 +435,11 @@ int main() {
 	// Allocate memory and assign neighbourhoods
 	initialise_grid(&the_grid, x, y, z, dx, dy, dz, particle_number);
 	
+	return 0;
+}
+	
+	/*
+	
 	// DEBUGGING
 	assert(the_grid.cells != NULL);
 	assert(the_grid.particles != NULL);
@@ -496,7 +501,7 @@ int main() {
 		test_particle->position.x,
 		test_particle->position.y,
 		test_particle->position.z,
-		cx, cy, cz);*/
+		cx, cy, cz);*//*
 	int n_x, n_y, n_z;
 	// Loop through the planes at x-1, x and x+1
 	for (n_x = -1; n_x < 2; n_x++) {
@@ -715,3 +720,4 @@ int main() {
 	
 	//return 0;
 }
+*/

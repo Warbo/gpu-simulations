@@ -120,12 +120,12 @@ int get_index(double position, double interval_size) {
 }
 
 /*int get_subscript_for_position(int x, int y, int z) {
-	/*
+	
 	 * Given an x, y and z coordinate, calculate the index with which to
 	 * subscript the cell array.
-	 */
+	 
 	
-	/*// To get the address we must first find the layer it's in, which
+	// To get the address we must first find the layer it's in, which
 	// depends on the magnitude of the coordinate abs(x)+abs(y)+abs(z)
 	int start = 0;		// Indexing starts at zero
 	int inc = 8;		// We initially go up by 8
