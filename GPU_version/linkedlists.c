@@ -9,27 +9,26 @@ typedef struct particle particle;
 typedef struct cell cell;
 typedef struct grid grid;
 
-typedef struct three_vector {
-	/* 
-	 * A very basic datatype, included for completeness. Final code
-	 * should use optimised vector types from elsewhere (eg. Eigen2)
-	 */
-	double x;
-	double y;
-	double z;
-} three_vector;
-
 struct particle {
 	/*
 	 * This particle implementation is for illustrative purposes only.
 	 * It can easily be replaced with an arbitrary datastructure.
 	 */
-	particle* next;
-	cell* container;
-	three_vector position;
-	three_vector velocity;
-	three_vector acceleration;
-	double mass;
+	int id;			// Useful when its memory location isn't constant
+	float x;		// x position
+	float y;		// y position
+	float z;		// z position
+	float x_vel;	// x velocity
+	float y_vel;	// y velocity
+	float z_vel;	// z velocity
+	float x_acc;	// x acceleration
+	float y_acc;	// y acceleration
+	float z_acc;	// z acceleration
+	float mass;		// The particle's mass
+	
+	// The following two are implementation-specific and may be removed
+	particle* next;		// Pointer used in particle linked lists
+	cell* container;	// Pointer to containing cell, could be inferred
 };
 
 struct cell {
@@ -38,6 +37,7 @@ struct cell {
 	 * linked list of the particles it contains.
 	 */
 	
+	// The following may be removed
 	// This points to the first particle in our linked list
 	particle* first_particle;
 	
@@ -60,13 +60,18 @@ struct grid {
 	int dy;
 	int dz;
 	
+	// The location of the first cell (x minimum, y minimum, z minimum)
+	float x_offset;
+	float y_offset;
+	float z_offset;
+	
 	// This is the total number of particles in this space
 	int particle_number;
 	
 	// This stores the volume units of this grid
 	cell* cells;
 	
-	// This stores the particles which the cells point to
+	// This stores the particles which the cells contain
 	particle* particles;
 	
 };
@@ -87,7 +92,7 @@ int count_cell_contents(cell* the_cell) {
 	return count;
 }
 
-int get_index(double position, double interval_size) {
+int get_index(float position, float interval_size) {
 	/*
 	 * This does an "integer division" for doubles. It is effectively
 	 * the same as (A-(A%B))/B, but % doesn't accept doubles and C
@@ -106,7 +111,7 @@ int get_index(double position, double interval_size) {
 	
 	// If not then we'll need to count the intervals
 	int count = 0;
-	double remaining = position;
+	float remaining = position;
 	while (remaining > interval_size) {
 		count++;
 		remaining -= interval_size;
@@ -119,35 +124,10 @@ int get_index(double position, double interval_size) {
 	return count;
 }
 
-/*int get_subscript_for_position(int x, int y, int z) {
-	
-	 * Given an x, y and z coordinate, calculate the index with which to
-	 * subscript the cell array.
-	 
-	
-	// To get the address we must first find the layer it's in, which
-	// depends on the magnitude of the coordinate abs(x)+abs(y)+abs(z)
-	int start = 0;		// Indexing starts at zero
-	int inc = 8;		// We initially go up by 8
-	int inc_inc = 16;		// We initially increase the increment by 16
-	count = 0;
-	// Loop as long as we haven't found the right layer yet
-	while ((abs(x)+abs(y)+abs(z))-count > 0) {
-		inc_inc += 8;		// The increment's increase goes up by 8
-		inc += inc_inc;		// Increase the increment
-		start += inc;		// Increment the start address
-		count += 1;			// Increment the loop
-	}
-	// Now start should be the beginning of the layer containing the
-	// given coordinates
-	
-	//FIXME: Not implemented yet
-}
-*/
-	
-
 void initialise_grid(grid* the_grid, int x, int y, int z,
-	double dx, double dy, double dz, int particles) {
+	float dx, float dy, float dz,
+	float x_offset, float y_offset, float z_offset,
+	int particles) {
 	/*
 	 * Set up a grid at the given pointer, assigning it memory for its
 	 * cells and its particles.
@@ -166,6 +146,12 @@ void initialise_grid(grid* the_grid, int x, int y, int z,
 	the_grid->x_size = x;
 	the_grid->y_size = y;
 	the_grid->z_size = z;
+	the_grid->dx = dx;
+	the_grid->dy = dy;
+	the_grid->dz = dz;
+	the_grid->x_offset = x_offset;
+	the_grid->y_offset = y_offset;
+	the_grid->z_offset = z_offset;
 	the_grid->particle_number = particles;
 	
 	// Give the grid room for its cells
@@ -174,11 +160,10 @@ void initialise_grid(grid* the_grid, int x, int y, int z,
 	// Then the same for its particles
 	the_grid->particles = (particle*)malloc(particles*sizeof(particle));
 									
-	// Now we can populate the cell array by filling up rows, planes
+	// Now we can initialise the cell array by looping over rows, planes
 	// and eventually the whole space
 	int x_index, y_index, z_index;
 	int x_rel, y_rel, z_rel;
-	
 	
 	// Step through each cell
 	for (x_index = 0; x_index < x; x_index++) {
@@ -192,7 +177,7 @@ void initialise_grid(grid* the_grid, int x, int y, int z,
 				// definitely outside the particle list to begin with
 				the_grid->cells[
 					(y*z)*x_index+(z)*y_index+z_index
-					].first_particle = NULL;
+				].first_particle = NULL;
 			}
 		}
 	}
@@ -200,7 +185,13 @@ void initialise_grid(grid* the_grid, int x, int y, int z,
 	// POSTCONDITIONS
 	assert(the_grid->particles != NULL);
 	assert(the_grid->cells != NULL);
-	
+	assert(the_grid->x_size > 0);
+	assert(the_grid->y_size > 0);
+	assert(the_grid->z_size > 0);
+	assert(the_grid->dx > 0);
+	assert(the_grid->dy > 0);
+	assert(the_grid->dz > 0);
+	assert(the_grid->particle_number > 0);
 }
 	
 void put_particle_in_cell(particle* the_particle, cell* intended_cell) {
@@ -251,21 +242,30 @@ void grid_particles(grid* the_grid) {
 	cell* intended_cell;
 	for (particle_index=0; particle_index<the_grid->particle_number;
 		particle_index++) {
+			
+		// Find which y-z plane this particle is in
+		// Remember to take off the grid's offset!
 		x_position = get_index(
-			the_grid->particles[particle_index].position.x,
+			the_grid->particles[particle_index].x - the_grid->x_offset,
 			the_grid->dx
 		);
 		
+		// Find which x-z plane this particle is in
+		// Remember to take off the grid's offset!
 		y_position = get_index(
-			the_grid->particles[particle_index].position.y,
+			the_grid->particles[particle_index].y - the_grid->y_offset,
 			the_grid->dy
 		);
 		
+		// Find which x-y plane this particle is in
+		// Remember to take off the grid's offset!
 		z_position = get_index(
-			the_grid->particles[particle_index].position.z,
+			the_grid->particles[particle_index].z - the_grid->z_offset,
 			the_grid->dz
 		);
 		
+		// Now use the intersection of all of these to get its relevant
+		// cell
 		intended_cell = &(
 			the_grid->cells[
 				((the_grid->y_size)*(the_grid->z_size))*x_position
@@ -274,6 +274,22 @@ void grid_particles(grid* the_grid) {
 			]
 		);
 		
+		// Check the validity of the found cell
+		// Mustn't be NULL
+		assert(intended_cell != NULL);
+		// Must be at least as high as the cell array's location
+		assert(intended_cell >= the_grid->cells);
+		// Can't be more than the upper bound on the cells
+		assert(
+			intended_cell <= the_grid->cells + (
+				sizeof(cell) *
+				the_grid->x_size *
+				the_grid->y_size *
+				the_grid->z_size
+			)
+		);
+		
+		// Now assign the particle to the found cell
 		put_particle_in_cell(
 			&(the_grid->particles[particle_index]), intended_cell
 		);
@@ -309,6 +325,7 @@ void get_potential_neighbours_for_particle(grid* the_grid,
 	
 	// Start our counter at 0
 	*length = 0;
+	
 	// This will store the particle we're up to
 	particle* found_particle;
 	
@@ -322,6 +339,45 @@ void get_potential_neighbours_for_particle(grid* the_grid,
 	// FIXME: Remove me after debugging
 	int count = 0;
 	
+	// TODO: We can compact a lot of this calculation
+	// together since it involves converting pointers to
+	// coordinates and back, but for now we'll leave it
+	// since it's easier to see what's going on
+			
+	//// Get the coordinates of the current particle's cell
+				
+	// First get z by throwing away multiples of 
+	// y_size*z_size (x coordinates) then 
+	// z_size (y coordinates)
+	int z = (
+		(
+			(the_particle->container - the_grid->cells) 
+			/ sizeof(cell)
+		) 
+		% (the_grid->y_size * the_grid->z_size)
+	) % (the_grid->z_size);
+	
+	// Now get y by taking off z and throwing away x
+	// coordinates
+	int y = (
+		(
+			(
+				(the_particle->container - the_grid->cells) 
+				/ sizeof(cell)
+			) - z
+		) % (the_grid->y_size * the_grid->z_size)
+	) / the_grid->z_size;
+
+	// Now get x by taking off z and z_size*y then divide by
+	// y_size*z_size to get x
+	int x = (
+		(
+			(the_particle->container - the_grid->cells) 
+			/ sizeof(cell)
+		) - z - (the_grid->z_size * y)
+	) / (the_grid->y_size * the_grid->z_size);
+
+	//// Loop
 	// Loop through the planes at x-1, x and x+1
 	for (n_x = -1; n_x < 2; n_x++) {
 		
@@ -330,47 +386,6 @@ void get_potential_neighbours_for_particle(grid* the_grid,
 			
 			// Loop through the cells at z-1, z and z+1 
 			for (n_z = -1; n_z < 2; n_z++) {
-			
-				////////////////////////////////////////////////////////
-				// FIXME: THERE IS NO NEED TO RECALCULATE x, y AND z FOR
-				// EVERY NEIGHBOUR!
-				// TODO: We can compact a lot of this calculation
-				// together since it involves converting pointers to
-				// coordinates and back, but for now we'll leave it
-				// since it's easier to see what's going on
-				
-				// Get the coordinates of the current particle's cell
-				
-				// First get z by throwing away multiples of 
-				// y_size*z_size (x coordinates) then 
-				// z_size (y coordinates)
-				int z = (
-					(
-						(the_particle->container - the_grid->cells) 
-						/ sizeof(cell)
-					) 
-					% (the_grid->y_size * the_grid->z_size)
-				) % (the_grid->z_size);
-				
-				// Now get y by taking off z and throwing away x
-				// coordinates
-				int y = (
-					(
-						(
-							(the_particle->container - the_grid->cells) 
-							/ sizeof(cell)
-						) - z
-					) % (the_grid->y_size * the_grid->z_size)
-				) / the_grid->z_size;
-
-				// Now get x by taking off z and z_size*y then divide by
-				// y_size*z_size to get x
-				int x = (
-					(
-						(the_particle->container - the_grid->cells) 
-						/ sizeof(cell)
-					) - z - (the_grid->z_size * y)
-				) / (the_grid->y_size * the_grid->z_size);
 
 				// Only act if this neighbour is actually in the grid
 				////////////////////////////////////////////////////////
