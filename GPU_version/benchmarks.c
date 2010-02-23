@@ -105,7 +105,7 @@ void get_index_from_cell(grid* the_grid, particle* the_particle,
 		
 }
 
-void compare_index_methods(grid* the_grid) {
+void check_index_methods(grid* the_grid) {
 	/*
 	 * Ensures that both methods for obtaining a particle's cell's
 	 * position are valid and give the same results.
@@ -152,6 +152,55 @@ void compare_index_methods(grid* the_grid) {
 	
 }
 
+void loop_index_from_position(grid* the_grid, int count) {
+	/*
+	 * Repeatedly loops the "get_index_from_position" function across
+	 * all of the particles in the_grid, looping "count" times.
+	 * 
+	 * This is useful for benchmarking index lookups
+	 */
+	int x_index, y_index, z_index;
+	int loop_count, particle_count;
+	
+	// Loop to get a large sample size
+	for (loop_count=0; loop_count < count; loop_count++) {
+		// Loop through every particle
+		for (particle_count = 0;
+			particle_count < the_grid->particle_number;
+			particle_count++) {
+			
+			get_index_from_position(the_grid,
+				&(the_grid->particles[particle_count]),
+				&x_index, &y_index, &z_index);
+	
+		}
+	}
+}
+
+void loop_index_from_cell(grid* the_grid, int count) {
+	/*
+	 * Repeatedly loops the "get_index_from_cell" function across
+	 * all of the particles in the_grid, looping "count" times.
+	 * 
+	 * This is useful for benchmarking index lookups
+	 */
+	int x_index, y_index, z_index;
+	int loop_count, particle_count;
+	
+	// Loop to get a large sample size
+	for (loop_count=0; loop_count < count; loop_count++) {
+		// Loop through every particle
+		for (particle_count = 0;
+			particle_count < the_grid->particle_number;
+			particle_count++) {
+	
+			get_index_from_cell(the_grid,
+				&(the_grid->particles[particle_count]),
+				&x_index, &y_index, &z_index);
+		}
+	}
+}
+
 int main() {
 	//// Setup a grid
 	
@@ -185,7 +234,11 @@ int main() {
 	grid_particles(the_grid);
 	
 	// Check particle cell indexing
-	compare_index_methods(the_grid);
+	//check_index_methods(the_grid);
+	
+	// Compare the indexing methods by timing the following
+	loop_index_from_position(the_grid, 100000);
+	//loop_index_from_cell(the_grid, 100000);
 	
 	return 0;
 }
