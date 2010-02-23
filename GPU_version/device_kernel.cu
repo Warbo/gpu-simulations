@@ -158,6 +158,19 @@ __device__ float3 gravitation(float4 myPos, float3 accel)
 // once.
 //#define WRAP(x,m) (((x)<m)?(x):(x-m))  // Mod without divide, works on values from 0 up to 2m
 
+__device__ void compute_all_neighbours(particle* current_particle,
+	int buffer_size) {
+	/*
+	 * Calculates interactions on the given particle for particles in
+	 * all neighbouring cells.
+	 * Initially we will just load in the neighbouring cells one at a
+	 * time, but later we will probably add a buffer.
+	 */
+	for (int x_rel = 0; x_rel < 2; x_rel++) {
+		for (int y_rel = 0; y_rel < 2; y_rel++) {
+			for (int z_rel = 0; z_rel < 2; z_rel++) {
+				
+
 template <bool multithreadBodies>
 __device__ float3
 computeBodyAccel(float4 bodyPos, float4* positions, int numBodies)

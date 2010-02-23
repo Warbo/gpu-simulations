@@ -75,7 +75,8 @@ void get_index_from_cell(grid* the_grid, particle* the_particle,
 	
 	// First get the relative memory location in the array, rather than
 	// the absolute memory location in RAM
-	temp = (the_particle->container) - (the_grid->cells);
+	temp = (((int)the_particle->container) - ((int)the_grid->cells)) / 
+		sizeof(cell);
 
 	// The memory is arranged as each z from z_min to z_max for each y
 	// from y_min to y_max for each x from x_min to x_max.
@@ -138,10 +139,10 @@ void check_index_methods(grid* the_grid) {
 			&x2, &y2, &z2);
 		
 		// Debug
-		//fprintf(stderr, "%f -> %i, %i; %f -> %i, %i; %f -> %i, %i\n",
-		//	the_grid->particles[particle_index].x, x1, x2,
-		//	the_grid->particles[particle_index].y, y1, y2,
-		//	the_grid->particles[particle_index].z, z1, z2);
+		fprintf(stderr, "%f -> %i, %i; %f -> %i, %i; %f -> %i, %i\n",
+			the_grid->particles[particle_index].x, x1, x2,
+			the_grid->particles[particle_index].y, y1, y2,
+			the_grid->particles[particle_index].z, z1, z2);
 		
 		// Make sure they give the same answer
 		assert(x1 == x2);
@@ -234,10 +235,10 @@ int main() {
 	grid_particles(the_grid);
 	
 	// Check particle cell indexing
-	//check_index_methods(the_grid);
+	check_index_methods(the_grid);
 	
 	// Compare the indexing methods by timing the following
-	loop_index_from_position(the_grid, 100000);
+	//loop_index_from_position(the_grid, 100000);
 	//loop_index_from_cell(the_grid, 100000);
 	
 	return 0;
