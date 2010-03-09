@@ -16,7 +16,6 @@ __global__ void vector_add(float* A, float* B, float* C) {
 int main() {
 	// This is the size of our vectors, and the number of threads
 	int N = 100;
-	//int keep_going = 1;
 	
 	// These will be our vectors
 	float* A;
@@ -25,41 +24,22 @@ int main() {
 	
 	// Use this for indices
 	int i;
-	
-	//while (keep_going == 1) {
 
-		// Define our vectors
-		A = (float*) malloc(N*sizeof(float));
-		B = (float*) malloc(N*sizeof(float));
-		C = (float*) malloc(N*sizeof(float));
+	// Define our vectors
+	A = (float*) malloc(N*sizeof(float));
+	B = (float*) malloc(N*sizeof(float));
+	C = (float*) malloc(N*sizeof(float));
 	
-		// Initialise them
-		for (i = 0; i < N; i++) {
-			A[i] = (float)i;
-			B[i] = 2.0 * (float)i;
-			C[i] = 0.0;
-		}
+	// Initialise them
+	for (i = 0; i < N; i++) {
+		A[i] = (float)i;
+		B[i] = 2.0 * (float)i;
+		C[i] = 0.0;
+	}
 
-		// Call our function; second number is how many threads to use
-		// The first number is to do with thread blocks...
-		vector_add<<<1, N>>>(A, B, C);
-
-		printf("N=%i\n", N);
-
-	//	if (C[1] == 0) {
-	//		keep_going = 0;
-	//	}
-	//	else {
-	//		N++;
-	//	}
-		
-	//}
-	
-	
-	//return 0;
-	
-//}
-
+	// Call our function; second number is how many threads to use
+	// The first number is to do with thread blocks...
+	vector_add<<<1, N>>>(A, B, C);
 
 	// Output our results
 	printf("A = [");
