@@ -55,7 +55,7 @@ __device__ void calculate_from_buffer(particle* particle_A, particle* buffer, in
 		
 */
 
-__device__ void do_neighbouring_cells(particle* particle_A, x_cell, y_cell, z_cell) {
+__device__ void do_neighbouring_cells(x_cell, y_cell, z_cell, x_size, y_size, z_size, cell_size) {
 	// Loop through neighbours
         for (int x_rel = -1; x_rel < 2; x_rel++) {
                 for (int y_rel = -1; y_rel < 2; y_rel++) {
@@ -63,11 +63,30 @@ __device__ void do_neighbouring_cells(particle* particle_A, x_cell, y_cell, z_ce
 
                                 // Only act if we've got a valid neighbour
                                 if (
-                                        (x_cell+x_rel >= 0) && (x_cell+x_rel < the_grid->x_size) &&
-                                        (y_cell+y_rel >= 0) && (y_cell+y_rel < the_grid->y_size) &&
-                                        (z_cell+z_rel >= 0) && (z_cell+z_rel < the_grid->z_size)
+                                        (x_cell+x_rel >= 0) && (x_cell+x_rel < x_size) &&
+                                        (y_cell+y_rel >= 0) && (y_cell+y_rel < y_size) &&
+                                        (z_cell+z_rel >= 0) && (z_cell+z_rel < z_size)
                                 ) {
-                                        calculate_from_buffer(particle_A
+
+					// Load neighbour to shared memory
+					int offset = (z_size*y_size*(x_cell+x_rel)) + (z_size*(y_cell+y_rel)) + (z_cell+z_rel);
+				
+					for (int count = 0; count < cell_size; count++) {
+						local_particles[cell_size+count] =
+							all_particles[(cell_size*offset)+count];
+					}
+	
+					// TODO: DON'T LOOP HERE, SET UP SOME THREADS AND MAKE THEM SYNCHRONISE			
+					for (int count = 0; count < cell_size; count++) {
+						calculate_from_buffer(&(local_particles[count]), 
+&(local_particles[cell_size]), cell_size);
+					}
+
+				}
+			}
+		}
+	}
+}
 
 extern __shared__ particle current_particles
 __device__ void do_particle(particle* particle_A, int x, int y, int z) {
@@ -88,11 +107,14 @@ cell_size) {
 	int offset = (z_size*y_size*x) + (z_size*y) + z;
 
 	// Allocate some local storage for them
-	__device__ __shared__ particle local_particles[cell_size];
+	// TODO: At the moment, treat all cells as having cell_size particles
+	// Allocating 2*cell_size gives us our local cell and a neighbour cell
+	__device__ __shared__ particle local_particles[2*cell_size];
 
 	for (int count = 0; count < cell_size; count++) {
-		local_particles[count] = all_particles[offset+count];
+		local_particles[count] = all_particles[(cell_size*offset)+count];
 	}
 	
 	// Now load in our neighbours and calculate interactions
-	
+	do_neighbouring_cells(x, y, z, x_size, y_size, z_size, cell_size);
+}
