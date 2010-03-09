@@ -2,8 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void dump_grid(grid* the_grid, double dx, double dy, double dz, 
-	int print_cells, int print_particles, int print_lists) {
+void dump_grid(grid* the_grid, float dx, float dy, float dz) {
 	/*
 	 * This function will dump the entire memory representation of the
 	 * grid at the given pointer to stdout. This can be piped in to a
@@ -19,79 +18,84 @@ void dump_grid(grid* the_grid, double dx, double dy, double dz,
 	assert (the_grid != NULL);
 	
 	// Start with the grid, saying that we're a grid and our address
-	printf("GRID:%u{", the_grid);
+	printf("GRID:%u{", (int)the_grid);
 	// Now give our size
 	printf("X:%i,Y:%i,Z:%i,", the_grid->x_size, 
 		the_grid->y_size, the_grid->z_size);
+	// Our offset
+	printf("OX:%G,OY:%G,OZ:%G,", the_grid->x_offset, the_grid->y_offset,
+		the_grid->z_offset);
 	// And our population
 	printf("POPULATION:%i,", the_grid->particle_number);
 	// And our cell dimensions
 	printf("DX:%G,DY:%G,DZ:%G", dx, dy, dz);
 	
-	// Branch if we've been told to check the cells
-	if (print_cells != 0) {
-		// Start a collection of cells, giving the starting address
-		printf(",CELLS:STARTINGAT:%u{", the_grid->cells);
-		// Go through the memory which we assume is devoted to cells
-		int cell_count;
-		for (cell_count = 0; 
-			cell_count < 
-				(the_grid->x_size)
-				*(the_grid->y_size)
-				*(the_grid->z_size); 
-			cell_count++) {
-			printf("CELL:%u{", &(the_grid->cells[cell_count]));
-			
-			// Branch if we have been told to print our particles
-			if (print_particles != 0) {
-				if (the_grid->cells[cell_count].first_particle == NULL){
-					printf("FIRSTPARTICLE:NULL");
-				}
-				else {
-					printf("FIRSTPARTICLE:%u",
-						the_grid->cells[cell_count].first_particle);
-				}
-			}
-			printf("}");
-			// For all but the last cell we need to insert a comma here
-			if (cell_count < (
-				(the_grid->x_size)*(the_grid->y_size)*(the_grid->z_size)
-			)-1) {
-				printf(",");
-			}
+	// Print cells
+	// Start a collection of cells, giving the starting address
+	printf(",CELLS:STARTINGAT:%u{", (int)(the_grid->cells));
+	// Go through the memory which we assume is devoted to cells
+	int cell_count;
+	for (cell_count = 0; 
+		cell_count < 
+			(the_grid->x_size)
+			*(the_grid->y_size)
+			*(the_grid->z_size); 
+		cell_count++) {
+		printf("CELL:%u{", (int)(&(the_grid->cells[cell_count])));
+		
+		// Print our particles
+		if (the_grid->cells[cell_count].first_particle == NULL){
+			printf("FIRSTPARTICLE:NULL");
 		}
+		else {
+			printf("FIRSTPARTICLE:%u",
+				(int)(the_grid->cells[cell_count].first_particle));
+		}
+		
 		printf("}");
+		// For all but the last cell we need to insert a comma here
+		if (cell_count < (
+			(the_grid->x_size)*(the_grid->y_size)*(the_grid->z_size)
+		)-1) {
+			printf(",");
+		}
+	}
+	printf("}");
+	
+	// Print particles
+	printf(",PARTICLES:STARTINGAT:%u{", (int)(the_grid->particles));
+	
+	// Loop through all of the particles
+	int particle_count;
+	for (particle_count = 0; 
+		particle_count < the_grid->particle_number; 
+		particle_count++) {
+			
+		// Print the particle's address
+		printf("PARTICLE:%u{", 
+			(int)(&(the_grid->particles[particle_count])));
+		
+		// Position
+		printf("X:%G", 
+			the_grid->particles[particle_count].x);
+		printf(",Y:%G", 
+			the_grid->particles[particle_count].y);
+		printf(",Z:%G", 
+			the_grid->particles[particle_count].z);
+		printf(",CONTAINER:%u", 
+			(int)(the_grid->particles[particle_count].container));
+		// Print the list pointer
+		printf(",NEXT:%u", 
+			(int)(the_grid->particles[particle_count].next));
+		
+		printf("}");
+		if (particle_count < (the_grid->particle_number) - 1) {
+			printf(",");
+		}
 	}
 	
-	// Branch if we've been told to print particles
-	if (print_particles != 0) {
-		printf(",PARTICLES:STARTINGAT:%u{", the_grid->particles);
-		int particle_count;
-		for (particle_count = 0; 
-			particle_count < the_grid->particle_number; 
-			particle_count++) {
-			printf("PARTICLE:%u{", 
-				&(the_grid->particles[particle_count]));
-			printf("X:%G", 
-				the_grid->particles[particle_count].position.x);
-			printf(",Y:%G", 
-				the_grid->particles[particle_count].position.y);
-			printf(",Z:%G", 
-				the_grid->particles[particle_count].position.z);
-			printf(",CONTAINER:%u", 
-				the_grid->particles[particle_count].container);
-			// Branch if we've been told to print particle lists
-			if (print_lists != 0) {
-				printf(",NEXT:%u", 
-					the_grid->particles[particle_count].next);
-			}
-			printf("}");
-			if (particle_count < (the_grid->particle_number) - 1) {
-				printf(",");
-			}
-		}
-		printf("}");
-	}
+	// Close the braces we opened
+	printf("}");
 	
 	printf("}");
 }
@@ -122,10 +126,10 @@ void populate_random(grid* the_grid, int particles, int x, int y, int z,
 	assert(the_grid != NULL);
 	
 	// Store the total size of the space
-	three_vector space;
-	space.x = ((double) x) * dx;
-	space.y = ((double) y) * dy;
-	space.z = ((double) z) * dz;
+	double x_space, y_space, z_space;
+	x_space = ((double) x) * dx;
+	y_space = ((double) y) * dy;
+	z_space = ((double) z) * dz;
 	
 	// Loop through the particle memory
 	int particle_index;
@@ -133,12 +137,12 @@ void populate_random(grid* the_grid, int particles, int x, int y, int z,
 		particle_index < particles;
 		particle_index++) {
 		// Assign the position
-		the_grid->particles[particle_index].position.x =
-			new_random()*space.x;
-		the_grid->particles[particle_index].position.y = 
-			new_random()*space.y;
-		the_grid->particles[particle_index].position.z = 
-			new_random()*space.z;
+		the_grid->particles[particle_index].x =
+			new_random()*x_space;
+		the_grid->particles[particle_index].y = 
+			new_random()*y_space;
+		the_grid->particles[particle_index].z = 
+			new_random()*z_space;
 		
 		// Ensure that the particle's linked list pointer doesn't start
 		// in the particle memory
@@ -159,14 +163,14 @@ int check_particles(grid* the_grid, int particle_number) {
 	
 	int counter;
 	for (counter = 0; counter < particle_number; counter++) {
-		//assert(the_grid->particles[counter] != NULL);
-		////////////////////////////////////////////////////////////////
-		// FIXME: These tests are completely broken if we allow
-		// negative positions!
-		////////////////////////////////////////////////////////////////
-		assert(the_grid->particles[counter].position.x >= 0);
-		assert(the_grid->particles[counter].position.y >= 0);
-		assert(the_grid->particles[counter].position.z >= 0);
+		// These tests require that particle positions - grid offset
+		// is positive, so if we want negative particle positions we
+		// need to make sure that our offset is negative and large
+		// enough to keep that subtraction positive!
+		assert(the_grid->particles[counter].x-the_grid->x_offset >= 0);
+		assert(the_grid->particles[counter].y-the_grid->y_offset >= 0);
+		assert(the_grid->particles[counter].z-the_grid->z_offset >= 0);
+		assert(the_grid->particles[counter].container != NULL);
 		
 		c = (the_grid->particles[counter].container-the_grid->cells)
 			/ sizeof(cell);
@@ -176,7 +180,9 @@ int check_particles(grid* the_grid, int particle_number) {
 		x = (c - z - (the_grid->z_size * y))
 			/ (the_grid->y_size * the_grid->z_size);
 		
-		
+		assert(x >= 0);
+		assert(y >= 0);
+		assert(z >= 0);
 	}
 	return 0;
 }
@@ -198,37 +204,40 @@ void count_neighbours(particle* current_particle, double radius,
 	
 	// These will store the values of our comparisons
 	double delta_x, delta_y, delta_z;
+	
 	// This will store the running total of true neighbours
-	//int count = 0;
 	*result = 0;
+	
 	// This is simply the loop iterator
 	int index;
+	
 	// Loop through the given array
 	for (index = 0; index < length; index++) {
+		
 		// Don't act if we're comparing the current_particle to itself
 		if (to_check[index] != current_particle) {
+			
 			// Work out this particle's distance from current_particle
-			delta_x = current_particle->position.x 
-				- to_check[index]->position.x;
-			delta_y = current_particle->position.y 
-				- to_check[index]->position.y;
-			delta_z = current_particle->position.z 
-				- to_check[index]->position.z;
+			delta_x = current_particle->x 
+				- to_check[index]->x;
+			delta_y = current_particle->y 
+				- to_check[index]->y;
+			delta_z = current_particle->z 
+				- to_check[index]->z;
+			
 			// Increment the count if we're within a radius
 			// (use squares to save on unnecessary computation)
 			if ((delta_x*delta_x) 
 				+ (delta_y*delta_y) 
 				+ (delta_z*delta_z) <= (radius*radius)) {
-				//count++;
 				*result = (*result) + 1;
 			}
 		}
 	}
 	
 	// POSTCONDITIONS
-	//assert(count >= 0);
+	assert(*result >= 0);
 	
-	//return count;
 }
 
 void find_neighbours_by_brute_force(particle* current_particle, 
@@ -283,12 +292,12 @@ void find_neighbours_by_brute_force(particle* current_particle,
 		// otherwise...
 		if (particle_being_checked != current_particle) {
 			// Get the difference in their positions
-			delta_x = particle_being_checked->position.x 
-				- current_particle->position.x;
-			delta_y = particle_being_checked->position.y 
-				- current_particle->position.y;
-			delta_z = particle_being_checked->position.z 
-				- current_particle->position.z;
+			delta_x = particle_being_checked->x 
+				- current_particle->x;
+			delta_y = particle_being_checked->y 
+				- current_particle->y;
+			delta_z = particle_being_checked->z 
+				- current_particle->z;
 			// See whether they're within one radius of each other
 			if (delta_x*delta_x + delta_y*delta_y + delta_z*delta_z <= 
 				radius*radius) {
@@ -322,12 +331,12 @@ void brute_force_all(particle* current_particle, grid* the_grid,
 		// Don't bother comparing the current_particle to itself
 		if (&(the_grid->particles[index]) != current_particle) {
 			// Get the difference in positions
-			delta_x = the_grid->particles[index].position.x 
-				- current_particle->position.x;
-			delta_y = the_grid->particles[index].position.y 
-				- current_particle->position.y;
-			delta_z = the_grid->particles[index].position.z 
-				- current_particle->position.z;
+			delta_x = the_grid->particles[index].x 
+				- current_particle->x;
+			delta_y = the_grid->particles[index].y 
+				- current_particle->y;
+			delta_z = the_grid->particles[index].z 
+				- current_particle->z;
 			// If they're within the radius then remember this pointer
 			if (delta_x*delta_x + delta_y*delta_y + delta_z*delta_z <= 
 				radius*radius) {
@@ -344,12 +353,12 @@ void brute_force_all(particle* current_particle, grid* the_grid,
 	for (index = 0; index < number; index++) {
 		if ((&the_grid->particles[index]) != current_particle) {
 			// Get the difference in positions
-			delta_x = the_grid->particles[index].position.x 
-				- current_particle->position.x;
-			delta_y = the_grid->particles[index].position.y 
-				- current_particle->position.y;
-			delta_z = the_grid->particles[index].position.z 
-				- current_particle->position.z;
+			delta_x = the_grid->particles[index].x 
+				- current_particle->x;
+			delta_y = the_grid->particles[index].y 
+				- current_particle->y;
+			delta_z = the_grid->particles[index].z 
+				- current_particle->z;
 			// If they're within the radius then remember this pointer
 			if (delta_x*delta_x + delta_y*delta_y + delta_z*delta_z <= 
 				radius*radius) {
@@ -417,29 +426,30 @@ int check_for_dupes(particle** particles, int length) {
 
 int main() {
 	// These are the dimensions of our volume elements
-	double dx = 1.0;
-	double dy = 1.0;
-	double dz = 1.0;
+	float dx = 1.0;
+	float dy = 1.0;
+	float dz = 1.0;
 	
 	// These are the dimensions of our space as multiples of dx, dy & dz
 	int x = 4;
 	int y = 4;
 	int z = 4;
 	
+	// These are the offsets of the grid coordinates from the particles'
+	float x_offset = 0.0;
+	float y_offset = 0.0;
+	float z_offset = 0.0;
+	
 	// This is the total number of particles to simulate
-	int particle_number = 400;
+	int particle_number = 500;
 	
 	// Make the space we are simulating
 	grid the_grid;
 	
 	// Allocate memory and assign neighbourhoods
-	initialise_grid(&the_grid, x, y, z, dx, dy, dz, particle_number);
-	
-	return 0;
-}
-	
-	/*
-	
+	initialise_grid(&the_grid, x, y, z, dx, dy, dz, 
+		x_offset, y_offset, z_offset, particle_number);
+		
 	// DEBUGGING
 	assert(the_grid.cells != NULL);
 	assert(the_grid.particles != NULL);
@@ -450,13 +460,19 @@ int main() {
 	// Sort the particles into cells
 	grid_particles(&the_grid);
 
+	// DEBUGGING, dump the memory
+	//dump_grid(&the_grid, dx, dy, dz);
+
+	// DEBUGGING, check the particles are in the correct cells
+	//check_particles(&the_grid, particle_number);
+
+	return 0;
+}
+
+/*
 	// DEBUGGING
 	assert(the_grid.particles[0].container != NULL);
 	assert(count_all_particles(&the_grid, x, y, z) == particle_number);
-
-	//dump_grid(&(the_grid), dx, dy, dz, 1, 1, 1, 1);
-
-	//return 0;
 
 	// Choose a particle from the group
 	particle* test_particle = &(the_grid.particles[0]);
@@ -465,153 +481,40 @@ int main() {
 	assert(test_particle != NULL);
 	assert(test_particle->container != NULL);
 
-	////////////////////////////////////////////////////////////////////
-	// First get z by throwing away multiples of 
-	// y_size*z_size (x coordinates) then 
-	// z_size (y coordinates)
-	int cz = (
-		(
-			(test_particle->container - the_grid.cells) 
-			/ sizeof(cell)
-		) 
-		% (the_grid.y_size * the_grid.z_size)
-	) % (the_grid.z_size);
-			
-	// Now get y by taking off z and throwing away x
-	// coordinates
-	int cy = (
-		(
-			(
-				(test_particle->container - the_grid.cells) 
-				/ sizeof(cell)
-			) - cz
-		) % (the_grid.y_size * the_grid.z_size)
-	) / the_grid.z_size;
-
-	// Now get x by taking off z and z_size*y then divide by
-	// y_size*z_size to get x
-	int cx = (
-		(
-			(test_particle->container - the_grid.cells) 
-			/ sizeof(cell)
-		) - cz - (the_grid.z_size * cy)
-	) / (the_grid.y_size * the_grid.z_size);
-	
-	/*fprintf(stderr, "Particle is at (%G,%G,%G), in cell (%i,%i,%i)\n", 
-		test_particle->position.x,
-		test_particle->position.y,
-		test_particle->position.z,
-		cx, cy, cz);*//*
-	int n_x, n_y, n_z;
-	// Loop through the planes at x-1, x and x+1
-	for (n_x = -1; n_x < 2; n_x++) {
-		
-		// Loop through the rows at y-1, y and y+1
-		for (n_y = -1; n_y < 2; n_y++) {
-			
-			// Loop through the cells at z-1, z and z+1 
-			for (n_z = -1; n_z < 2; n_z++) {
-
-				// Only act if this neighbour is actually in the grid
-				////////////////////////////////////////////////////////
-				// FIXME: This is a completely broken way of working if
-				// we want to support negative positions!
-				////////////////////////////////////////////////////////
-				if ((cx+n_x >= 0) && (cx+n_x < the_grid.x_size) &&
-					(cy+n_y >= 0) && (cy+n_y < the_grid.y_size) &&
-					(cz+n_z >= 0) && (cz+n_z < the_grid.z_size)) {
-					//fprintf(stderr, "Neighbour at (%i,%i,%i)\n",
-					//	cx+n_x, cy+n_y, cz+n_z);
-				}
-			}
-		}
-	}
-
 	// Find its neighbours through the grid
 	// This will point to an array of neighbours
 	particle** neighbour_array;
 	// This will tell us how long the array is
-	int neighbour_number;
+	int neighbour_number = -1;
 	get_potential_neighbours_for_particle(&the_grid, test_particle,
 		&neighbour_array, &neighbour_number);
 
-	//fprintf(stderr, "\nNeighbour array [");
-	int ix;
-	for (ix=0; ix < neighbour_number; ix++) {
-		
-		////////////////////////////////////////////////////////////////////
-		// First get z by throwing away multiples of 
-		// y_size*z_size (x coordinates) then 
-		// z_size (y coordinates)
-		n_z = (
-			(
-				(neighbour_array[ix]->container - the_grid.cells) 
-				/ sizeof(cell)
-			) 
-			% (the_grid.y_size * the_grid.z_size)
-		) % (the_grid.z_size);
-			
-		// Now get y by taking off z and throwing away x
-		// coordinates
-		n_y = (
-			(
-				(
-					(neighbour_array[ix]->container - the_grid.cells) 
-					/ sizeof(cell)
-				) - n_z
-			) % (the_grid.y_size * the_grid.z_size)
-		) / the_grid.z_size;
-
-		// Now get x by taking off z and z_size*y then divide by
-		// y_size*z_size to get x
-		n_x = (
-			(
-				(neighbour_array[ix]->container - the_grid.cells) 
-				/ sizeof(cell)
-			) - n_z - (the_grid.z_size * n_y)
-		) / (the_grid.y_size * the_grid.z_size);
-		
-		fprintf(stderr, "(%i %i %i), ", cx-n_x, cy-n_y, cz-n_z);
-		
-		
-		//fprintf(stderr, "%u, ", 
-		//	((int)neighbour_array[ix]-(int)the_grid.particles)/sizeof(particle));
-	}
-	//fprintf(stderr, "]\n");
-	
 	// DEBUGGING
 	assert(neighbour_number >= 0);
 	
 	assert(check_for_dupes(neighbour_array, neighbour_number) == 0);
 
-	//fprintf(stderr, "Potentials found: %i\n", neighbour_number);
+
+	fprintf(stderr, "Potentials found: %i\n", neighbour_number);
 	
-	int neighbours_in_grid = 0;
+	int neighbours_in_grid = -1;
 	count_neighbours(test_particle, dx, neighbour_array, 
 		neighbour_number, &neighbours_in_grid);
 	
-	//fprintf(stderr, "True neighbours a: %i\n", neighbours_in_grid);
+	fprintf(stderr, "True neighbours a: %i\n", neighbours_in_grid);
 	
 	// Now find which of those are true neighbours
 	particle** true_neighbour_array;
-	int true_neighbour_number;
+	int true_neighbour_number = -1;
 	find_neighbours_by_brute_force(test_particle, dx,
 		&true_neighbour_array, &true_neighbour_number, neighbour_array,
-		neighbour_number); 
+		neighbour_number);
 	
-	fprintf(stderr, "\nTrue neighbours [");
-	for (ix=0; ix < true_neighbour_number; ix++) {
-		fprintf(stderr, "%u, ", 
-			(true_neighbour_array[ix] - the_grid.particles)
-				/ sizeof(particle)
-		);
-	}
-	fprintf(stderr, "]\n");
+	fprintf(stderr, "True neighhbours b: %i\n", true_neighbour_number);
 	
 	return 0;
-	
-	//fprintf(stderr, "True neighhbours b: %i\n", true_neighbour_number);
-	
+}
+/*	
 	particle** all_pointers = (particle**) malloc(
 		particle_number*sizeof(particle*)
 	);

@@ -124,6 +124,64 @@ int get_index(float position, float interval_size) {
 	return count;
 }
 
+void get_index_from_position(grid* the_grid, particle* the_particle,
+								int* x, int* y, int* z) {
+	/*
+	 * This function works out the given particle's cell location in
+	 * the given grid based on its position in space, vital for finding
+	 * neighbouring cells.
+	 * This is used for benchmarking methods for calculating the index.
+	 */
+	
+	*x = get_index(the_particle->x - the_grid->x_offset, the_grid->dx);
+	*y = get_index(the_particle->y - the_grid->y_offset, the_grid->dy);
+	*z = get_index(the_particle->z - the_grid->z_offset, the_grid->dz);
+
+}
+
+void get_index_from_cell(grid* the_grid, particle* the_particle,
+							int* x, int* y, int* z) {
+	/*
+	 * This function works out the given particle's cell location in
+	 * the given grid based on the cell's memory location, vital for
+	 * finding neighbouring cells.
+	 * This is used for benchmarking methods for calculating the index.
+	 */
+	int temp;
+	
+	// First get the relative memory location in the array, rather than
+	// the absolute memory location in RAM
+	temp = (((int)the_particle->container) - ((int)the_grid->cells)) / 
+		sizeof(cell);
+
+	// The memory is arranged as each z from z_min to z_max for each y
+	// from y_min to y_max for each x from x_min to x_max.
+	// Therefore the z fluctuates at every step, the y only fluctuates
+	// when the relevant z locations have been exhausted (ie. every
+	// z_size steps), and the x only changes once the relevant y
+	// locations have been exhausted, ie. once y has changed y_size
+	// times, and since y changes every z_size steps this means x
+	// changes every y_size * z_size steps.
+	
+	// Get z by discarding everything above z_size
+	*z = temp % the_grid->z_size;
+	
+	// We can remove z fluctuations from our location and normalise to y
+	temp = temp - *z;
+	temp = temp / the_grid->z_size;
+
+	// Get y by discarding everything above y_size
+	*y = temp % the_grid->y_size;
+	
+	// Now remove y and normalise to x
+	temp = temp - *y;
+	temp = temp / the_grid->y_size;
+
+	// Now find x
+	*x = temp;
+		
+}
+
 void initialise_grid(grid* the_grid, int x, int y, int z,
 	float dx, float dy, float dz,
 	float x_offset, float y_offset, float z_offset,
@@ -233,7 +291,7 @@ void grid_particles(grid* the_grid) {
 	 * Goes through every particle in the given grid and assigns it to
 	 * the relevant cell.
 	 */
-	
+	int count = 0;
 	// PRECONDITIONS
 	assert(the_grid != NULL);
 	
@@ -242,27 +300,11 @@ void grid_particles(grid* the_grid) {
 	cell* intended_cell;
 	for (particle_index=0; particle_index<the_grid->particle_number;
 		particle_index++) {
-			
-		// Find which y-z plane this particle is in
-		// Remember to take off the grid's offset!
-		x_position = get_index(
-			the_grid->particles[particle_index].x - the_grid->x_offset,
-			the_grid->dx
-		);
 		
-		// Find which x-z plane this particle is in
-		// Remember to take off the grid's offset!
-		y_position = get_index(
-			the_grid->particles[particle_index].y - the_grid->y_offset,
-			the_grid->dy
-		);
-		
-		// Find which x-y plane this particle is in
-		// Remember to take off the grid's offset!
-		z_position = get_index(
-			the_grid->particles[particle_index].z - the_grid->z_offset,
-			the_grid->dz
-		);
+		// Get the relevant cell for this particle
+		get_index_from_position(the_grid,
+			&(the_grid->particles[particle_index]),
+			&x_position, &y_position, &z_position);
 		
 		// Now use the intersection of all of these to get its relevant
 		// cell
@@ -293,11 +335,12 @@ void grid_particles(grid* the_grid) {
 		put_particle_in_cell(
 			&(the_grid->particles[particle_index]), intended_cell
 		);
+		count++;
 	
 	}
 	
 	// POSTCONDITIONS
-	
+	fprintf(stderr, "%i", count);
 }
 
 void get_potential_neighbours_for_particle(grid* the_grid, 
