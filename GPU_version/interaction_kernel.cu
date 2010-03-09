@@ -40,21 +40,6 @@ __device__ void calculate_from_buffer(particle* particle_A, particle* buffer, in
 	}
 }
 
-// LEAVE THE BUFFERING UNTIL WE CAN GET THE THING WORKING
-/*__device__ void calculate_from_cell(particle* particle_A, particle* neighbours, int neighbour_number, int buffer_size) {
-	// Calculate the interactions between a particle and all of the neighbours in a cell
-	// We need to split the neighbours into chunks to fit in our buffer
-
-	// Loop through each chunk we need to handle
-	// TODO: Is this condition valid?
-	for (int chunk_count = 0; chunk_count <= (int) neighbour_number
-		
-		// For each chunk, calculate the particle interactions
-		for (unsigned int counter = 0; counter < buffer_size; counter++) {
-			calculate_from_buffer(particle_A, &(neighbours[
-		
-*/
-
 __device__ void do_neighbouring_cells(x_cell, y_cell, z_cell, x_size, y_size, z_size, cell_size) {
 	// Loop through neighbours
         for (int x_rel = -1; x_rel < 2; x_rel++) {
@@ -72,8 +57,7 @@ __device__ void do_neighbouring_cells(x_cell, y_cell, z_cell, x_size, y_size, z_
 					int offset = (z_size*y_size*(x_cell+x_rel)) + (z_size*(y_cell+y_rel)) + (z_cell+z_rel);
 				
 					for (int count = 0; count < cell_size; count++) {
-						local_particles[cell_size+count] =
-							all_particles[(cell_size*offset)+count];
+						local_particles[cell_size+count] = all_particles[(cell_size*offset)+count];
 					}
 	
 					// TODO: DON'T LOOP HERE, SET UP SOME THREADS AND MAKE THEM SYNCHRONISE			
@@ -117,4 +101,43 @@ cell_size) {
 	
 	// Now load in our neighbours and calculate interactions
 	do_neighbouring_cells(x, y, z, x_size, y_size, z_size, cell_size);
+}
+
+int main() {
+	// Toy example for testing
+
+	// Allocate room for a 1x1x1 grid with 10 particles
+	particle* all_particles_host = malloc(10*sizeof(particle));
+
+	// Give particles random positions
+	for (int i=0; i< 10; i++) {
+		all_particles_host[i].x = (float) (rand()/(float)(RAND_MAX));
+		all_particles_host[i].y = (float) (rand()/(float)(RAND_MAX));
+		all_particles_host[i].z = (float) (rand()/(float)(RAND_MAX));
+		
+		printf("%G, %G, %G\n", all_particles_host[i].x, all_particles_host[i].y, all_particles_host[i].z);
+	}
+
+	// Allocate memory on the GPU
+	particle* all_particles_device;
+	cudaMalloc((void**) &all_particles_device, 10*sizeof(particle));
+
+	// Copy across our particles
+	cudaMemcpy(all_particles_device, all_particles_host, 10*sizeof(particle), cudaMemcpyHostToDevice);
+
+	// Calculate the interactions
+	do_cell<<<1, 1>>>(all_particles_device, 1, 1, 1, 0, 0, 0, 10);
+
+	// Get results back
+	cudaMemcpy(all_particles_host, all_particles_device, 10*sizeof(particle), cudaMemcpyDeviceToHost);
+
+	// Free up the memory
+	cudaFree(all_particles_device);
+
+	for (int i=0; i<10; i++) {
+		printf("%G, %G, %G\n", all_particles_host[i].x, all_particles_host[i].y, all_particles_host[i].z);
+	}
+
+	// Exit
+	return 0;
 }
