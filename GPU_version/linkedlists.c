@@ -221,7 +221,7 @@ void initialise_grid(grid* the_grid, int x, int y, int z,
 	// Now we can initialise the cell array by looping over rows, planes
 	// and eventually the whole space
 	int x_index, y_index, z_index;
-	int x_rel, y_rel, z_rel;
+	//int x_rel, y_rel, z_rel;
 	
 	// Step through each cell
 	for (x_index = 0; x_index < x; x_index++) {
@@ -380,7 +380,7 @@ void get_potential_neighbours_for_particle(grid* the_grid,
 	int n_x, n_y, n_z;
 
 	// FIXME: Remove me after debugging
-	int count = 0;
+	//int count = 0;
 	
 	// TODO: We can compact a lot of this calculation
 	// together since it involves converting pointers to

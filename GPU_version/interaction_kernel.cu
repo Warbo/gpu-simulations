@@ -40,7 +40,8 @@ __device__ void calculate_from_buffer(particle* particle_A, particle* buffer, in
 	}
 }
 
-__device__ void do_neighbouring_cells(x_cell, y_cell, z_cell, x_size, y_size, z_size, cell_size) {
+__device__ void do_neighbouring_cells(int x_cell, int y_cell, int z_cell,
+int x_size, int y_size, int z_size, int cell_size) {
 	// Loop through neighbours
         for (int x_rel = -1; x_rel < 2; x_rel++) {
                 for (int y_rel = -1; y_rel < 2; y_rel++) {
