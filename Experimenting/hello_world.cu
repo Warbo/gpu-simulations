@@ -1,4 +1,6 @@
-// A "hello world" style CUDA program
+/*
+ * A "hello world" style CUDA program
+ */
 #include <stdio.h>
 #include <stdlib.h>
 
