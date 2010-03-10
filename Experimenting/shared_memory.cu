@@ -6,7 +6,7 @@
 #include <stdlib.h>
 
 // Define a kernel function
-__global__ void vector_sum(float* A, float* B, int length, int N) {
+__global__ void vector_sum(float* A, float* B, int length, const int N) {
 	// Take a vector A of length "length" and sum it, putting the result in
 	// the vector B
 
