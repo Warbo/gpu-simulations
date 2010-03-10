@@ -72,7 +72,7 @@ __device__ void do_neighbouring_cells(x_cell, y_cell, z_cell, x_size, y_size, z_
 	}
 }
 
-extern __shared__ particle current_particles
+//extern __shared__ particle current_particles
 __device__ void do_particle(particle* particle_A, int x, int y, int z) {
 	// Start off with no acceleration
 	particle_A->x_acc = 0.0;
