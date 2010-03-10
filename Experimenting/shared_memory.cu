@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+__shared__ float sums[10];
+
 // Define a kernel function
 __global__ void vector_sum(float* A, float* B, int length, const int N) {
 	// Take a vector A of length "length" and sum it, putting the result in
@@ -12,7 +14,7 @@ __global__ void vector_sum(float* A, float* B, int length, const int N) {
 
 	// Declare some shared memory to store the sums.
 	// We need enough floats for each thread to have one
-	__shared__ float sums[N];
+	//__shared__ float sums[N];
 	
 	// Our ID is unique to our thread, so use it as our index
 
