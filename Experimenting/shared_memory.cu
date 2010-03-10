@@ -12,7 +12,7 @@ __global__ void vector_sum(float* A, float* B, int length) {
 
 	// Declare some shared memory to store the sums.
 	// We need enough floats for each thread to have one, so use blockDim.x
-	__shared__ float sums[blockDim.x];
+	__shared__ float sums[(int)blockDim.x];
 	
 	// Our ID is unique to our thread, so use it as our index
 
