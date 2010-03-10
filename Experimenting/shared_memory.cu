@@ -65,7 +65,7 @@ int main() {
 
 	// Call our function; second number is how many threads to use
 	// The first number is to do with thread blocks...
-	vector_sum<<<1, N>>>(device_A, device_B, length);
+	vector_sum<<<1, N>>>(device_A, device_B, length, N);
 
 	// Copy memory back
 	cudaMemcpy(host_B, device_B, sizeof(float)*N, cudaMemcpyDeviceToHost);
