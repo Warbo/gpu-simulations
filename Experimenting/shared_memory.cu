@@ -30,7 +30,7 @@ __global__ void vector_sum(float* A, float* B, int length, const int N) {
 
 int main() {
 	// This is the size of our output vector, and the number of threads
-	int N = 10;
+	const int N = 10;
 
 	// This will be the length of our input vectors
 	int length = 50;
