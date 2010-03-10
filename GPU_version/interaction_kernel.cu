@@ -94,7 +94,7 @@ cell_size) {
 	// Allocate some local storage for them
 	// TODO: At the moment, treat all cells as having cell_size particles
 	// Allocating 2*cell_size gives us our local cell and a neighbour cell
-	__device__ __shared__ particle local_particles[2*cell_size];
+	__shared__ particle local_particles[2*cell_size];
 
 	for (int count = 0; count < cell_size; count++) {
 		local_particles[count] = all_particles[(cell_size*offset)+count];

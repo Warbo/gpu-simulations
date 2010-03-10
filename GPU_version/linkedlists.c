@@ -380,7 +380,7 @@ void get_potential_neighbours_for_particle(grid* the_grid,
 	int n_x, n_y, n_z;
 
 	// FIXME: Remove me after debugging
-	//int count = 0;
+	int count = 0;
 	
 	// TODO: We can compact a lot of this calculation
 	// together since it involves converting pointers to
