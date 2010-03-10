@@ -52,7 +52,7 @@ __device__ void calculate_all_neighbours(int cell_size) {
 	}
 }
 
-__device__ void load_neighbouring_cells(int cell_size) {
+__device__ void load_neighbouring_cells(particle* all_particles, int cell_size){
 	// Loop through neighbours
 	for (int x_rel = -1; x_rel < 2; x_rel++) {
 		for (int y_rel = -1; y_rel < 2; y_rel++) {
@@ -110,7 +110,7 @@ __global__ void do_cell(particle* all_particles, int cell_size) {
 	local_particles[threadIdx.x].x_acc = 0.0;
 	
 	// Now load in our neighbours and calculate interactions
-	load_neighbouring_cells(cell_size);
+	load_neighbouring_cells(all_particles, cell_size);
 }
 
 int main() {
