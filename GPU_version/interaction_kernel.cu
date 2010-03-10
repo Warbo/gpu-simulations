@@ -111,6 +111,14 @@ __global__ void do_cell(particle* all_particles, int cell_size) {
 	
 	// Now load in our neighbours and calculate interactions
 	load_neighbouring_cells(all_particles, cell_size);
+
+	// Now put shared values back into global memory
+	all_particles[(cell_size * offset) + threadIdx.x] =
+		local_particles[threadIdx.x];
+
+	// Make sure we're all done
+	__syncthreads();
+	
 }
 
 int main() {
