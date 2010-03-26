@@ -139,10 +139,13 @@ int main() {
 
 	// Copy across our particles
 	cudaMemcpy(all_particles_device, all_particles_host, 27*32*sizeof(particle),
-cudaMemcpyHostToDevice);
+			   cudaMemcpyHostToDevice);Blogger's editor throws a hissy fit when
+using Dirac notation. No, they're NOT anchor tags, they are the value of A in a
+Hilbert space and its dual!
 
+	dim3 dimBlock(3, 3, 3);
 	// Calculate the interactions
-	do_cell<<<1, 27*32>>>(all_particles_device, 32);
+	do_cell<<<1, dimBlock>>>(all_particles_device, 32);
 
 	// Get results back
 	cudaMemcpy(all_particles_host, all_particles_device, 27*32*sizeof(particle),
