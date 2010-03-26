@@ -70,7 +70,7 @@ __global__ void do_cell(particle* all_particles, int cell_size) {
 
 						// Try doing a predictable interaction
 						//particle_A->x_acc += 1;
-						local_particles[threadIdx.x].x_acc += 1,
+						local_particles[threadIdx.x].x_acc += 1;
 						//&(local_particles[cell_size + counter])
 					}
 
