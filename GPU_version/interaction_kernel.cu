@@ -7,9 +7,6 @@
 #include <math.h>
 #include "linkedlists.c"
 
-// Each block needs access to its local particles and a neighbour
-__shared__ particle local_particles[2*32];
-
 __device__ void particles_interact(particle* particle_A, particle* particle_B) {
 	// Make two particles interact
 
@@ -97,6 +94,10 @@ __device__ void load_neighbouring_cells(particle* all_particles, int cell_size){
 __global__ void do_cell(particle* all_particles, int cell_size) {
 	// This begins calculation of the particle interactions
 
+	// Each block needs access to its local particles and a neighbour
+	// Note: We can't use 2*cell_size here since it's not constant!
+	__shared__ particle local_particles[2*32];
+	
 	// Work out where in the array our particles start
 	int offset = (gridDim.z*gridDim.y*blockIdx.x) + (gridDim.z*blockIdx.y)
 			+ blockIdx.z;
