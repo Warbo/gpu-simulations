@@ -10,25 +10,6 @@
 __device__ void particles_interact(particle* particle_A, particle* particle_B) {
 	// Make two particles interact
 
-	/*
-	// Here we use a dummy gravity interaction
-	float x_delta, y_delta, z_delta, distance, x_unit, y_unit, z_unit;
-	x_delta = particle_B->x - particle_A->x;
-	y_delta = particle_B->y - particle_A->y;
-	z_delta = particle_B->z - particle_A->z;
-
-	distance = sqrtf((x_delta*x_delta + y_delta*y_delta + z_delta*z_delta));
-	
-	x_unit = x_delta / distance;
-	y_unit = y_delta / distance;
-	z_unit = z_delta / distance;
-
-	// F = (-G*m1*m2/r^2)*r_hat
-	particle_A->x_acc += ((particle_A->mass * particle_B->mass)/(distance*distance))*x_unit;
-	particle_A->y_acc += ((particle_A->mass * particle_B->mass)/(distance*distance))*y_unit;
-	particle_A->z_acc += ((particle_A->mass * particle_B->mass)/(distance*distance))*z_unit;
-	*/
-
 	// Try doing a predictable interaction
 	particle_A->x_acc += 1;
 	
