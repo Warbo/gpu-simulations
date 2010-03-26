@@ -69,9 +69,9 @@ __global__ void do_cell(particle* all_particles, int cell_size) {
 						// second half of local memory
 
 						// Try doing a predictable interaction
-						particle_A->x_acc += 1;
-							local_particles[threadIdx.x].x_acc += 1,
-							//&(local_particles[cell_size + counter])
+						//particle_A->x_acc += 1;
+						local_particles[threadIdx.x].x_acc += 1,
+						//&(local_particles[cell_size + counter])
 					}
 
 					// Ensure everyone's finished before loading the next cell
