@@ -141,9 +141,9 @@ int main() {
 	cudaMemcpy(all_particles_device, all_particles_host, 27*32*sizeof(particle),
 			   cudaMemcpyHostToDevice);
 
-	dim3 dimBlock(3, 3, 3);
+	dim3 dimGrid(3, 3, 3);
 	// Calculate the interactions
-	do_cell<<<1, dimBlock>>>(all_particles_device, 32);
+	do_cell<<<dimGrid, 32>>>(all_particles_device, 32);
 
 	// Get results back
 	cudaMemcpy(all_particles_host, all_particles_device, 27*32*sizeof(particle),
