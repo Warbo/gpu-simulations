@@ -142,7 +142,7 @@ int main() {
 cudaMemcpyHostToDevice);
 
 	// Calculate the interactions
-	do_cell<<<27, 32>>>(all_particles_device, 32);
+	do_cell<<<1, 27*32>>>(all_particles_device, 32);
 
 	// Get results back
 	cudaMemcpy(all_particles_host, all_particles_device, 27*32*sizeof(particle),
