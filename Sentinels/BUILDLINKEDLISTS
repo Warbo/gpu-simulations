@@ -3,24 +3,24 @@
 case "$1" in
 
 	debug)
-		gcc -c -fmudflap linkedlists.c -o linkedlists.o
-		#gcc -fmudflap -lmudflap linkedlists.o -o linkedlists
+		gcc -c -fmudflap linkedlists.c -lm -o linkedlists.o
+		#gcc -fmudflap -lmudflap linkedlists.o -I/usr/include -o linkedlists
 		;;
 	
 	tests)
-		gcc -c linkedlists.c -o linkedlists.o
-		gcc -c tests.c -o tests.o
-		gcc tests.o -o tests
+		gcc -c linkedlists.c -Wall -lm -o linkedlists.o
+		gcc -c tests.c -Wall -lm -o tests.o
+		gcc tests.o -Wall -lm -o tests
 		;;
 
 	benchmarks)
-		gcc -c linkedlists.c -o linkedlists.o
-		gcc -c benchmarks.c -o benchmarks.o
-		gcc benchmarks.o -o benchmarks
+		gcc -c linkedlists.c -lm -o linkedlists.o
+		gcc -c benchmarks.c -lm -o benchmarks.o
+		gcc benchmarks.o -lm -o benchmarks
 		;;
 
 	*)
-		gcc -c linkedlists.c -o linkedlists.o
+		gcc -c linkedlists.c -lm -o linkedlists.o
 		;;
 
 esac
