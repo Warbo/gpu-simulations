@@ -25,22 +25,6 @@ struct particle {
 	float y_acc;	// y acceleration
 	float z_acc;	// z acceleration
 	float mass;		// The particle's mass
-	
-	// The following two are implementation-specific and may be removed
-	particle* next;		// Pointer used in particle linked lists
-	cell* container;	// Pointer to containing cell, could be inferred
-};
-
-struct cell {
-	/*
-	 * A cell is a unit volume in the grid. It stores a pointer to a
-	 * linked list of the particles it contains.
-	 */
-	
-	// The following may be removed
-	// This points to the first particle in our linked list
-	particle* first_particle;
-	
 };
 
 struct grid {
@@ -68,22 +52,27 @@ struct grid {
 	// This is the total number of particles in this space
 	int particle_number;
 	
-	// This stores the volume units of this grid
-	cell* cells;
-	
 	// This stores the particles which the cells contain
 	particle* particles;
+	
+	// This stores cell boundaries (ie. where in the particles list each
+	// cell starts)
+	int* cells;
 	
 };
 
 // FIXME: There should be no tests in the core library, so move this
 // after debugging!
 
-int count_cell_contents(cell* the_cell) {
+int count_cell_contents(grid* the_grid, int x, int y, int z) {
 	/*
-	 * This returns the number of particles in the given cell.
+	 * This returns the number of particles in the cell at the
+	 * given location.
 	 */
-	int count = 0;
+	// Gets the difference between the 
+	int location = (the_grid->dy * the_grid->dz)*x + 
+		(the_grid->dz)* y +
+		z;
 	particle* current_particle = the_cell->first_particle;
 	while (current_particle != NULL) {
 		count++;
