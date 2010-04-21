@@ -58,6 +58,32 @@ struct grid {
 	
 };
 
+// Tests useful for assertions
+
+int get_sentinel_number(grid* the_grid) {
+	/*
+	 * Counts the number of sentinel particles in the given grid.
+	 */
+	
+	// Preconditions
+	assert(the_grid != NULL);
+	assert(the_grid->particle_number >= 0);
+	assert(the_grid->particles != NULL);
+	
+	int sentinel_number = 0;
+	int index;
+	for (index=0; index < the_grid->particle_number; index++) {
+		if (the_grid->particles[index].id == -1) {
+			sentinel_count++;
+		}
+	}
+	
+	// Postconditions
+	assert(sentinel_count >= 0);
+	
+	return sentinel_count;
+}
+
 float get_distance(particle* p1, particle* p2) {
 	double result = 0;
 	result = result + (double) ((p2->x - p1->x)*(p2->x - p1->x));
@@ -205,6 +231,7 @@ void grid_particles(grid* the_grid, particle* particles) {
 	 */
 	// PRECONDITIONS
 	assert(the_grid != NULL);
+	assert(particles != NULL);
 
 	int array_index = 0;		// Stores our particle array position
 	int index;		// Used to loop through particles
@@ -246,6 +273,11 @@ void grid_particles(grid* the_grid, particle* particles) {
 			}
 		}
 	}
+	
+	// POSTCONDITIONS
+	assert(get_sentinel_number(the_grid) == 
+		the_grid->x_size * the_grid->y_size * the_grid->zsize - 1);
+		
 }
 
 void get_cell_contents(grid* the_grid, int x, int y, int z, particle** start,

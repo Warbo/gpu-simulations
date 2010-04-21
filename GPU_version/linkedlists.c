@@ -392,33 +392,10 @@ void get_potential_neighbours_for_particle(grid* the_grid,
 	// First get z by throwing away multiples of 
 	// y_size*z_size (x coordinates) then 
 	// z_size (y coordinates)
-	int z = (
-		(
-			(the_particle->container - the_grid->cells) 
-			/ sizeof(cell)
-		) 
-		% (the_grid->y_size * the_grid->z_size)
-	) % (the_grid->z_size);
-	
-	// Now get y by taking off z and throwing away x
-	// coordinates
-	int y = (
-		(
-			(
-				(the_particle->container - the_grid->cells) 
-				/ sizeof(cell)
-			) - z
-		) % (the_grid->y_size * the_grid->z_size)
-	) / the_grid->z_size;
-
-	// Now get x by taking off z and z_size*y then divide by
-	// y_size*z_size to get x
-	int x = (
-		(
-			(the_particle->container - the_grid->cells) 
-			/ sizeof(cell)
-		) - z - (the_grid->z_size * y)
-	) / (the_grid->y_size * the_grid->z_size);
+	int x;
+	int y;
+	int z;
+	get_index_from_position(the_grid, the_particle, &x, &y, &z);
 
 	//// Loop
 	// Loop through the planes at x-1, x and x+1
