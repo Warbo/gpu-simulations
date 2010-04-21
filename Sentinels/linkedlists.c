@@ -70,7 +70,7 @@ int get_sentinel_number(grid* the_grid) {
 	assert(the_grid->particle_number >= 0);
 	assert(the_grid->particles != NULL);
 	
-	int sentinel_number = 0;
+	int sentinel_count = 0;
 	int index;
 	for (index=0; index < the_grid->particle_number; index++) {
 		if (the_grid->particles[index].id == -1) {
@@ -276,7 +276,7 @@ void grid_particles(grid* the_grid, particle* particles) {
 	
 	// POSTCONDITIONS
 	assert(get_sentinel_number(the_grid) == 
-		the_grid->x_size * the_grid->y_size * the_grid->zsize - 1);
+		the_grid->x_size * the_grid->y_size * the_grid->z_size - 1);
 		
 }
 
