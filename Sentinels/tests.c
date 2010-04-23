@@ -153,244 +153,12 @@ void populate_random(particle** p_array, int particles, int x, int y, int z,
 }
 
 /*int check_particles(grid* the_grid, int particle_number) {
-	// PRECONDITIONS
-	assert(the_grid != NULL);
-	assert(particle_number >= 0);
-	
-	int c, x, y, z;
-	
-	int counter;
-	for (counter = 0; counter < particle_number; counter++) {
-		// These tests require that particle positions - grid offset
-		// is positive, so if we want negative particle positions we
-		// need to make sure that our offset is negative and large
-		// enough to keep that subtraction positive!
-		assert(the_grid->particles[counter].x-the_grid->x_offset >= 0);
-		assert(the_grid->particles[counter].y-the_grid->y_offset >= 0);
-		assert(the_grid->particles[counter].z-the_grid->z_offset >= 0);
-		assert(the_grid->particles[counter].container != NULL);
-		
-		c = (the_grid->particles[counter].container-the_grid->cells)
-			/ sizeof(cell);
-		z = (c % (the_grid->y_size*the_grid->z_size))%the_grid->z_size;
-		y = ((c - z) % (the_grid->y_size*the_grid->z_size))
-			/ (the_grid->z_size);
-		x = (c - z - (the_grid->z_size * y))
-			/ (the_grid->y_size * the_grid->z_size);
-		
-		assert(x >= 0);
-		assert(y >= 0);
-		assert(z >= 0);
-	}
-	return 0;
-}*/
-
-//void count_neighbours(particle* current_particle, double radius,
-//	particle** to_check, int length, int* result) {
-	/*
-	 * This will count the true neighbours of current_particle, ie.
-	 * those within one radius of it, out of the array of particle
-	 * pointers to_check, the length of which is given as "length".
-	 * The result is written into "result".
-	 */
-/*	
-	// PRECONDITIONS
-	assert(current_particle != NULL);
-	assert(radius >= 0);
-	assert(to_check != NULL);
-	assert(length >= 0);
-	
-	// These will store the values of our comparisons
-	double delta_x, delta_y, delta_z;
-	
-	// This will store the running total of true neighbours
-	*result = 0;
-	
-	// This is simply the loop iterator
-	int index;
-	
-	// Loop through the given array
-	for (index = 0; index < length; index++) {
-		
-		// Don't act if we're comparing the current_particle to itself
-		if (to_check[index] != current_particle) {
-			
-			// Work out this particle's distance from current_particle
-			delta_x = current_particle->x 
-				- to_check[index]->x;
-			delta_y = current_particle->y 
-				- to_check[index]->y;
-			delta_z = current_particle->z 
-				- to_check[index]->z;
-			
-			// Increment the count if we're within a radius
-			// (use squares to save on unnecessary computation)
-			if ((delta_x*delta_x) 
-				+ (delta_y*delta_y) 
-				+ (delta_z*delta_z) <= (radius*radius)) {
-				*result = (*result) + 1;
-			}
-		}
-	}
-	
-	// POSTCONDITIONS
-	assert(*result >= 0);
-	
-}*/
-
-//void find_neighbours_by_brute_force(particle* current_particle, 
-//	double radius, particle*** neighbour_particles, int* length, 
-//	particle** set_to_check, int length_of_set) {
-	/*
-	 * This function will go through all "length_of_set" particles in
-	 * the array "set_to_check", comparing their distance to the given
-	 * "current_particle". If they are within "radius" distance from
-	 * each other then a pointer to that particle is added to the array
-	 * pointed to by "neighbour_particles". After they have all been
-	 * compared, "length" will point to the number of neighbours found.
-	 * 
-	 * WARNING! This will modify the array it is given!
-	 * 
-	 */
-/*	
-	// PRECONDITIONS
-	assert(current_particle != NULL);
-	assert(radius > 0);
-	assert(set_to_check != NULL);
-	assert(length != NULL);
-	assert(length_of_set >= 0);
-	
-	*length = 0;
-	count_neighbours(current_particle, radius, set_to_check, 
-		length_of_set, length);
-	neighbour_particles[0] = (particle**) malloc(
-		*length*sizeof(particle*)
-	);
-	
-	int position = 0;
-	
-	// These will let us compare the positions
-	double delta_x;
-	double delta_y;
-	double delta_z;
-	
-	// This points to the current particle in the given array
-	particle* particle_being_checked;
-	
-	// Loop through the given array
-	int index;
-	for (index = 0; index < length_of_set; index++) {
-		// Get the next particle
-		particle_being_checked = set_to_check[index];
-		
-		// Make sure it exists
-		assert(particle_being_checked != NULL);
-		
-		// If we've found the current particle then discard it
-		// otherwise...
-		if (particle_being_checked != current_particle) {
-			// Get the difference in their positions
-			delta_x = particle_being_checked->x 
-				- current_particle->x;
-			delta_y = particle_being_checked->y 
-				- current_particle->y;
-			delta_z = particle_being_checked->z 
-				- current_particle->z;
-			// See whether they're within one radius of each other
-			if (delta_x*delta_x + delta_y*delta_y + delta_z*delta_z <= 
-				radius*radius) {
-				// If so then don't discard it, and increment the length
-				neighbour_particles[0][position]=particle_being_checked;
-				//fprintf(stderr, " %i ", particle_being_checked);
-				position++;
-				
-			}
-		}
-	}
-		
-	// Now our array is populated, so we can return
-	
-	// POSTCONDITIONS
-	// We should have a valid output array
-	assert(neighbour_particles != NULL);
-	// We shouldn't output more particles than we were given
-	assert(*length <= length_of_set);
-	
-}*/
-
-/*void brute_force_all(particle* current_particle, grid* the_grid, 
-	int number, double radius, particle*** found, int* length) {
-	int index;
-	double delta_x;
-	double delta_y;
-	double delta_z;
-	int counter = 0;
-	for (index = 0; index < number; index++) {
-		// Don't bother comparing the current_particle to itself
-		if (&(the_grid->particles[index]) != current_particle) {
-			// Get the difference in positions
-			delta_x = the_grid->particles[index].x 
-				- current_particle->x;
-			delta_y = the_grid->particles[index].y 
-				- current_particle->y;
-			delta_z = the_grid->particles[index].z 
-				- current_particle->z;
-			// If they're within the radius then remember this pointer
-			if (delta_x*delta_x + delta_y*delta_y + delta_z*delta_z <= 
-				radius*radius) {
-				counter++;
-			}
-		}
-	}
-	
-	*length = counter;
-	found[0] = (particle**) malloc( counter*sizeof(particle*) );
-	
-	counter = 0;
-	
-	for (index = 0; index < number; index++) {
-		if ((&the_grid->particles[index]) != current_particle) {
-			// Get the difference in positions
-			delta_x = the_grid->particles[index].x 
-				- current_particle->x;
-			delta_y = the_grid->particles[index].y 
-				- current_particle->y;
-			delta_z = the_grid->particles[index].z 
-				- current_particle->z;
-			// If they're within the radius then remember this pointer
-			if (delta_x*delta_x + delta_y*delta_y + delta_z*delta_z <= 
-				radius*radius) {
-				found[0][counter] = &(the_grid->particles[index]);
-				counter++;
-			}
-		}
-	}
-	
-	// POSTCONDITIONS
-	assert(*length <= number);
-	assert(found != NULL);
 	
 }*/
 
 /*int count_all_particles(grid* the_grid, int x, int y, int z) {
 	
-	// PRECONDITIONS
-	assert(the_grid != NULL);
-	assert(x > 0);
-	assert(y > 0);
-	assert(z > 0);
 	
-	int count = 0;
-	int index;
-	particle* current_particle;
-	for (index=0; index < x*y*z; index++) {
-		current_particle = the_grid->cells[index].first_particle;
-		while (current_particle != NULL) {
-			current_particle = current_particle->next;
-			count++;
-		}
-	}
-	return count;
 }*/
 
 //int check_for_dupes(particle** particles, int length) {
@@ -400,26 +168,7 @@ void populate_random(particle** p_array, int particles, int x, int y, int z,
 	 * If duplicates are found return 1, else return 0.
 	 */
 /*	
-	// PRECONDITIONS
-	assert(particles != NULL);
-	assert(length >= 0);
-
-	// There can be no duplicates if the array is empty or a singleton
-	if (length < 2) {
-		return 0;
-	}
 	
-	int index1, index2;
-	for (index1 = 0; index1 < length; index1++) {
-		for (index2 = 0; index2 < length; index2++) {
-			if (index1 != index2) {
-				if (particles[index1] == particles[index2]) {
-					return 1;
-				}
-			}
-		}
-	}
-	return 0;
 }*/
 
 int main() {
@@ -460,7 +209,7 @@ int main() {
 	grid_particles(&the_grid, p_array);
 
 	// Choose a particle from the group
-	particle* test_particle = &(the_grid.particles[0]);
+	particle* test_particle = &(the_grid.particles[1]);
 
 	// DEBUGGING
 	assert(test_particle != NULL);

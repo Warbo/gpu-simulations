@@ -3,8 +3,9 @@
 case "$1" in
 
 	debug)
-		gcc -c -fmudflap linkedlists.c -lm -o linkedlists.o
-		#gcc -fmudflap -lmudflap linkedlists.o -I/usr/include -o linkedlists
+		gcc -c -fmudflap -Wall linkedlists.c -lm -o linkedlists.o
+		gcc -c -fmudflap -Wall -lm tests.c -o tests.o
+		gcc -lmudflap tests.o -Wall -lm -I/usr/include -o tests
 		;;
 	
 	tests)
