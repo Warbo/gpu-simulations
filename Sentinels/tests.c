@@ -90,22 +90,22 @@ void populate_random(particle** p_array, int particles, int x, int y, int z,
 
 int main() {
 	// These are the dimensions of our volume elements
-	float dx = 1.0;
-	float dy = 1.0;
-	float dz = 1.0;
+	float dx = (float)1.0;
+	float dy = (float)1.0;
+	float dz = (float)1.0;
 	
 	// These are the dimensions of our space as multiples of dx, dy & dz
-	int x = 2;
-	int y = 2;
-	int z = 2;
+	int x = 50;
+	int y = 75;
+	int z = 100;
 	
 	// These are the offsets of the grid coordinates from the particles'
-	float x_offset = 0.0;
-	float y_offset = 0.0;
-	float z_offset = 0.0;
+	float x_offset = (float)-4.0;
+	float y_offset = (float)3.2;
+	float z_offset = (float)18.7;
 	
 	// This is the total number of particles to simulate
-	int particle_number = 500;
+	int particle_number = 375000;
 	
 	// Make the space we are simulating
 	grid the_grid;
@@ -126,8 +126,15 @@ int main() {
 	// Sort the particles into cells
 	grid_particles(&the_grid, p_array);
 
-	// Choose a particle from the group
-	particle* test_particle = &(the_grid.particles[1]);
+	// Choose a particle randomly from the group
+	particle* test_particle = NULL;
+	int test_probe;
+	while (test_particle == NULL) {
+		test_probe = (int)( ((float)particle_number) * new_random());
+		if (the_grid.particles[test_probe].id > 0) {
+			test_particle = &(the_grid.particles[test_probe]);
+		}
+	}
 
 	// DEBUGGING
 	assert(test_particle != NULL);

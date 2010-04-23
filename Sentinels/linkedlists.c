@@ -266,6 +266,8 @@ void grid_particles(grid* the_grid, particle* particles) {
 	 * Goes through every cell in the given grid and puts its particles in
 	 * the right part of the array.
 	 */
+
+// TODO: Take off the offsets when moving from one to the other!
 	
 	// PRECONDITIONS
 	assert(the_grid != NULL);
