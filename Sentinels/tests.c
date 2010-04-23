@@ -153,45 +153,19 @@ int main() {
 		&true_neighbour_array, &true_neighbour_number);
 	
 	fprintf(stderr, "True neighhbours: %i\n", true_neighbour_number);
-	
+
+	particle* brute_force_neighbours;
 	int total_neighbours = -1;
 	get_neighbours_brute_force(&the_grid, test_particle,
-	&(the_grid.particles), &total_neighbours);
+	&(brute_force_neighbours), &total_neighbours);
 	
 	fprintf(stderr, "True neighbours from all: %i\n", total_neighbours);
 
-	return 0;
-}
-	/*
-	assert(neighbours_in_grid == true_neighbour_number);
-	
-	assert(total_neighbours == neighbours_in_grid);
-	
-	particle** brute_force_array;
-
-	int total_neighbours2;
-	
-	find_neighbours_by_brute_force(test_particle, dx, 
-		&brute_force_array, &total_neighbours2, all_pointers, 
-		particle_number);
-	
-	assert(total_neighbours == neighbours_in_grid);
-	
-	// Now "true_neighbour_array" should contain "true_neighbour_number"
-	// neighbours
-	
-	
-	int brute_force_number;
-	brute_force_all(test_particle, &the_grid, particle_number, dx, 
-		&brute_force_array, &brute_force_number);
-	
-	// Now "brute_force_array" should contain "brute_force_number"
-	
-	// Compare the two
 	assert(total_neighbours == true_neighbour_number);
-	
-	
-	double delta_x, delta_y, delta_z;
+	assert(total_neighbours < neighbour_number);
+
+	// Check every particle found
+	float delta_x, delta_y, delta_z;
 	
 	// Check that all of the "true neighbours" were found during 
 	// brute force
@@ -199,58 +173,59 @@ int main() {
 	int index2;		// Used for indexing the "brute" array
 	int found;		// 0 means no match yet, 1 means match found
 	
-	int diff_count = 0;
-	
 	for (index1 = 0; index1 < true_neighbour_number; index1++) {
 		found = 0;
-		delta_x = true_neighbour_array[index1]->position.x 
-			- test_particle->position.x;
-		delta_y = true_neighbour_array[index1]->position.y 
-			- test_particle->position.y;
-		delta_z = true_neighbour_array[index1]->position.z 
-			- test_particle->position.z;
+		delta_x = true_neighbour_array[index1].x
+			- test_particle->x;
+		delta_y = true_neighbour_array[index1].y
+			- test_particle->y;
+		delta_z = true_neighbour_array[index1].z
+			- test_particle->z;
+
+		// Check that the particle is a true neighbour
+		assert((delta_x*delta_x)+(delta_y*delta_y)+(delta_z*delta_z) <=
+			(the_grid.dx * the_grid.dx));
 		
-		for (index2 = 0; index2 < brute_force_number; index2++) {
+		for (index2 = 0; index2 < total_neighbours; index2++) {
 			if (found == 0) {
-				if (true_neighbour_array[index1] ==
-					brute_force_array[index2]) {
+				if (true_neighbour_array[index1].id ==
+					brute_force_neighbours[index2].id) {
 					found = 1;
 				}
 			}
 		}
-		if (found == 0) {
-			diff_count++;
-			return 1;
-		}
+
+		// Ensure the grid particle was found in the brute force
+		assert(found == 1);
+
 	}
 	
-	diff_count = 0;
-	
 	// Now do the same but the other way around
-	for (index2 = 0; index2 < brute_force_number; index2++) {
+	for (index2 = 0; index2 < total_neighbours; index2++) {
 		found = 0;
 		
-		delta_x = brute_force_array[index2]->position.x 
-			- test_particle->position.x;
-		delta_y = brute_force_array[index2]->position.y 
-			- test_particle->position.y;
-		delta_z = brute_force_array[index2]->position.z 
-			- test_particle->position.z;
+		delta_x = brute_force_neighbours[index2].x
+			- test_particle->x;
+		delta_y = brute_force_neighbours[index2].y
+			- test_particle->y;
+		delta_z = brute_force_neighbours[index2].z
+			- test_particle->z;
 		
 		for (index1 = 0; index1 < true_neighbour_number; index1++) {
 			if (found == 0) {
-				if (true_neighbour_array[index1] ==
-					brute_force_array[index2]) {
+				if (true_neighbour_array[index1].id ==
+					brute_force_neighbours[index2].id) {
 					found = 1;
 				}
 			}
 		}
-		if (found == 0) {
-			diff_count++;
-			return 1;
-		}
+
+		// Ensure everything found through brute force was found by the grid
+		assert(found == 1);
+		
 	}
+
+	// Success
+	return 0;
 	
-	//return 0;
 }
-*/

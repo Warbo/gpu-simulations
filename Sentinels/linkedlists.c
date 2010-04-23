@@ -340,7 +340,6 @@ void get_cell_contents(grid* the_grid, int x, int y, int z,
 	 * which is stored in 'length'. The contents of the array are those
 	 * particles in 'the_grid' at the grid cell with coordinates (x,y,z)
 	 */
-	fprintf(stderr, "x:%i, y:%i, z:%i\n", x, y, z);
 	// PRECONDITIONS
 	assert(the_grid != NULL);
 	assert(x >= 0);
@@ -386,7 +385,6 @@ void get_cell_contents(grid* the_grid, int x, int y, int z,
 		// Move on to the next particle
 		index++;
 	}
-	fprintf(stderr, "A %i\n", index);
 
 	// POSTCONDITIONS
 	assert(*length >= 0);
@@ -473,8 +471,6 @@ void get_potential_neighbours_for_particle(grid* the_grid,
 			}
 		}
 	}
-
-	fprintf(stderr, "B %i\n", *length);
 	
 	// DEBUG
 	assert(neighbour_particles != NULL);
@@ -650,6 +646,7 @@ void get_neighbours_brute_force(grid* the_grid, particle* the_particle,
 
 	// PRECONDITIONS
 	assert(the_grid != NULL);
+	assert(the_grid->particles != NULL);
 	assert(the_particle != NULL);
 	assert(neighbour_particles != NULL);
 	assert(length != NULL);
@@ -659,7 +656,7 @@ void get_neighbours_brute_force(grid* the_grid, particle* the_particle,
 	
 	int all_count = the_grid->particle_number +
 		(the_grid->x_size * the_grid->y_size * the_grid->z_size);
-
+	
 	// Now see how many are real neighbours
 	int index;
 	for (index = 0; index < all_count; index++) {
@@ -668,14 +665,13 @@ void get_neighbours_brute_force(grid* the_grid, particle* the_particle,
 				the_grid->dx) &&
 			(the_particle->id != the_grid->particles[index].id)) {
 	
-			fprintf(stderr, "ID1: %i\n", the_grid->particles[index].id);
-	
 			// DEBUG
 			assert(*length < the_grid->particle_number);
 			assert(get_distance(&(the_grid->particles[index]),
 				the_particle) <= the_grid->dy);
 			assert(get_distance(&(the_grid->particles[index]),
 				the_particle) <= the_grid->dz);
+			assert(the_grid->particles[index].id >= 0);
 			
 			*length = *length + 1;
 			
@@ -696,7 +692,7 @@ void get_neighbours_brute_force(grid* the_grid, particle* the_particle,
 	assert(*neighbour_particles != NULL);
 	assert(all_count == the_grid->particle_number +
 		(the_grid->x_size * the_grid->y_size * the_grid->z_size));
-
+	
 	// Now populate the array
 	int position = 0;
 	for (index = 0; index < all_count; index++) {
@@ -705,15 +701,14 @@ void get_neighbours_brute_force(grid* the_grid, particle* the_particle,
 				   the_grid->dx) &&
 				   (the_particle->id != the_grid->particles[index].id)) {
 	
-			fprintf(stderr, "ID2: %i\n", the_grid->particles[index].id);
-	
 			// DEBUG
 			assert(*length < the_grid->particle_number);
-			assert(position <= *length);
+			assert(position < *length);
 			assert(get_distance(&(the_grid->particles[index]),
 				   the_particle) <= the_grid->dy);
 			assert(get_distance(&(the_grid->particles[index]),
 				   the_particle) <= the_grid->dz);
+			assert(the_grid->particles[index].id >= 0);
 			
 			neighbour_particles[0][position] = the_grid->particles[index];
 			position++;
@@ -724,27 +719,4 @@ void get_neighbours_brute_force(grid* the_grid, particle* the_particle,
 		}
 	}
 	
-	
-	/*for (index = 0; index < all_count; index++) {
-		if ((the_grid->particles[index].id != -1) &&
-			(get_distance(&(the_grid->particles[index]), the_particle) <=
-				the_grid->dx) &&
-			(the_particle->id != the_grid->particles[index].id)) {
-		
-			// DEBUG
-			fprintf(stderr, "len %i pos %i\n", *length, position);
-			//assert(position < *length || *length == 0);
-			assert(get_distance(&(the_grid->particles[index]),
-				the_particle) <= the_grid->dy);
-			assert(get_distance(&(the_grid->particles[index]),
-				the_particle) <= the_grid->dz);
-				
-			neighbour_particles[0][position] = the_grid->particles[index];
-			position++;
-			
-			// DEBUG
-			//assert(position <= *length || *length == 0);
-			
-		}
-	}*/
 }
