@@ -40,9 +40,9 @@ struct grid {
 	int z_size;
 	
 	// These store the dimensions of the cells
-	int dx;
-	int dy;
-	int dz;
+	float dx;
+	float dy;
+	float dz;
 	
 	// The location of the first cell (x minimum, y minimum, z minimum)
 	float x_offset;
@@ -69,10 +69,10 @@ int get_sentinel_number(grid* the_grid) {
 	assert(the_grid->particle_number >= 0);
 	assert(the_grid->particles != NULL);
 	
-	int sentinel_count = 0;
+	int sentinel_count;
+	sentinel_count = 0;
 	int index;
-	for (index=0;
-		index < the_grid->particle_number +
+	for (index=0; index < the_grid->particle_number +
 			(the_grid->x_size * the_grid->y_size * the_grid->z_size);
 		index++) {
 			
@@ -162,8 +162,8 @@ int get_index(float position, float interval_size) {
 	 */
 	
 	// PRECONDITIONS
-	assert(position >= 0);
-	assert(interval_size > 0);
+	assert(position >= 0.0);
+	assert(interval_size > 0.0);
 	
 	// If the given position fits inside one interval then return 0
 	if (position < interval_size) {
@@ -179,8 +179,8 @@ int get_index(float position, float interval_size) {
 	}
 	
 	// POSTCONDITIONS
-	assert(count*interval_size < position);
-	assert((count+1)*interval_size >= position);
+	assert( ((float)count) * interval_size < position);
+	assert( ((float)(count+1)) * interval_size >= position);
 	
 	return count;
 }
@@ -247,7 +247,8 @@ void initialise_grid(grid* the_grid, int x, int y, int z,
 						
 	// Allocate space for the particles and sentinels
 	the_grid->particles =
-		(particle*)malloc((particles+x*y*z)*sizeof(particle));
+		(particle*) malloc( ((unsigned int)(particles+x*y*z)) *
+			sizeof(particle));
 	
 	// POSTCONDITIONS
 	assert(the_grid->particles != NULL);
@@ -480,7 +481,8 @@ void get_potential_neighbours_for_particle(grid* the_grid,
 	
 	// Now we know how many neighbour particles we have we can make an array to
 	// store them
-	*neighbour_particles = (particle*) malloc(*length * sizeof(particle));
+	*neighbour_particles = (particle*) malloc( ((unsigned int)*length) *
+		sizeof(particle));
 	
 	// DEBUG
 	assert(*neighbour_particles != NULL);
@@ -599,7 +601,8 @@ void get_true_neighbours_for_particle(grid* the_grid,
 
 	// Now we know how many true neighbours we've got, so allocate
 	// memory
-	*neighbour_particles=(particle*) malloc(*length * sizeof(particle));
+	*neighbour_particles=(particle*) malloc( ((unsigned int)*length) *
+		sizeof(particle));
 
 	// DEBUG
 	assert(*neighbour_particles != NULL);
@@ -658,16 +661,14 @@ void get_neighbours_brute_force(grid* the_grid, particle* the_particle,
 		(the_grid->x_size * the_grid->y_size * the_grid->z_size);
 
 	// Now see how many are real neighbours
-	int count = 0;
 	int index;
 	for (index = 0; index < all_count; index++) {
-		if ((!(the_grid->particles[index].id == -1)) &&
-			(get_distance(&(the_grid->particles[index]),
-				the_particle) <= the_grid->dx) &&
+		if ((the_grid->particles[index].id != -1) &&
+			(get_distance(&(the_grid->particles[index]), the_particle) <=
+				the_grid->dx) &&
 			(the_particle->id != the_grid->particles[index].id)) {
 	
-			count++;
-			fprintf(stderr, "count: %i\n", count);
+			fprintf(stderr, "ID1: %i\n", the_grid->particles[index].id);
 	
 			// DEBUG
 			assert(*length < the_grid->particle_number);
@@ -688,17 +689,46 @@ void get_neighbours_brute_force(grid* the_grid, particle* the_particle,
 	assert(neighbour_particles != NULL);
 
 	// Now we know how many true neighbours we've got, so allocate memory
-	*neighbour_particles = (particle*) malloc(*length * sizeof(particle));
+	*neighbour_particles = (particle*) malloc( ((unsigned int)*length) *
+		sizeof(particle));
 
 	// DEBUG
 	assert(*neighbour_particles != NULL);
+	assert(all_count == the_grid->particle_number +
+		(the_grid->x_size * the_grid->y_size * the_grid->z_size));
 
 	// Now populate the array
 	int position = 0;
 	for (index = 0; index < all_count; index++) {
-		if ((!(the_grid->particles[index].id == -1)) &&
-			(get_distance(&(the_grid->particles[index]),
-				the_particle) <= the_grid->dx) &&
+		if ((the_grid->particles[index].id != -1) &&
+				   (get_distance(&(the_grid->particles[index]), the_particle) <=
+				   the_grid->dx) &&
+				   (the_particle->id != the_grid->particles[index].id)) {
+	
+			fprintf(stderr, "ID2: %i\n", the_grid->particles[index].id);
+	
+			// DEBUG
+			assert(*length < the_grid->particle_number);
+			assert(position <= *length);
+			assert(get_distance(&(the_grid->particles[index]),
+				   the_particle) <= the_grid->dy);
+			assert(get_distance(&(the_grid->particles[index]),
+				   the_particle) <= the_grid->dz);
+			
+			neighbour_particles[0][position] = the_grid->particles[index];
+			position++;
+			
+			// DEBUG
+			assert(*length < the_grid->particle_number);
+		
+		}
+	}
+	
+	
+	/*for (index = 0; index < all_count; index++) {
+		if ((the_grid->particles[index].id != -1) &&
+			(get_distance(&(the_grid->particles[index]), the_particle) <=
+				the_grid->dx) &&
 			(the_particle->id != the_grid->particles[index].id)) {
 		
 			// DEBUG
@@ -716,5 +746,5 @@ void get_neighbours_brute_force(grid* the_grid, particle* the_particle,
 			//assert(position <= *length || *length == 0);
 			
 		}
-	}
+	}*/
 }

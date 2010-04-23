@@ -3,15 +3,15 @@
 case "$1" in
 
 	debug)
-		gcc -c -fmudflap -Wall linkedlists.c -lm -o linkedlists.o
-		gcc -c -fmudflap -Wall -lm tests.c -o tests.o
-		gcc -lmudflap tests.o -Wall -lm -I/usr/include -o tests
+		gcc -c -fmudflap -Wall -W -Wextra -Wconversion -Wshadow -Wcast-qual -Wwrite-strings -Werror linkedlists.c -lm -o linkedlists.o
+		gcc -c -fmudflap -Wall -W -Wextra -Wconversion -Wshadow -Wcast-qual -Wwrite-strings -Werror -lm tests.c -o tests.o
+		gcc -lmudflap tests.o -Wall -W -Wextra -Wconversion -Wshadow -Wcast-qual -Wwrite-strings -Werror -lm -I/usr/include -o tests
 		;;
 	
 	tests)
-		gcc -c linkedlists.c -Wall -lm -o linkedlists.o
-		gcc -c tests.c -Wall -lm -o tests.o
-		gcc tests.o -Wall -lm -o tests
+		gcc -c linkedlists.c -Wall -W -Wextra -Wconversion -Wshadow -Wcast-qual -Wwrite-strings -Werror -lm -o linkedlists.o
+		gcc -c tests.c -Wall -W -Wextra -Wconversion -Wshadow -Wcast-qual -Wwrite-strings -Werror -lm -o tests.o
+		gcc tests.o -Wall -W -Wextra -Wconversion -Wshadow -Wcast-qual -Wwrite-strings -Werror -lm -o tests
 		;;
 
 	benchmarks)

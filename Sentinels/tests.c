@@ -16,98 +16,15 @@
 	 * These values are simply 0 for no and nonzero for yes.
 	 */
 /*	
-	// PRECONDITIONS
-	assert (the_grid != NULL);
-	
-	// Start with the grid, saying that we're a grid and our address
-	printf("GRID:%u{", (int)the_grid);
-	// Now give our size
-	printf("X:%i,Y:%i,Z:%i,", the_grid->x_size, 
-		the_grid->y_size, the_grid->z_size);
-	// Our offset
-	printf("OX:%G,OY:%G,OZ:%G,", the_grid->x_offset, the_grid->y_offset,
-		the_grid->z_offset);
-	// And our population
-	printf("POPULATION:%i,", the_grid->particle_number);
-	// And our cell dimensions
-	printf("DX:%G,DY:%G,DZ:%G", dx, dy, dz);
-	
-	// Print cells
-	// Start a collection of cells, giving the starting address
-	printf(",CELLS:STARTINGAT:%u{", (int)(the_grid->cells));
-	// Go through the memory which we assume is devoted to cells
-	int cell_count;
-	for (cell_count = 0; 
-		cell_count < 
-			(the_grid->x_size)
-			*(the_grid->y_size)
-			*(the_grid->z_size); 
-		cell_count++) {
-		printf("CELL:%u{", (int)(&(the_grid->cells[cell_count])));
-		
-		// Print our particles
-		if (the_grid->cells[cell_count].first_particle == NULL){
-			printf("FIRSTPARTICLE:NULL");
-		}
-		else {
-			printf("FIRSTPARTICLE:%u",
-				(int)(the_grid->cells[cell_count].first_particle));
-		}
-		
-		printf("}");
-		// For all but the last cell we need to insert a comma here
-		if (cell_count < (
-			(the_grid->x_size)*(the_grid->y_size)*(the_grid->z_size)
-		)-1) {
-			printf(",");
-		}
-	}
-	printf("}");
-	
-	// Print particles
-	printf(",PARTICLES:STARTINGAT:%u{", (int)(the_grid->particles));
-	
-	// Loop through all of the particles
-	int particle_count;
-	for (particle_count = 0; 
-		particle_count < the_grid->particle_number; 
-		particle_count++) {
-			
-		// Print the particle's address
-		printf("PARTICLE:%u{", 
-			(int)(&(the_grid->particles[particle_count])));
-		
-		// Position
-		printf("X:%G", 
-			the_grid->particles[particle_count].x);
-		printf(",Y:%G", 
-			the_grid->particles[particle_count].y);
-		printf(",Z:%G", 
-			the_grid->particles[particle_count].z);
-		printf(",CONTAINER:%u", 
-			(int)(the_grid->particles[particle_count].container));
-		// Print the list pointer
-		printf(",NEXT:%u", 
-			(int)(the_grid->particles[particle_count].next));
-		
-		printf("}");
-		if (particle_count < (the_grid->particle_number) - 1) {
-			printf(",");
-		}
-	}
-	
-	// Close the braces we opened
-	printf("}");
-	
-	printf("}");
+
 }*/
 
-double new_random() {
+float new_random() {
 	/*
 	 * Returns a random double between 0 and 0.999...
 	 * NOTE: You may wish to change the random seed first using srand()!
 	 */
-	 return rand()/(double)(RAND_MAX);
+	 return ((float)rand()) / ((float)RAND_MAX);
 }
 
 void populate_random(particle** p_array, int particles, int x, int y, int z,
@@ -128,10 +45,10 @@ void populate_random(particle** p_array, int particles, int x, int y, int z,
 	assert(p_array != NULL);
 	
 	// Store the total size of the space
-	double x_space, y_space, z_space;
-	x_space = ((double) x) * dx;
-	y_space = ((double) y) * dy;
-	z_space = ((double) z) * dz;
+	float x_space, y_space, z_space;
+	x_space = ((float) x) * dx;
+	y_space = ((float) y) * dy;
+	z_space = ((float) z) * dz;
 	
 	// Loop through the particle memory
 	int particle_index;
@@ -200,7 +117,8 @@ int main() {
 	// DEBUGGING
 	assert(the_grid.particles != NULL);
 
-	particle* p_array = (particle*) malloc(particle_number*sizeof(particle));
+	particle* p_array = (particle*) malloc( ((unsigned int)particle_number) *
+		sizeof(particle));
 	
 	// Fill the space with particles at random positions
 	populate_random(&p_array, particle_number, x, y, z, dx, dy, dz);
