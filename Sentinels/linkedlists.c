@@ -185,6 +185,157 @@ int get_index(float position, float interval_size) {
 	return count;
 }
 
+void get_extents(particle* p_array, int length, int* x_min, int* x_max,
+	int* y_min, int* y_max, int* z_min, int* z_max) {
+	/*
+	 * Given an array of particles 'p_array' of size 'length', set the minimum
+	 * and maximum values of x, y and z to the appropriate arguments.
+	 */
+
+	// PRECONDITIONS
+	assert(p_array != NULL);
+	assert(length > 0);
+	assert(x_min != NULL);
+	assert(x_max != NULL);
+	assert(y_min != NULL);
+	assert(y_max != NULL);
+	assert(z_min != NULL);
+	assert(z_max != NULL);
+
+	// Initialise the values based on the first available particle
+	int first = 0;
+	int initialised = 0;
+
+	// Get a non-sentinel particle
+	while (initialised == 0 && first < length) {
+		if (p_array[first].id >= 0) {
+			*x_min = p_array[first].x;
+			*x_max = p_array[first].x;
+			*y_min = p_array[first].y;
+			*y_max = p_array[first].y;
+			*z_min = p_array[first].z;
+			*z_max = p_array[first].z;
+			initialised = 1;
+		}
+		first++;
+	}
+
+	// DEBUG
+	assert(initialised == 1);
+
+	// Now loop through them all until we establish the true maxes and mins
+	for (first = 0; first < length; first++) {
+		if (p_array[first].id >= 0) {
+
+			if (p_array[first].x < *x_min) {
+				*x_min = p_array[first].x;
+			}
+			if (p_array[first].x > *x_max) {
+				*x_max = p_array[first].x;
+			}
+			if (p_array[first].y < *y_min) {
+				*y_min = p_array[first].y;
+			}
+			if (p_array[first].y > *y_max) {
+				*y_max = p_array[first].y;
+			}
+			if (p_array[first].z < *z_min) {
+				*z_min = p_array[first].z;
+			}
+			if (p_array[first].z > *z_max) {
+				*z_max = p_array[first].z;
+			}
+		}
+	}
+
+	// POSTCONDITIONS
+	assert(initialised == 1);
+	assert(*x_min <= *x_max);
+	assert(*y_min <= *y_max);
+	assert(*z_min <= *z_max);
+
+}
+
+void grid_size(int x_min, int x_max, int y_min, int y_max, int z_min, int z_max,
+	float dx, float dy, float dz, int* x, int* y, int* z,
+	float* x_offset, float* y_offset, float* z_offset) {
+	/*
+	 * Given the ranges x_min to x_max, y_min to y_max and z_min to z_max, works
+	 * out how many cells of size dx*dy*dz would be needed to contain all of
+	 * these. These dimensions are stored in x, y and z, and the offset between
+	 * such a grid's coordinate system and the particles' coordinate system is
+	 * stored in x_offset, y_offset, z_offset.
+	 */
+
+	// PRECONDITIONS
+	assert(x_min <= x_max);
+	assert(y_min <= y_max);
+	assert(z_min <= z_max);
+	assert(dx > 0.0);
+	assert(dy > 0.0);
+	assert(dz > 0.0);
+	assert(x != NULL);
+	assert(y != NULL);
+	assert(z != NULL);
+	assert(x_offset != NULL);
+	assert(y_offset != NULL);
+	assert(z_offset != NULL);
+	assert(dx == dy);
+	assert(dx == dz);
+	assert(dy == dz);
+
+	// Get the sizes of each range
+	float delta_x = x_max - x_min;
+	float delta_y = y_max - y_min;
+	float delta_z = z_max - z_min;
+
+	// DEBUG
+	assert(delta_x > 0);
+	assert(delta_y > 0);
+	assert(delta_z > 0);
+
+	// See how many cells we can fit into each of these ranges
+	*x = (int) (delta_x / dx);
+	*y = (int) (delta_y / dy);
+	*z = (int) (delta_z / dz);
+
+	// DEBUG
+	assert(*x >= 0);
+	assert(*y >= 0);
+	assert(*z >= 0);
+
+	// These will round down in the general case, so add one to each
+	// This can give us an overhead, but it only goes up as a square, whilst the
+	// cell count goes up as a cube, so it's only significant for small grids
+	// which are quick anyway.
+	*x = *x + 1;
+	*y = *y + 1;
+	*z = *z + 1;
+
+	// DEBUG
+	assert( ((float)*x) * dx > delta_x);
+	assert( ((float)*y) * dy > delta_y);
+	assert( ((float)*z) * dz > delta_z);
+
+	// We may as well centre the smaller range on the bigger, to avoid particles
+	// directly on the boundaries
+	float leftover_x = ((float)*x * dx) - delta_x;
+	float leftover_y = ((float)*y * dy) - delta_y;
+	float leftover_z = ((float)*z * dz) - delta_z;
+
+	// DEBUG
+	assert(leftover_x > 0.0);
+	assert(leftover_y > 0.0);
+	assert(leftover_z > 0.0);
+
+	*x_offset = (-1.0 * delta_x) - (leftover_x / 2.0);
+	*y_offset = (-1.0 * delta_y) - (leftover_y / 2.0);
+	*z_offset = (-1.0 * delta_z) - (leftover_z / 2.0);
+
+	// POSTCONDITIONS
+	
+}
+
 void get_index_from_position(grid* the_grid, particle* the_particle,
 	int* x, int* y, int* z) {
 	/*
@@ -259,6 +410,7 @@ void initialise_grid(grid* the_grid, int x, int y, int z,
 	assert(the_grid->dy > 0);
 	assert(the_grid->dz > 0);
 	assert(the_grid->particle_number > 0);
+	
 }
 
 void grid_particles(grid* the_grid, particle* particles) {
@@ -266,8 +418,6 @@ void grid_particles(grid* the_grid, particle* particles) {
 	 * Goes through every cell in the given grid and puts its particles in
 	 * the right part of the array.
 	 */
-
-// TODO: Take off the offsets when moving from one to the other!
 	
 	// PRECONDITIONS
 	assert(the_grid != NULL);
@@ -323,8 +473,7 @@ void grid_particles(grid* the_grid, particle* particles) {
 						array_index++;
 					}
 				}
-
-				
+			
 			}
 		}
 	}
