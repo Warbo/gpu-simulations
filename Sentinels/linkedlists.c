@@ -185,8 +185,8 @@ int get_index(float position, float interval_size) {
 	return count;
 }
 
-void get_extents(particle* p_array, int length, int* x_min, int* x_max,
-	int* y_min, int* y_max, int* z_min, int* z_max) {
+void get_extents(particle* p_array, int length, float* x_min, float* x_max,
+	float* y_min, float* y_max, float* z_min, float* z_max) {
 	/*
 	 * Given an array of particles 'p_array' of size 'length', set the minimum
 	 * and maximum values of x, y and z to the appropriate arguments.
@@ -256,8 +256,8 @@ void get_extents(particle* p_array, int length, int* x_min, int* x_max,
 
 }
 
-void grid_size(int x_min, int x_max, int y_min, int y_max, int z_min, int z_max,
-	float dx, float dy, float dz, int* x, int* y, int* z,
+void grid_size(float x_min, float x_max, float y_min, float y_max, float z_min,
+	float z_max, float dx, float dy, float dz, int* x, int* y, int* z,
 	float* x_offset, float* y_offset, float* z_offset) {
 	/*
 	 * Given the ranges x_min to x_max, y_min to y_max and z_min to z_max, works
@@ -328,9 +328,9 @@ void grid_size(int x_min, int x_max, int y_min, int y_max, int z_min, int z_max,
 	assert(leftover_y > 0.0);
 	assert(leftover_z > 0.0);
 
-	*x_offset = (-1.0 * delta_x) - (leftover_x / 2.0);
-	*y_offset = (-1.0 * delta_y) - (leftover_y / 2.0);
-	*z_offset = (-1.0 * delta_z) - (leftover_z / 2.0);
+	*x_offset = (((float)-1.0) * delta_x) - (leftover_x / ((float)2.0));
+	*y_offset = (((float)-1.0) * delta_y) - (leftover_y / ((float)2.0));
+	*z_offset = (((float)-1.0) * delta_z) - (leftover_z / ((float)2.0));
 
 	// POSTCONDITIONS
 	
@@ -413,16 +413,32 @@ void initialise_grid(grid* the_grid, int x, int y, int z,
 	
 }
 
-void grid_particles(grid* the_grid, particle* particles) {
+void grid_particles(grid* the_grid, particle* particles, int particle_number,
+	float size) {
 	/*
-	 * Goes through every cell in the given grid and puts its particles in
-	 * the right part of the array.
+	 * Sets up a grid at 'the_grid' and puts the contents of 'particles', of
+	 * length 'particle_number', into it, each with size 'size'.
 	 */
 	
 	// PRECONDITIONS
 	assert(the_grid != NULL);
 	assert(particles != NULL);
+	assert(particle_number > 0);
+	assert(size > (float)0.0);
 
+	// Get grid parameters needed to store these particles
+	float x_min, x_max, y_min, y_max, z_min, z_max;
+	float x_offset, y_offset, z_offset;
+	int x_size, y_size, z_size;
+	get_extents(particles, particle_number, &x_min, &x_max, &y_min, &y_max,
+		&z_min, &z_max);
+	grid_size(x_min, x_max, y_min, y_max, z_min, z_max, size, size, size,
+		&x_size, &y_size, &z_size, &x_offset, &y_offset, &z_offset);
+
+	// Make the grid
+	initialise_grid(the_grid, x_size, y_size, z_size, size, size, size,
+		x_offset, y_offset, z_offset, particle_number);
+	
 	int array_index = 0;		// Stores our particle array position
 	int index;		// Used to loop through particles
 	int x;		// Used to loop through cell x coordinates
@@ -481,7 +497,11 @@ void grid_particles(grid* the_grid, particle* particles) {
 	// POSTCONDITIONS
 	assert(get_sentinel_number(the_grid) == 
 		the_grid->x_size * the_grid->y_size * the_grid->z_size);
-		
+	assert((array_index ==
+			(the_grid->x_size * the_grid->y_size * the_grid->z_size)) ||
+		(array_index ==
+			(the_grid->x_size * the_grid->y_size * the_grid->z_size)));
+
 }
 
 void get_cell_contents(grid* the_grid, int x, int y, int z,

@@ -90,41 +90,32 @@ void populate_random(particle** p_array, int particles, int x, int y, int z,
 
 int main() {
 	// These are the dimensions of our volume elements
-	float dx = (float)1.0;
-	float dy = (float)1.0;
-	float dz = (float)1.0;
+	float particle_size = (float)1.0;
 	
 	// These are the dimensions of our space as multiples of dx, dy & dz
 	int x = 50;
 	int y = 75;
 	int z = 100;
 	
-	// These are the offsets of the grid coordinates from the particles'
-	float x_offset = (float)-4.0;
-	float y_offset = (float)3.2;
-	float z_offset = (float)18.7;
-	
 	// This is the total number of particles to simulate
 	int particle_number = 375000;
 	
 	// Make the space we are simulating
 	grid the_grid;
-	
-	// Allocate memory and assign neighbourhoods
-	initialise_grid(&the_grid, x, y, z, dx, dy, dz, 
-		x_offset, y_offset, z_offset, particle_number);
-		
-	// DEBUGGING
-	assert(the_grid.particles != NULL);
 
+	// Make the particles we're testing with (could be read from a file)
 	particle* p_array = (particle*) malloc( ((unsigned int)particle_number) *
 		sizeof(particle));
 	
-	// Fill the space with particles at random positions
-	populate_random(&p_array, particle_number, x, y, z, dx, dy, dz);
+	// Fill the array with random particles
+	populate_random(&p_array, particle_number, x, y, z,
+		particle_size, particle_size, particle_size);
 	
-	// Sort the particles into cells
-	grid_particles(&the_grid, p_array);
+	// Allocate memory and assign neighbourhoods
+	grid_particles(&the_grid, p_array, particle_number, particle_size);
+		
+	// DEBUGGING
+	assert(the_grid.particles != NULL);
 
 	// Choose a particle randomly from the group
 	particle* test_particle = NULL;
@@ -135,6 +126,18 @@ int main() {
 			test_particle = &(the_grid.particles[test_probe]);
 		}
 	}
+
+	// DEBUGGING ///////////////////////////////////////////////////////////////
+	int test_x, test_y, test_z;
+	get_index_from_position(&the_grid, test_particle,
+		&test_x, &test_y, &test_z);
+	assert(test_x >= 0);
+	assert(test_y >= 0);
+	assert(test_z >= 0);
+	assert(test_x < the_grid.x_size);
+	assert(test_y < the_grid.y_size);
+	assert(test_z < the_grid.z_size);
+	////////////////////////////////////////////////////////////////////////////
 
 	// DEBUGGING
 	assert(test_particle != NULL);
