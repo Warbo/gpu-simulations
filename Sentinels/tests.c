@@ -94,11 +94,11 @@ int main() {
 	
 	// These are the dimensions of our space as multiples of dx, dy & dz
 	int x = 50;
-	int y = 75;
-	int z = 100;
+	int y = 20;
+	int z = 10;
 	
 	// This is the total number of particles to simulate
-	int particle_number = 375000;
+	int particle_number = 3750;
 	
 	// Make the space we are simulating
 	grid the_grid;

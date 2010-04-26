@@ -290,9 +290,9 @@ void grid_size(float x_min, float x_max, float y_min, float y_max, float z_min,
 	float delta_z = z_max - z_min;
 
 	// DEBUG
-	assert(delta_x > 0);
-	assert(delta_y > 0);
-	assert(delta_z > 0);
+	assert(delta_x > (float)0.0);
+	assert(delta_y > (float)0.0);
+	assert(delta_z > (float)0.0);
 
 	// See how many cells we can fit into each of these ranges
 	*x = (int) (delta_x / dx);
@@ -324,15 +324,21 @@ void grid_size(float x_min, float x_max, float y_min, float y_max, float z_min,
 	float leftover_z = ((float)*z * dz) - delta_z;
 
 	// DEBUG
-	assert(leftover_x > 0.0);
-	assert(leftover_y > 0.0);
-	assert(leftover_z > 0.0);
+	assert(leftover_x > (float)0.0);
+	assert(leftover_y > (float)0.0);
+	assert(leftover_z > (float)0.0);
 
-	*x_offset = (((float)-1.0) * delta_x) - (leftover_x / ((float)2.0));
-	*y_offset = (((float)-1.0) * delta_y) - (leftover_y / ((float)2.0));
-	*z_offset = (((float)-1.0) * delta_z) - (leftover_z / ((float)2.0));
+	*x_offset = x_min - (leftover_x / ((float)2.0));
+	*y_offset = y_min - (leftover_y / ((float)2.0));
+	*z_offset = z_min - (leftover_z / ((float)2.0));
 
 	// POSTCONDITIONS
+	assert(x_min - *x_offset > (float)0.0);
+	assert(x_max - *x_offset < dx * ((float)*x));
+	assert(y_min - *y_offset > (float)0.0);
+	assert(y_max - *y_offset < dy * ((float)*y));
+	assert(z_min - *z_offset > (float)0.0);
+	assert(z_max - *z_offset < dz * ((float)*z));
 	
 }
 
@@ -435,9 +441,23 @@ void grid_particles(grid* the_grid, particle* particles, int particle_number,
 	grid_size(x_min, x_max, y_min, y_max, z_min, z_max, size, size, size,
 		&x_size, &y_size, &z_size, &x_offset, &y_offset, &z_offset);
 
+	// DEBUG
+	assert(x_size > 0);
+	assert(y_size > 0);
+	assert(z_size > 0);
+	assert(x_min - x_offset > (float)0.0);
+	assert(x_max - x_offset > (float)0.0);
+	assert(y_min - y_offset > (float)0.0);
+	assert(y_max - y_offset > (float)0.0);
+	assert(z_min - z_offset > (float)0.0);
+	assert(z_max - z_offset > (float)0.0);
+	
 	// Make the grid
 	initialise_grid(the_grid, x_size, y_size, z_size, size, size, size,
 		x_offset, y_offset, z_offset, particle_number);
+
+	// DEBUG
+	assert(the_grid->x_size == x_size);
 	
 	int array_index = 0;		// Stores our particle array position
 	int index;		// Used to loop through particles
@@ -463,7 +483,7 @@ void grid_particles(grid* the_grid, particle* particles, int particle_number,
 					px = -1;
 					py = -1;
 					pz = -1;
-					
+
 					// If the particle is in this cell, add it to the grid
 					get_index_from_position(the_grid, &(particles[index]),
 						&px, &py, &pz);
@@ -498,9 +518,11 @@ void grid_particles(grid* the_grid, particle* particles, int particle_number,
 	assert(get_sentinel_number(the_grid) == 
 		the_grid->x_size * the_grid->y_size * the_grid->z_size);
 	assert((array_index ==
-			(the_grid->x_size * the_grid->y_size * the_grid->z_size)) ||
+			the_grid->particle_number +
+		   get_sentinel_number(the_grid)) ||
 		(array_index ==
-			(the_grid->x_size * the_grid->y_size * the_grid->z_size)));
+			the_grid->particle_number +
+			get_sentinel_number(the_grid) + 1));
 
 }
 
