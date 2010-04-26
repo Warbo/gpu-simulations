@@ -67,7 +67,8 @@ __global__ void do_cell(particle* all_particles, int cell_size) {
 						counter++) {
 						// Make our particle interact with everything in the
 						// second half of local memory
-
+						
+http://irc.essex.ac.uk/www.iota-six.co.uk/c/c2_printf_and_scanf.asp
 						// Try doing a predictable interaction
 						//particle_A->x_acc += 1;
 						local_particles[threadIdx.x].x_acc += 1;
@@ -94,11 +95,24 @@ __global__ void do_cell(particle* all_particles, int cell_size) {
 int main() {
 	// Toy example for testing
 
+	// Put our GPU's limits here
+	int block_size = 512;
+	//int grid_size;
+	
+	// Cell maximum size
+	int cell_size = 32;
+	
+	// Particle grid dimensions
+	int grid_x = 3;
+	int grid_y = 3;
+	int grid_z = 3;
+	
 	// Allocate room for a 3x3x3 grid with 32 particles each
-	particle* all_particles_host = (particle*)malloc(9*32*sizeof(particle));
+	particle* all_particles_host = (particle*)malloc(
+		grid_x*grid_y*grid_z*cell_size*sizeof(particle));
 
 	// Give particles random positions
-	for (int i=0; i < 9*32; i++) {
+	for (int i=0; i < grid_x*grid_y*grid_z*cell_size; i++) {
 		all_particles_host[i].x = (float) (rand()/(float)(RAND_MAX));
 		all_particles_host[i].y = (float) (rand()/(float)(RAND_MAX));
 		all_particles_host[i].z = (float) (rand()/(float)(RAND_MAX));
@@ -106,24 +120,28 @@ int main() {
 
 	// Allocate memory on the GPU
 	particle* all_particles_device;
-	cudaMalloc((void**) &all_particles_device, 9*32*sizeof(particle));
+	cudaMalloc(
+		(void**)&all_particles_device,
+		grid_x*grid_y*grid_z*cell_size*sizeof(particle));
 
 	// Copy across our particles
-	cudaMemcpy(all_particles_device, all_particles_host, 9*32*sizeof(particle),
+	cudaMemcpy(all_particles_device, all_particles_host,
+		grid_x*grid_y*grid_z*cell_size*sizeof(particle),
 			   cudaMemcpyHostToDevice);
 
-	dim3 dimGrid(3, 3);
+	dim3 dimGrid(grid_x*grid_y*grid_z);
 	// Calculate the interactions
-	do_cell<<<dimGrid, 32>>>(all_particles_device, 32);
+	do_cell<<<dimGrid, cell_size>>>(all_particles_device, cell_size);
 
 	// Get results back
-	cudaMemcpy(all_particles_host, all_particles_device, 9*32*sizeof(particle),
-cudaMemcpyDeviceToHost);
+	cudaMemcpy(all_particles_host, all_particles_device,
+		grid_x*grid_y*grid_z*cell_size*sizeof(particle),
+		cudaMemcpyDeviceToHost);
 
 	// Free up the memory
 	cudaFree(all_particles_device);
 
-	for (int i=0; i<9*32; i++) {
+	for (int i=0; i<grid_x*grid_y*grid_z*cell_size; i++) {
 		printf("%G\n", all_particles_host[i].x_acc);
 	}
 
