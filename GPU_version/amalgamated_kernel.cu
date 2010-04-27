@@ -142,9 +142,9 @@ int main() {
 	int cell_size = 32;
 	
 	// Particle grid dimensions
-	int grid_x = 10;
-	int grid_y = 10;
-	int grid_z = 10;
+	int grid_x = 8;
+	int grid_y = 6;
+	int grid_z = 7;
 	
 	// Allocate room for a 3x3x3 grid with 32 particles each
 	particle* all_particles_host = (particle*)malloc(
