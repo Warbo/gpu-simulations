@@ -8,7 +8,53 @@
 #include <math.h>
 #include "linkedlists.c"
 
-__global__ void do_cell(particle* all_particles, int cell_size) {
+int get_global_offset(int bIdx_x, int grid_x, int grid_y,
+	int grid_z) {
+	// This gets the offset of the current thread in the global particle array
+	/*return (int)(cell_size * (
+		(bIdx_y * gDim_x*(bDim_x*bDim_y*bDim_z)) +
+		(bIdx_x * (bDim_x*bDim_y*bDim_z)) +
+		tIdx_z * (bDim_x*bDim_y) +
+		tIdx_y * (bDim_x) +
+		tIdx_x));*/
+	int z = bIdx_x % grid_z;
+	int y = ((bIdx_x - z) % (grid_z * grid_y)) / grid_z;
+	int x = (bIdx_x - z - (grid_z * y)) / (grid_z * grid_y);
+	return z+grid_z*y+(grid_z*grid_y)*x;
+}
+
+int current_global_offset(int grid_x, int grid_y, int grid_z) {
+	return get_global_offset((int)blockIdx.x, grid_x, grid_y,
+		grid_z);
+}
+
+int neighbour_offset(int x_rel, int y_rel, int z_rel, int grid_x, int grid_y
+	int grid_z) {
+	// Gets the offset of a neighbour at relative position (x,y,z)
+	// NOTE: Implementation-specific, assuming 1D grid of 1D blocks!
+	int z = ((int)blockIdx.x) % grid_z;
+	z += z_rel;
+	int y = ((((int)blockIdx.x) - z) % (grid_z * grid_y)) / grid_z;
+	y += y_rel;
+	int x = (((int)blockIdx.x) - z - (grid_z * y)) / (grid_z * grid_y);
+	x += x_rel;
+	if (x < 0 || y < 0 || z < 0 || x >= grid_x || y >= grid_y || z >= grid_z) {
+		return -1;
+	}
+	else {
+		return z+grid_z*y+(grid_z*grid_y)*x;
+	}
+}
+
+int get_local_offset() {
+	// This gets the offset of the current thread in the local particle array
+	return (int)(threadIdx.z * (blockDim.x*blockDim.y) +
+		threadIdx.y * (blockDim.x) +
+		threadIdx.x);
+}
+
+__global__ void do_cell(particle* all_particles, int cell_size, int grid_x,
+	int grid_y, int grid_z) {
 	// This begins calculation of the particle interactions
 
 	// Each block needs access to its local particles and a neighbour
@@ -16,15 +62,14 @@ __global__ void do_cell(particle* all_particles, int cell_size) {
 	__shared__ particle local_particles[2*32];
 	
 	// Work out where in the array our particles start
-	int offset = (gridDim.z*gridDim.y*blockIdx.x) + (gridDim.z*blockIdx.y)
-			+ blockIdx.z;
+	int cell_offset = current_global_offset(grid_x, grid_y, grid_z);
 
 	// Each thread loads its own particle to local memory
-	local_particles[threadIdx.x] =
-		all_particles[(cell_size * offset) + threadIdx.x];
+	local_particles[get_local_offset()] =
+		all_particles[(cell_size*cell_offset) + get_local_offset()];
 
 	// Initialise the interaction values
-	local_particles[threadIdx.x].x_acc = 0.0;
+	local_particles[get_local_offset()].x_acc = (float)0.0;
 	
 	// Now load in our neighbours and calculate interactions
 	// Loop through neighbours
@@ -33,27 +78,20 @@ __global__ void do_cell(particle* all_particles, int cell_size) {
 			for (int z_rel = -1; z_rel < 2; z_rel++) {
 
 				// Only act if we've got a valid neighbour
-				if (
-					(((int)blockIdx.x)+x_rel >= 0) &&
-								(((int)blockIdx.x)+x_rel < gridDim.x) &&
-								(((int)blockIdx.y)+y_rel >= 0) &&
-								(((int)blockIdx.y)+y_rel < gridDim.y) &&
-								(((int)blockIdx.z)+z_rel >= 0) &&
-								(((int)blockIdx.z)+z_rel < gridDim.z)
-				   ) {
+				if (neighbour_offset(x_rel, y_rel, z_rel, grid_x, grid_y,
+					grid_z) >= 0) {
 
 					// Load neighbouring cell to shared memory
 
 					// This is the memory location we need to start allocating
 					// from
-					int offset = (gridDim.z * gridDim.y * (blockIdx.x + x_rel))
-							+ (gridDim.z * (blockIdx.y + y_rel))
-							+ (blockIdx.z + z_rel);
+					int offset = neighbour_offset(x_rel, y_rel, z_rel,
+						grid_x, grid_y, grid_z);
 
 					// Each thread allocates a particle from the neighbour
 					// Start at cell_size since we're filling the second half
-					local_particles[cell_size + threadIdx.x] =
-							all_particles[(cell_size * offset) + threadIdx.x];
+					local_particles[cell_size + get_local_offset()] =
+						all_particles[offset*cell_size + get_local_offset()];
 
 					// Ensure all particles have been loaded into shared mem
 					__syncthreads();
@@ -68,10 +106,9 @@ __global__ void do_cell(particle* all_particles, int cell_size) {
 						// Make our particle interact with everything in the
 						// second half of local memory
 						
-http://irc.essex.ac.uk/www.iota-six.co.uk/c/c2_printf_and_scanf.asp
 						// Try doing a predictable interaction
 						//particle_A->x_acc += 1;
-						local_particles[threadIdx.x].x_acc += 1;
+						local_particles[get_local_offset()].x_acc += (float)1.0;
 						//&(local_particles[cell_size + counter])
 					}
 
@@ -84,8 +121,8 @@ http://irc.essex.ac.uk/www.iota-six.co.uk/c/c2_printf_and_scanf.asp
 	}
 
 	// Now put shared values back into global memory
-	all_particles[(cell_size * offset) + threadIdx.x] =
-		local_particles[threadIdx.x];
+	all_particles[(cell_size * cell_offset) + get_local_offset()] =
+		local_particles[get_local_offset()];
 
 	// Make sure we're all done
 	__syncthreads();
@@ -96,7 +133,7 @@ int main() {
 	// Toy example for testing
 
 	// Put our GPU's limits here
-	int block_size = 512;
+	// int block_size = 512;
 	//int grid_size;
 	
 	// Cell maximum size
@@ -131,7 +168,8 @@ int main() {
 
 	dim3 dimGrid(grid_x*grid_y*grid_z);
 	// Calculate the interactions
-	do_cell<<<dimGrid, cell_size>>>(all_particles_device, cell_size);
+	do_cell<<<dimGrid, cell_size>>>(all_particles_device, cell_size,
+		grid_x, grid_y, grid_z);
 
 	// Get results back
 	cudaMemcpy(all_particles_host, all_particles_device,
