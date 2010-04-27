@@ -42,7 +42,7 @@ __global__ void do_cell(particle* all_particles, int cell_size, int grid_x,
 
 	particle neighbour;
 	particle self = all_particles[current_global_offset(grid_x, grid_y, grid_z)*
-		cell_size + get_local_offset];
+		cell_size + get_local_offset()];
 
 	self.x_acc = (float)0.0;
 	
