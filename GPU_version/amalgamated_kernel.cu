@@ -61,7 +61,7 @@ __global__ void do_cell(particle* all_particles, int cell_size, int grid_x,
 
 	// Each block needs access to its local particles and a neighbour
 	// Note: We can't use 2*cell_size here since it's not constant!
-	__shared__ particle local_particles[2*32];
+	__shared__ particle local_particles[2*29];
 	
 	// Work out where in the array our particles start
 	int cell_offset = current_global_offset(grid_x, grid_y, grid_z);
@@ -139,7 +139,7 @@ int main() {
 	//int grid_size;
 	
 	// Cell maximum size
-	int cell_size = 32;
+	int cell_size = 29;
 	
 	// Particle grid dimensions
 	int grid_x = 8;
