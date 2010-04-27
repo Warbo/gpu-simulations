@@ -33,11 +33,13 @@ __device__ int neighbour_offset(int x_rel, int y_rel, int z_rel, int grid_x,
 	// Gets the offset of a neighbour at relative position (x,y,z)
 	// NOTE: Implementation-specific, assuming 1D grid of 1D blocks!
 	int z = ((int)blockIdx.x) % grid_z;
-	z += z_rel;
 	int y = ((((int)blockIdx.x) - z) % (grid_z * grid_y)) / grid_z;
-	y += y_rel;
 	int x = (((int)blockIdx.x) - z - (grid_z * y)) / (grid_z * grid_y);
+
 	x += x_rel;
+	y += y_rel;
+	z += z_rel;
+	
 	if (x < 0 || y < 0 || z < 0 || x >= grid_x || y >= grid_y || z >= grid_z) {
 		return -1;
 	}
@@ -70,6 +72,8 @@ __global__ void do_cell(particle* all_particles, int cell_size, int grid_x,
 
 	// Initialise the interaction values
 	local_particles[get_local_offset()].x_acc = (float)0.0;
+
+	int n_offset;
 	
 	// Now load in our neighbours and calculate interactions
 	// Loop through neighbours
@@ -85,13 +89,13 @@ __global__ void do_cell(particle* all_particles, int cell_size, int grid_x,
 
 					// This is the memory location we need to start allocating
 					// from
-					int offset = neighbour_offset(x_rel, y_rel, z_rel,
+					n_offset = neighbour_offset(x_rel, y_rel, z_rel,
 						grid_x, grid_y, grid_z);
 
 					// Each thread allocates a particle from the neighbour
 					// Start at cell_size since we're filling the second half
 					local_particles[cell_size + get_local_offset()] =
-						all_particles[offset*cell_size + get_local_offset()];
+						all_particles[n_offset*cell_size + get_local_offset()];
 
 					// Ensure all particles have been loaded into shared mem
 					__syncthreads();
@@ -107,9 +111,7 @@ __global__ void do_cell(particle* all_particles, int cell_size, int grid_x,
 						// second half of local memory
 						
 						// Try doing a predictable interaction
-						//particle_A->x_acc += 1;
 						local_particles[get_local_offset()].x_acc += (float)1.0;
-						//&(local_particles[cell_size + counter])
 					}
 
 					// Ensure everyone's finished before loading the next cell
