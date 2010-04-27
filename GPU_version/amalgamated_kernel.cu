@@ -28,9 +28,8 @@ __device__ int current_global_offset(int grid_x, int grid_y, int grid_z) {
 		grid_z);
 }
 
-__device__ int neighbour_offset(int x_rel, int y_rel, int z_rel, int grid_x, int
-grid_y
-	int grid_z) {
+__device__ int neighbour_offset(int x_rel, int y_rel, int z_rel, int grid_x,
+	int grid_y, int grid_z) {
 	// Gets the offset of a neighbour at relative position (x,y,z)
 	// NOTE: Implementation-specific, assuming 1D grid of 1D blocks!
 	int z = ((int)blockIdx.x) % grid_z;
