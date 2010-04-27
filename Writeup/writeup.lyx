@@ -1,0 +1,128 @@
+#LyX 1.6.4 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\language english
+\inputencoding auto
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Physics Simulations on Graphics Cards
+\end_layout
+
+\begin_layout Abstract
+Abstract
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Subsection
+Typical Physics Simulations
+\end_layout
+
+\begin_layout Subsection
+GPU Overview
+\end_layout
+
+\begin_layout Standard
+The world of computing is abound with acronyms, and the arena of graphics
+ is no different.
+ A typical commodity computer (ie.
+ not intended for embedded or server use) will contain a graphics card,
+ which is either a plug-in circuit board or combined with the main motherboard.
+ The reason for this is historical, since IBM-compatible machines were originall
+y incapable of displaying bit-mapped graphics, and thus required an add-on,
+ and as the computer game industry kept up pressure for ever-greater rendering
+ throughput it was sensible to keep these co-processors separate so that
+ they could be upgraded on their own without having to design and build
+ new motherboards at the relentless pace demanded by the gaming world.
+\end_layout
+
+\begin_layout Standard
+Real-time 3D rendering was certainly the main driving force for graphics
+ card development (for example, most modern graphics cards no longer contain
+ explicit circuitry for 2D rendering, instead opting to use the bloated
+ 3D engines to emulate it).
+ The most striking difference between this and other common computing tasks
+ is that it is 
+\emph on
+embarassingly parallel
+\emph default
+.
+ In other words, it is trivial to get a near 100% increase in performance
+ simply by doubling the number of computers that are working on the task
+ at once (in 
+\emph on
+parallel
+\emph default
+).
+\end_layout
+
+\begin_layout Standard
+In general such speedups are hard to achieve, since allowing many machines
+ to access mutable variables at once requires 
+\emph on
+locks
+\emph default
+ to prevent conflicting changes, which themselves bring notoriously difficult
+ to spot problems like 
+\emph on
+deadlock
+\emph default
+ (where two machines require two locks before accessing memory, one machine
+ holds one lock, the other machine holds the other lock and neither is capable
+ of proceeding).
+ A trivial method, such as an optimisation pass in a compiler, for effectively
+ utilising resources in parallel is a much sought-after goal in many research
+ groups.
+ The fact that 3D graphics scales so easily makes the difficulties of parallel
+ programming seem embarassing in comparison.
+\end_layout
+
+\begin_layout Standard
+The reason 3D is so inherently parallel is that there is very little dependence
+ between the calculations being performed, so any extra resources can simply
+ have part of the input sent there, calculated and the results sent back.
+ Sections of a 3D scene can be rendered largely in isolation, and more commonly
+ the final image for screencertainly therendering routines can have their
+ input divided up, processed
+\end_layout
+
+\end_body
+\end_document
