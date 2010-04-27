@@ -48,12 +48,12 @@ __global__ void do_cell(particle* all_particles, int cell_size, int grid_x,
 	
 	int index;
 	for (index = 0; index < grid_x*grid_y*grid_z*cell_size; index++) {
-		particle = all_particles[index];
+		naighbour = all_particles[index];
 		self.x_acc += (float)1.0;
 	}
 
 	// Now put shared values back into global memory
-	all_particles[(cell_size * get_current_global_offset(
+	all_particles[(cell_size * current_global_offset(
 		grid_x, grid_y,grid_z)) + get_local_offset()] =
 		self;
 
