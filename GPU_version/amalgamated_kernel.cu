@@ -8,7 +8,7 @@
 #include <math.h>
 #include "linkedlists.c"
 
-int get_global_offset(int bIdx_x, int grid_x, int grid_y,
+__device__ int get_global_offset(int bIdx_x, int grid_x, int grid_y,
 	int grid_z) {
 	// This gets the offset of the current thread in the global particle array
 	/*return (int)(cell_size * (
@@ -23,12 +23,13 @@ int get_global_offset(int bIdx_x, int grid_x, int grid_y,
 	return z+grid_z*y+(grid_z*grid_y)*x;
 }
 
-int current_global_offset(int grid_x, int grid_y, int grid_z) {
+__device__ int current_global_offset(int grid_x, int grid_y, int grid_z) {
 	return get_global_offset((int)blockIdx.x, grid_x, grid_y,
 		grid_z);
 }
 
-int neighbour_offset(int x_rel, int y_rel, int z_rel, int grid_x, int grid_y
+__device__ int neighbour_offset(int x_rel, int y_rel, int z_rel, int grid_x, int
+grid_y
 	int grid_z) {
 	// Gets the offset of a neighbour at relative position (x,y,z)
 	// NOTE: Implementation-specific, assuming 1D grid of 1D blocks!
@@ -46,7 +47,7 @@ int neighbour_offset(int x_rel, int y_rel, int z_rel, int grid_x, int grid_y
 	}
 }
 
-int get_local_offset() {
+__device__ int get_local_offset() {
 	// This gets the offset of the current thread in the local particle array
 	return (int)(threadIdx.z * (blockDim.x*blockDim.y) +
 		threadIdx.y * (blockDim.x) +
