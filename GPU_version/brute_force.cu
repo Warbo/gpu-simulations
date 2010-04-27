@@ -48,7 +48,7 @@ __global__ void do_cell(particle* all_particles, int cell_size, int grid_x,
 	
 	int index;
 	for (index = 0; index < grid_x*grid_y*grid_z*cell_size; index++) {
-		naighbour = all_particles[index];
+		neighbour = all_particles[index];
 		self.x_acc += (float)1.0;
 	}
 
