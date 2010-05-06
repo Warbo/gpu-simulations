@@ -8,6 +8,12 @@
 #include <math.h>
 #include "linkedlists.c"
 
+// Cell size must be a constant value, since it's used to allocate an array in
+// shared memory
+#ifndef CELLSIZE
+#define CELLSIZE (32)
+#endif
+
 __device__ int get_global_offset(int bIdx_x, int grid_x, int grid_y,
 	int grid_z) {
 	// This gets the offset of the current thread in the global particle array
@@ -55,7 +61,7 @@ __device__ int get_local_offset() {
 		threadIdx.x);
 }
 
-__global__ void do_cell(particle* all_particles, int cell_size, int grid_x,
+__global__ void do_cell(particle* all_particles, int grid_x,
 	int grid_y, int grid_z) {
 	// This begins calculation of the particle interactions
 
@@ -68,7 +74,7 @@ __global__ void do_cell(particle* all_particles, int cell_size, int grid_x,
 
 	// Each thread loads its own particle to local memory
 	local_particles[get_local_offset()] =
-		all_particles[(cell_size*cell_offset) + get_local_offset()];
+		all_particles[(CELLSIZE*cell_offset) + get_local_offset()];
 
 	// Initialise the interaction values
 	local_particles[get_local_offset()].x_acc = (float)0.0;
@@ -95,7 +101,7 @@ __global__ void do_cell(particle* all_particles, int cell_size, int grid_x,
 					// Each thread allocates a particle from the neighbour
 					// Start at cell_size since we're filling the second half
 					local_particles[cell_size + get_local_offset()] =
-						all_particles[n_offset*cell_size + get_local_offset()];
+						all_particles[n_offset*CELLSIZE + get_local_offset()];
 
 					// Ensure all particles have been loaded into shared mem
 					__syncthreads();
@@ -105,7 +111,7 @@ __global__ void do_cell(particle* all_particles, int cell_size, int grid_x,
 					// in the neighbour
 
 					// Loop through the size of the neighbour
-					for (unsigned int counter = 0; counter < cell_size;
+					for (unsigned int counter = 0; counter < CELLSIZE;
 						counter++) {
 						// Make our particle interact with everything in the
 						// second half of local memory
@@ -123,7 +129,7 @@ __global__ void do_cell(particle* all_particles, int cell_size, int grid_x,
 	}
 
 	// Now put shared values back into global memory
-	all_particles[(cell_size * cell_offset) + get_local_offset()] =
+	all_particles[(CELLSIZE * cell_offset) + get_local_offset()] =
 		local_particles[get_local_offset()];
 
 	// Make sure we're all done
@@ -138,9 +144,6 @@ int main() {
 	// int block_size = 512;
 	//int grid_size;
 	
-	// Cell maximum size
-	int cell_size = 29;
-	
 	// Particle grid dimensions
 	int grid_x = 8;
 	int grid_y = 6;
@@ -148,10 +151,10 @@ int main() {
 	
 	// Allocate room for a 3x3x3 grid with 32 particles each
 	particle* all_particles_host = (particle*)malloc(
-		grid_x*grid_y*grid_z*cell_size*sizeof(particle));
+		grid_x*grid_y*grid_z*CELLSIZE*sizeof(particle));
 
 	// Give particles random positions
-	for (int i=0; i < grid_x*grid_y*grid_z*cell_size; i++) {
+	for (int i=0; i < grid_x*grid_y*grid_z*CELLSIZE; i++) {
 		all_particles_host[i].x = (float) (rand()/(float)(RAND_MAX));
 		all_particles_host[i].y = (float) (rand()/(float)(RAND_MAX));
 		all_particles_host[i].z = (float) (rand()/(float)(RAND_MAX));
@@ -161,27 +164,27 @@ int main() {
 	particle* all_particles_device;
 	cudaMalloc(
 		(void**)&all_particles_device,
-		grid_x*grid_y*grid_z*cell_size*sizeof(particle));
+		grid_x*grid_y*grid_z*CELLSIZE*sizeof(particle));
 
 	// Copy across our particles
 	cudaMemcpy(all_particles_device, all_particles_host,
-		grid_x*grid_y*grid_z*cell_size*sizeof(particle),
+		grid_x*grid_y*grid_z*CELLSIZE*sizeof(particle),
 			   cudaMemcpyHostToDevice);
 
 	dim3 dimGrid(grid_x*grid_y*grid_z);
 	// Calculate the interactions
-	do_cell<<<dimGrid, cell_size>>>(all_particles_device, cell_size,
+	do_cell<<<dimGrid, CELLSIZE>>>(all_particles_device,
 		grid_x, grid_y, grid_z);
 
 	// Get results back
 	cudaMemcpy(all_particles_host, all_particles_device,
-		grid_x*grid_y*grid_z*cell_size*sizeof(particle),
+		grid_x*grid_y*grid_z*CELLSIZE*sizeof(particle),
 		cudaMemcpyDeviceToHost);
 
 	// Free up the memory
 	cudaFree(all_particles_device);
 
-	for (int i=0; i<grid_x*grid_y*grid_z*cell_size; i++) {
+	for (int i=0; i<grid_x*grid_y*grid_z*CELLSIZE; i++) {
 		printf("%G\n", all_particles_host[i].x_acc);
 	}
 
