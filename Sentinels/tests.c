@@ -153,7 +153,7 @@ void sort_array(grid* the_grid, particle* p_array, particle** out_array) {
 	// Garbage collect
 	free(positions);
 	// POSTCONDITIONS
-	assert(*output_array != NULL);
+	assert(*out_array != NULL);
 }
 
 int main() {
