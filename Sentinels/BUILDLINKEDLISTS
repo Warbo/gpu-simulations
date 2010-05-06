@@ -15,9 +15,9 @@ case "$1" in
 		;;
 
 	benchmarks)
-		gcc -c linkedlists.c -lm -o linkedlists.o
-		gcc -c benchmarks.c -lm -o benchmarks.o
-		gcc benchmarks.o -lm -o benchmarks
+		gcc -c linkedlists.c -O2 -DNDEBUG -lm -o linkedlists.o
+		gcc -c tests.c -O2 -DNDEBUG -lm -o tests.o
+		gcc tests.o -lm -o tests
 		;;
 
 	*)

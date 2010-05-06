@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "linkedlists.c"
+//#include "linkedlists.c"
 
 // Cell size must be a constant value, since it's used to allocate an array in
 // shared memory
