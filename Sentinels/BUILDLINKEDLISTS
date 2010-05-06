@@ -23,7 +23,7 @@ case "$1" in
 	cuda)
 		gcc -c -Wall -W -Wextra -Wshadow -Wconversion -Wcast-qual -Wwrite-strings -Werror linkedlists.c -lm -o linkedlists.o
 		nvcc -c macro_kernel.cu -o macro_kernel.o
-		gcc -c tests.c -Wall -W -Wextra -Wshadow -Wconversion -Wcast-qual -Wwrite-strings -Werror -lm tests.o
+		gcc -c tests.c -Wall -W -Wextra -Wshadow -Wconversion -Wcast-qual -Wwrite-strings -Werror -lm -o tests.o
 		nvcc tests.o -lm -o tests
 		;;
 	
