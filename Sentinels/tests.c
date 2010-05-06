@@ -1,14 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-//#include "linkedlists.c"
+#include "linkedlists.c"
 
 #ifndef CELLSIZE
 #define CELLSIZE (64)
 #endif
 
 // Include CUDA version
-#include "macro_kernel.cu"
+//#include "macro_kernel.cu"
 
 //void dump_grid(grid* the_grid, float dx, float dy, float dz) {
 	/*
