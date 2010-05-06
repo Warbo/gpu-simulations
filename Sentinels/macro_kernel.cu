@@ -184,9 +184,10 @@ int main() {
 	// Free up the memory
 	cudaFree(all_particles_device);
 
-	for (int i=0; i<grid_x*grid_y*grid_z*CELLSIZE; i++) {
-		printf("%G\n", all_particles_host[i].x_acc);
-	}
+	//for (int i=0; i<grid_x*grid_y*grid_z*CELLSIZE; i++) {
+	//	printf("%G\n", all_particles_host[i].x_acc);
+	//}
+	printf("%G\n", all_particles_host[0].x_acc);
 
 	// Exit
 	return 0;
