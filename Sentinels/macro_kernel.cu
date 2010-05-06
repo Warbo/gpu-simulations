@@ -100,7 +100,7 @@ __global__ void do_cell(particle* all_particles, int grid_x,
 
 					// Each thread allocates a particle from the neighbour
 					// Start at cell_size since we're filling the second half
-					local_particles[cell_size + get_local_offset()] =
+					local_particles[CELLSIZE + get_local_offset()] =
 						all_particles[n_offset*CELLSIZE + get_local_offset()];
 
 					// Ensure all particles have been loaded into shared mem
