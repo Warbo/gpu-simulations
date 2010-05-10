@@ -8,6 +8,9 @@
 // Access the particle and grid datatypes
 #include "datatypes.c"
 
+// Read particles from stdin
+#include "file_reading.c"
+
 // Tests useful for assertions
 
 float get_distance(particle* p1, particle* p2) {
