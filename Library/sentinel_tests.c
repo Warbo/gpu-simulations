@@ -25,55 +25,9 @@
 
 }*/
 
-float new_random() {
-	/*
-	 * Returns a random double between 0 and 0.999...
-	 * NOTE: You may wish to change the random seed first using srand()!
-	 */
-	 return ((float)rand()) / ((float)RAND_MAX);
-}
 
-void populate_random(particle** p_array, int particles, int x, int y, int z,
-	float dx, float dy, float dz) {
-	/*
-	 * This populates the given array with particles, determining their
-	 * positions using the standard rand() function.
-	 */
-	
-	// PRECONDITIONS
-	assert(particles > 0);
-	assert(x > 0);
-	assert(y > 0);
-	assert(z > 0);
-	assert(dx > 0);
-	assert(dy > 0);
-	assert(dz > 0);
-	assert(p_array != NULL);
-	
-	// Store the total size of the space
-	float x_space, y_space, z_space;
-	x_space = ((float) x) * dx;
-	y_space = ((float) y) * dy;
-	z_space = ((float) z) * dz;
-	
-	// Loop through the particle memory
-	int particle_index;
-	for (particle_index = 0;
-		particle_index < particles;
-		particle_index++) {
-		// Assign the position
-		p_array[0][particle_index].x =
-			new_random()*x_space;
-		p_array[0][particle_index].y =
-			new_random()*y_space;
-		p_array[0][particle_index].z =
-			new_random()*z_space;
-	}
-	
-	// POSTCONDITIONS
-	//assert(check_particles(the_grid, particles) == 0);
-	
-}
+
+
 
 /*int check_particles(grid* the_grid, int particle_number) {
 	
@@ -157,33 +111,6 @@ void sort_array(grid* the_grid, particle* p_array, particle** out_array) {
 }
 
 int main() {
-	// These are the dimensions of our volume elements
-	float particle_size = (float)1.0;
-	
-	// These are the dimensions of our space as multiples of dx, dy & dz
-	int x = 50;
-	int y = 20;
-	int z = 10;
-	
-	// This is the total number of particles to simulate
-	int particle_number = 3750;
-	
-	// Make the space we are simulating
-	grid the_grid;
-
-	// Make the particles we're testing with (could be read from a file)
-	particle* p_array = (particle*) malloc( ((unsigned int)particle_number) *
-		sizeof(particle));
-	
-	// Fill the array with random particles
-	populate_random(&p_array, particle_number, x, y, z,
-		particle_size, particle_size, particle_size);
-	
-	// Allocate memory and assign neighbourhoods
-	grid_particles(&the_grid, p_array, particle_number, particle_size);
-		
-	// DEBUGGING
-	assert(the_grid.particles != NULL);
 
 	// Choose a particle randomly from the group
 	particle* test_particle = NULL;
