@@ -5,14 +5,17 @@
 // This is to aid in debugging
 #include <assert.h>
 
-// Access the particle and grid datatypes
-#include "datatypes.c"
-
 // Read particles from stdin
 #include "file_reading.c"
 
-// Tests useful for assertions
+// Externally defined functions
+int count_cell_contents(grid*, int, int, int);
+void get_cell_contents(grid*, int, int, int, particle**, int*);
+void grid_particles(grid*, particle*, int, float);
+void initialise_grid(grid*, int, int, int, float, float, float,
+	float, float, float, int);
 
+// Tests useful for assertions
 float get_distance(particle* p1, particle* p2) {
 	/*
 	 * Returns the scalar distance between two particles.

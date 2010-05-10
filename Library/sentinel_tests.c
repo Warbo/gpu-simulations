@@ -1,11 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include "common_functions.c"
-
-#ifndef CELLSIZE
-#define CELLSIZE (64)
-#endif
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <math.h>
+//#include "common_functions.c"
+#include "sentinel_functions.c"
 
 // Include CUDA version
 //#include "macro_kernel.cu"
@@ -48,7 +45,7 @@
 	
 }*/
 
-void sort_array(grid* the_grid, particle* p_array, particle** out_array) {
+/*void sort_array(grid* the_grid, particle* p_array, particle** out_array) {
 
 	// PRECONDITIONS
 	assert(the_grid != NULL);
@@ -108,10 +105,17 @@ void sort_array(grid* the_grid, particle* p_array, particle** out_array) {
 	free(positions);
 	// POSTCONDITIONS
 	assert(*out_array != NULL);
-}
+}*/
 
 int main() {
 
+	particle* p_array;
+	int particle_number;
+	read_particles(&p_array, &particle_number);
+
+	return 0;
+}
+/*
 	// Choose a particle randomly from the group
 	particle* test_particle = NULL;
 	int test_probe;
@@ -234,3 +238,4 @@ int main() {
 	return 0;
 	
 }
+*/

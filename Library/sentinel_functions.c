@@ -11,7 +11,17 @@
  */
 
 // Grab everything that's not specific to sentinels
-#include "common_functions."
+#include "common_functions.c"
+
+// Prototype our functions first
+void get_cell_contents(grid*, int, int, int, particle**, int*);
+int get_sentinel_number(grid*);
+int count_cell_contents(grid*, int, int, int);
+void initialise_grid(grid*, int, int, int, float, float, float,
+	float, float, float, int);
+void grid_particles(grid*, particle*, int, float);
+
+// Now define them
 
 int get_sentinel_number(grid* the_grid) {
 	/*

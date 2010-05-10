@@ -1,9 +1,34 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "datatypes.c"
+#include <assert.h>
 
 /*
  * Facilities for reading particle data from STDIN
  */
+
+float decimals_to_float(int decimals) {
+	/*
+	* Returns a float between 0 and 1, with the given integer appearing after
+	* the decimal point.
+	*/
+
+	// PRECONDITIONS
+	assert(decimals >= 0);
+	
+	// First we need to find the power of 10 to work with
+	int divisor = 10;
+	while (divisor < decimals) {
+		divisor = divisor * 10;
+	}
+
+	// POSTCONDITIONS
+	assert(decimals < divisor);
+	assert(((float)decimals) / ((float)divisor) > (float)0.0);
+	assert(((float)decimals) / ((float)divisor) < (float)1.0);
+
+	return ((float)decimals) / ((float)divisor);
+}
 
 int count_commas(char* c_array, int max_length) {
 	/*
@@ -15,8 +40,8 @@ int count_commas(char* c_array, int max_length) {
 	assert(max_length > 0);
 
 	// These are the only characters we need to find
-	comma = (char)44;
-	linefeed = (char)10;
+	char comma = (char)44;
+	char linefeed = (char)10;
 
 	// Our running total
 	int count = 0;
@@ -54,7 +79,8 @@ int read_natural(char* c_array, int max_length) {
 	assert(max_length > 0);
 
 	// Define ASCII codes for numbers, in decimal
-	char zero, one, two, three, four, five, six, seven, eight, nine, linefeed;
+	char zero, one, two, three, four, five, six, seven, eight, nine, linefeed,
+ 		comma, null_end, dot;
 	zero = (char)48;
 	one = (char)49;
 	two = (char)50;
@@ -68,48 +94,53 @@ int read_natural(char* c_array, int max_length) {
 	linefeed = (char)10;
 	comma = (char)44;
 	null_end = (char)0;
+	dot = (char)46;
+
+	fprintf(stderr, "N\n");
 	
 	// This keeps track of the number we've read
 	int stored_number = 0;
 	int index;
 	for (index=0; index<max_length; index++) {
-		switch (c_array[index]) {
-			case zero: stored_number = (stored_number * 10);
-			break;
-			case one: stored_number = (stored_number * 10) + 1;
-			break;
-			case two: stored_number = (stored_number * 10) + 2;
-			break;
-			case three: stored_number = (stored_number * 10) + 3;
-			break;
-			case four: stored_number = (stored_number * 10) + 4;
-			break;
-			case five: stored_number = (stored_number * 10) + 5;
-			break;
-			case six: stored_number = (stored_number * 10) + 6;
-			break;
-			case seven: stored_number = (stored_number * 10) + 7;
-			break;
-			case eight: stored_number = (stored_number * 10) + 8;
-			break;
-			case nine: stored_number = (stored_number * 10) + 9;
-			break;
-			case linefeed:
-			case comma:
-			case null_end:
-				case dot: return stored_number;
-				break;
-				default: assert(c_array[index] == zero ||
-						c_array[index] == one ||
-								c_array[index] == two ||
-								c_array[index] == three ||
-								c_array[index] == four ||
-								c_array[index] == five ||
-								c_array[index] == six ||
-								c_array[index] == seven ||
-								c_array[index] == eight ||
-								c_array[index] == nine);
-						break;
+		if (c_array[index] == zero) {
+			stored_number = (stored_number * 10) + 0;
+		}
+		else if (c_array[index] == one) {
+			stored_number = (stored_number * 10) + 1;
+		}
+		else if (c_array[index] == two) {
+			stored_number = (stored_number * 10) + 2;
+		}
+		else if (c_array[index] == three) {
+			stored_number = (stored_number * 10) + 3;
+		}
+		else if (c_array[index] == four) {
+			stored_number = (stored_number * 10) + 4;
+		}
+		else if (c_array[index] == five) {
+			stored_number = (stored_number * 10) + 5;
+		}
+		else if (c_array[index] == six) {
+			stored_number = (stored_number * 10) + 6;
+		}
+		else if (c_array[index] == seven) {
+			stored_number = (stored_number * 10) + 7;
+		}
+		else if (c_array[index] == eight) {
+			stored_number = (stored_number * 10) + 8;
+		}
+		else if (c_array[index] == nine) {
+			stored_number = (stored_number * 10) + 9;
+		}
+		else if (c_array[index] == linefeed ||
+			c_array[index] == comma ||
+			c_array[index] == null_end ||
+			c_array[index] == dot) {
+			return stored_number;
+		}
+		else {
+			// ERROR
+			assert(c_array[index] == linefeed);
 		}
 	}
 
@@ -138,26 +169,30 @@ float read_decimal(char* c_array, int max_length) {
 	// Look for a dot in the first number
 	int index;
 	for (index = 0; index < max_length; index++) {
-		switch (c_array[index]) {
-			case comma:
-			case null_end:
-			case linefeed: index = max_length;
-				break;
-			case dot: decimal = index;
-			default: break;
+		if (c_array[index] == comma ||
+			c_array[index] == null_end ||
+			c_array[index] == linefeed) {
+
+			index = max_length;
+		}
+		else if (c_array[index] == dot) {
+			decimal = index;
 		}
 	}
 
 	// If decimal is still -1 then we found no decimal point, so look for a
 	// natural number
 	if (decimal == -1) {
+		fprintf(stderr, "NODEC\n");
 		return (float)read_natural(c_array, max_length);
 	}
 	else {
+		fprintf(stderr, "DEC\n");
 		// Otherwise, we've got a decimal so we need to look for two natural
 		// numbers
 		int whole = read_natural(c_array, max_length);
 		int fraction = read_natural(&(c_array[decimal+1]), max_length-decimal);
+		fprintf(stderr, "whole %i fraction %i\n", whole, fraction);
 		return (float)whole + decimals_to_float(fraction);
 	}
 }
@@ -179,9 +214,13 @@ float read_positive_or_negative(char* c_array, int max_length) {
 
 		// DEBUG
 		assert(max_length > 1);
+
+		fprintf(stderr, "Neg\n");
 		
 		return -1 * read_decimal(&(c_array[1]), max_length - 1);
 	}
+
+	fprintf(stderr, "Pos\n");
 	
 	return read_decimal(c_array, max_length);
 
@@ -215,8 +254,10 @@ void read_particle_line(char* c_array, int max_length, int* ID,
 	assert(count_commas(c_array, max_length) == 10);
 
 	// Take note of where the commas are
+	char comma = (char)44;
 	int* comma_positions = (int*) malloc((unsigned int)10 * sizeof(int));
 	int comma_index;	// Which comma we're looking for
+	int index;
 	int start_at = 0;	// Start looking immediately after the last one
 	for (comma_index=0; comma_index < 10; comma_index++) {
 
@@ -241,54 +282,31 @@ void read_particle_line(char* c_array, int max_length, int* ID,
 	}
 
 	// Now read each value we need
-	ID* = read_natural(c_array, max_length);
-	x* = read_positive_or_negative(&(c_array[comma_positions[0]+1]),
+	*ID = read_natural(c_array, max_length);
+	*x = read_positive_or_negative(&(c_array[comma_positions[0]+1]),
 		max_length - comma_positions[0]+1);
-	y* = read_positive_or_negative(&(c_array[comma_positions[1]+1]),
+	*y = read_positive_or_negative(&(c_array[comma_positions[1]+1]),
 		max_length - comma_positions[1]+1);
-	z* = read_positive_or_negative(&(c_array[comma_positions[2]+1]),
+	*z = read_positive_or_negative(&(c_array[comma_positions[2]+1]),
 		max_length - comma_positions[2]+1);
-	x_vel* = read_positive_or_negative(&(c_array[comma_positions[3]+1]),
+	*x_vel = read_positive_or_negative(&(c_array[comma_positions[3]+1]),
 		max_length - comma_positions[3]+1);
-	y_vel* = read_positive_or_negative(&(c_array[comma_positions[4]+1]),
+	*y_vel = read_positive_or_negative(&(c_array[comma_positions[4]+1]),
 		max_length - comma_positions[4]+1);
-	z_vel* = read_positive_or_negative(&(c_array[comma_positions[5]+1]),
+	*z_vel = read_positive_or_negative(&(c_array[comma_positions[5]+1]),
 		max_length - comma_positions[5]+1);
-	x_acc* = read_positive_or_negative(&(c_array[comma_positions[6]+1]),
+	*x_acc = read_positive_or_negative(&(c_array[comma_positions[6]+1]),
 		max_length - comma_positions[6]+1);
-	y_acc* = read_positive_or_negative(&(c_array[comma_positions[7]+1]),
+	*y_acc = read_positive_or_negative(&(c_array[comma_positions[7]+1]),
 		max_length - comma_positions[7]+1);
-	z_acc* = read_positive_or_negative(&(c_array[comma_positions[8]+1]),
+	*z_acc = read_positive_or_negative(&(c_array[comma_positions[8]+1]),
 		max_length - comma_positions[8]+1);
-	mass* = read_positive_or_negative(&(c_array[comma_positions[9]+1]),
+	*mass = read_positive_or_negative(&(c_array[comma_positions[9]+1]),
 		max_length - comma_positions[9]+1);
 
 	// Cleanup
-	free(comma_positions)
+	free(comma_positions);
 	
-}
-
-float decimals_to_float(int decimals) {
-	/*
-	 * Returns a float between 0 and 1, with the given integer appearing after
-	 * the decimal point.
-	 */
-
-	// PRECONDITIONS
-	assert(decimals >= 0);
-	
-	// First we need to find the power of 10 to work with
-	int divisor = 10;
-	while (divisor < decimals) {
-		divisor = divisor * 10;
-	}
-
-	// POSTCONDITIONS
-	assert(decimals < divisor);
-	assert(((float)decimals) / ((float)divisor) > (float)0.0);
-	assert(((float)decimals) / ((float)divisor) < (float)1.0);
-
-	return ((float)decimals) / ((float)divisor);
 }
 
 void assign_particle(char* c_array, int max_length, particle* p) {
@@ -301,14 +319,14 @@ void assign_particle(char* c_array, int max_length, particle* p) {
 	assert(max_length > 0);
 	assert(p != NULL);
 
-	read_particle_line(c_array, max_length,
+	read_particle_line(c_array, max_length, &(p->id),
 		&(p->x), &(p->y), &(p->z), &(p->x_vel), &(p->y_vel), &(p->z_vel),
 		&(p->x_acc), &(p->y_acc), &(p->z_acc), &(p->mass));
 }
 
 void read_particles(particle** p_array, int* length) {
 	/*
-	 * Reads data from the file 'filename'. These values are put into
+	 * Reads data from stdin. These values are put into
 	 * an array of particles created at *p_array of length *length.
 	 */
 
@@ -318,8 +336,6 @@ void read_particles(particle** p_array, int* length) {
 	 * Second line contains an ASCII decimal number, giving particle number
 	 * Afterwards, CSV format with each line representing a particle:
 	 * ID, x, y, z, x_vel, y_vel, z_vel, x_acc, y_acc, z_acc, mass
-	 *
-	 * Files should be entered via stdin
 	 */
 
 	// PRECONDITIONS
@@ -330,7 +346,7 @@ void read_particles(particle** p_array, int* length) {
 	int line_length = 1024;
 	
 	// This will store a line of text from our input.
-	char line = malloc((unsigned int)line_length * sizeof(char));
+	char* line = (char*) malloc((unsigned int)line_length * sizeof(char));
 
 	// Read the first line
 	fgets(line, line_length, stdin);
@@ -345,11 +361,11 @@ void read_particles(particle** p_array, int* length) {
 	*p_array = (particle*) malloc((unsigned int)(*length) * sizeof(particle));
 
 	// Now fill the array
-	index = 0;
+	int index = 0;
 	while (index < *length) {
 		// Read in a line
 		fgets(line, line_length, stdin);
-		assign_particle(line, line_length, p_array[0][index]);
+		assign_particle(line, line_length, &(p_array[0][index]));
 		index++;
 	}
 
