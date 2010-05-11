@@ -2,7 +2,7 @@
 //#include <stdlib.h>
 //#include <math.h>
 //#include "common_functions.c"
-#include "sentinel_functions.c"
+#include "pair_array_functions.c"
 
 // Include CUDA version
 //#include "macro_kernel.cu"

@@ -399,7 +399,7 @@ void assign_particle(char* c_array, int max_length, particle* p) {
 		&(p->x_acc), &(p->y_acc), &(p->z_acc), &(p->mass));
 }
 
-void read_particles(particle** p_array, int* length) {
+void read_particles(particle** p_array, int* length, float* size) {
 	/*
 	 * Reads data from stdin. These values are put into
 	 * an array of particles created at *p_array of length *length.
@@ -408,7 +408,10 @@ void read_particles(particle** p_array, int* length) {
 	/*
 	 * FILE FORMAT IS THE FOLLOWING:
 	 * First line is ignored
-	 * Second line contains an ASCII decimal number, giving particle number
+	 * Second line contains a positive ASCII decimal integer, giving particle
+	 * number.
+	 * Third line contains a positive ASCII decimal float, giving the maximum
+	 * particle size.
 	 * Afterwards, CSV format with each line representing a particle:
 	 * ID, x, y, z, x_vel, y_vel, z_vel, x_acc, y_acc, z_acc, mass
 	 */
@@ -432,6 +435,12 @@ void read_particles(particle** p_array, int* length) {
 	// Read the input size
 	*length = read_natural(line, line_length);
 
+	// Now read the third
+	fgets(line, line_length, stdin);
+
+	// Read the particle size
+	*size = read_decimal(line, line_length);
+	
 	// Now that we know the number of particles, allocate memory for them
 	*p_array = (particle*) malloc((unsigned int)(*length) * sizeof(particle));
 

@@ -38,6 +38,25 @@ case "$1" in
 		gcc -lmudflap sentinel_tests.o -Wall -W -Wextra -Wconversion -Wshadow -Wcast-qual -Wwrite-strings -Werror -lm -I/usr/include -o sentinel_tests
 		;;
 
+	# Builds the sentinels implementation, ie. using one array with special
+	# particles to mark cell boundaries
+	pairarray)
+		gcc -c datatypes.c -Wall -W -Wextra -Wconversion -Wshadow -Wcast-qual -Wwrite-strings -Werror -lm -o datatypes.o
+		gcc -c file_reading.c -Wall -W -Wextra -Wconversion -Wshadow -Wcast-qual -Wwrite-strings -Werror -lm -o file_reading.o
+		gcc -c common_functions.c -Wall -W -Wextra -Wconversion -Wshadow -Wcast-qual -Wwrite-strings -Werror -lm -o common_functions.o
+		gcc -c pair_array_functions.c -Wall -W -Wextra -Wconversion -Wshadow -Wcast-qual -Wwrite-strings -Werror -lm -o pair_array_functions.o
+		gcc -c -Wall -W -Wextra -Wconversion -Wshadow -Wcast-qual -Wwrite-strings -Werror -lm pair_array_tests.c -o pair_array_tests.o
+		gcc pair_array_tests.o -Wall -W -Wextra -Wconversion -Wshadow -Wcast-qual -Wwrite-strings -Werror -lm -I/usr/include -o pair_array_tests
+		;;
+
+	pairarray-debug)
+		gcc -c -fmudflap -Wall -W -Wextra -Wconversion -Wshadow -Wcast-qual -Wwrite-strings -Werror datatypes.c -lm -o datatypes.o
+		gcc -c -fmudflap -Wall -W -Wextra -Wconversion -Wshadow -Wcast-qual -Wwrite-strings -Werror -lm common_functions.c -o common_functions.o
+		gcc -c -fmudflap pair_array_functions.c -Wall -W -Wextra -Wconversion -Wshadow -Wcast-qual -Wwrite-strings -Werror -lm -o pair_array_functions.o
+		gcc -c -fmudflap -Wall -W -Wextra -Wconversion -Wshadow -Wcast-qual -Wwrite-strings -Werror -lm pair_array_tests.c -o pair_array_tests.o
+		gcc -lmudflap pair_array_tests.o -Wall -W -Wextra -Wconversion -Wshadow -Wcast-qual -Wwrite-strings -Werror -lm -I/usr/include -o pair_array_tests
+		;;
+
 	cuda)
 		gcc -c -Wall -W -Wextra -Wshadow -Wconversion -Wcast-qual -Wwrite-strings -Werror linkedlists.c -lm -o linkedlists.o
 		nvcc -c macro_kernel.cu -o macro_kernel.o

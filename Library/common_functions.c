@@ -633,34 +633,53 @@ void populate_random(particle** p_array, int particles, int x, int y, int z,
 	
 }
 
-void setup_test() {
-	// This is the size of our volume elements
-	float particle_size = (float)1.0;
-	
-	// These are the dimensions of our space as multiples of particle_size
-	int x = 50;
-	int y = 20;
-	int z = 10;
-	
-	// This is the total number of particles to simulate
-	int particle_number = 3750;
-	
-	// Make the space we are simulating
-	grid the_grid;
+void count_particles_in_cells(grid* the_grid, particle* p_array, int** cells) {
+	/*
+	 * Goes through p_array, incrementing a counter for each cell when a
+	 * particle is found from that cell.
+	 */
 
-	// Make the particles we're testing with (could be read from a file)
-	particle* p_array = (particle*) malloc( ((unsigned int)particle_number) *
-		sizeof(particle));
-	
-	// Fill the array with random particles
-	populate_random(&p_array, particle_number, x, y, z,
-		particle_size, particle_size, particle_size);
-	
-	// Allocate memory and assign neighbourhoods
-	grid_particles(&the_grid, p_array, particle_number, particle_size);
-		
-	// DEBUGGING
-	assert(the_grid.particles != NULL);
+	// PRECONDITIONS
+	assert(the_grid != NULL);
+	assert(p_array != NULL);
 
+	// Allocate the cell counters
+	*cells = (int*) malloc((unsigned int)(
+		the_grid->x_size * the_grid->y_size * the_grid->z_size
+	)*sizeof(int));
+	int index;
+	for (index=0; index<the_grid->x_size*the_grid->y_size*the_grid->z_size;
+		index++) {
+		cells[0][index] = 0;
+	}
+
+	// These will hold the particle's x, y and z cell coordinates
+	int x, y, z;
+	// Loop through the particles and increment their cells
+	for (index = 0; index<the_grid->particle_number; index++) {
+		get_index_from_position(the_grid, &(p_array[index]), &x, &y, &z);
+		cells[0][z + (the_grid->z_size * y) +
+			(the_grid->z_size * the_grid->y_size * x)]++;
+	}
+
+	// POSTCONDITIONS
 }
 
+int get_biggest_cell_size(grid* the_grid, particle* p_array) {
+	/*
+	 * This looks through the given array of particles and, using the values
+	 * defined in the_grid, gives back the largest population of any cell.
+	 */
+	int* cell_totals;
+	count_particles_in_cells(the_grid, p_array, &cell_totals);
+
+	int biggest = 0;
+	int index;
+	for (index=0; index<the_grid->z_size * the_grid->y_size * the_grid->x_size;
+		index++) {
+		if (cell_totals[index] > biggest) {
+			biggest = cell_totals[index];
+		}
+	}
+	return biggest;
+}

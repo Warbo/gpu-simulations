@@ -1,13 +1,18 @@
 /*
- * Contains all code specific to the use of sentinels in memory.
+ * Contains all code specific to the use of an array of cell's start locations.
  * The structure of the grid's particle storage in this case is:
- * S,(0,0,0),S,(0,0,1),S,(0,0,2)...S,(0,1,0),S,(0,1,1)...S,(1,0,0),S,(1,0,1)...
- * Where S is a sentinel particle, with ID -1, and (x,y,z) represents the
- * particles in cell (x,y,z) in arbitrary order.
+ * S(0,0,0), S(0,0,1) ... (0,0,0), (0,0,1)...
+ * Where S(x,y,z) is a particle storing the starting index of the cell (x,y,z).
+ * This is stored as the ID, but negated. Thus an ID -10 means this cell starts
+ * at particles[10]
+ * (x,y,z) represents the particles in cell (x,y,z) in arbitrary order.
  *
- * This allows efficient use of memory, since the overhead is linear with the
- * grid size. However, it makes accessing specific cells time consuming, as the
- * sentinels need to be counted beginning at zero, so lookup is O(N)
+ * This guarantees no wasted storage for nonexistant particles, however the use
+ * of particle structs to store ints is a bit of overhead. It does mean that we
+ * can keep the same grid struct.
+ * Care must be taken to keep the start locations in sync with the rest of the
+ * array, but it prevents the need to loop through the array over and over which
+ * happens for the sentinel implementation.
  */
 
 // Grab everything that's not specific to sentinels
@@ -15,41 +20,12 @@
 
 // Prototype our functions first
 void get_cell_contents(grid*, int, int, int, particle**, int*);
-int get_sentinel_number(grid*);
 int count_cell_contents(grid*, int, int, int);
 void initialise_grid(grid*, int, int, int, float, float, float,
 	float, float, float, int);
 void grid_particles(grid*, particle*, int, float);
 
 // Now define them
-
-int get_sentinel_number(grid* the_grid) {
-	/*
-	* Counts the number of sentinel particles in the given grid.
-	*/
-	
-	// Preconditions
-	assert(the_grid != NULL);
-	assert(the_grid->particle_number >= 0);
-	assert(the_grid->particles != NULL);
-	
-	int sentinel_count;
-	sentinel_count = 0;
-	int index;
-	for (index=0; index < the_grid->particle_number +
-			(the_grid->x_size * the_grid->y_size * the_grid->z_size);
-			index++) {
-			
-				if (the_grid->particles[index].id == -1) {
-					sentinel_count++;
-				}
-			}
-	
-	// Postconditions
-			assert(sentinel_count >= 0);
-	
-			return sentinel_count;
-}
 
 int count_cell_contents(grid* the_grid, int x, int y, int z) {
 	/*
@@ -65,38 +41,27 @@ int count_cell_contents(grid* the_grid, int x, int y, int z) {
 	assert(x < the_grid->x_size);
 	assert(y < the_grid->y_size);
 	assert(z < the_grid->z_size);
+
+	// We simply need the difference between the cell's start location and that
+	// of the next cell in storage.
 	
-	// Loop through the grid's particles, counting those between the sentinels
-	// we care about.
-	int start_sentinel = (the_grid->y_size * the_grid->z_size)*x +
-			(the_grid->z_size)*y + z;
-	int sentinel_count = 0;
-	int particle_count = 0;
-	int index = 0;
-
-	// Keep going until we go out the end of our cell, or run out of particles
-	while (sentinel_count < start_sentinel+1 &&
-			  index < the_grid->particle_number +
-			  (the_grid->x_size * the_grid->y_size * the_grid->z_size)){
-
-		// See if we've found another sentinel
-		if (the_grid->particles[index].id == -1) {
-			sentinel_count++;
-		}
-
-		// Otherwise count the particle if we're in the right cell
-		else if (sentinel_count == start_sentinel) {
-			particle_count++;
-		}
-
-		// Go to the next particle
-		index++;
-			  }
-	
-	// POSTCONDITIONS
-			  assert(sentinel_count >= 0);
-	
-			  return particle_count;
+	// First, work out where this cell's start index can be found
+	int index = z + (the_grid->z_size * y) +
+		(the_grid->z_size * the_grid->y_size * x);
+	int value;
+	// Slight complication: If we're the last cell then there is no next
+	// cell to compare with. Use the size of the array instead.
+	if (x-1 == the_grid->x_size &&
+		   y-1 == the_grid->y_size &&
+		   z-1 == the_grid->z_size) {
+		value = the_grid->particle_number +
+			(the_grid->x_size*the_grid->y_size*the_grid->z_size) - index;
+	}
+	else {
+		value = (-1 * the_grid->particles[index+1].id) -
+			(-1 * the_grid->particles[index].id);
+	}
+	return value;
 }
 
 void initialise_grid(grid* the_grid, int x, int y, int z,
@@ -185,9 +150,20 @@ void grid_particles(grid* the_grid, particle* particles, int particle_number,
 	
 	// DEBUG
 	assert(the_grid->x_size == x_size);
-	
-	int array_index = 0;		// Stores our particle array position
-	int index;		// Used to loop through particles
+
+	int* cell_sizes;
+	count_particles_in_cells(the_grid, particles, &cell_sizes);
+
+	int running_total = the_grid->x_size*the_grid->y_size*the_grid->z_size;
+	int index;
+	for (index=0; index<the_grid->x_size*the_grid->y_size*the_grid->z_size;
+		index++) {
+		the_grid->particles[index].id = -1 * running_total;
+		running_total = running_total + cell_sizes[index];
+	}
+
+	// Stores our particle array position (particles start after dummies)
+	int array_index = the_grid->x_size * the_grid->y_size * the_grid->z_size;
 	int x;		// Used to loop through cell x coordinates
 	int y;		// Ditto for y
 	int z;		// Ditto for z
@@ -200,9 +176,11 @@ void grid_particles(grid* the_grid, particle* particles, int particle_number,
 		for (y = 0; y < the_grid->y_size; y++) {
 			for (z = 0; z < the_grid->z_size; z++) {
 
-				// To begin with, add a sentinel
-				the_grid->particles[array_index].id = -1;
-				array_index++;
+				// To begin with, save our starting position
+				the_grid->particles[
+					z + (the_grid->z_size * y) +
+					(the_grid->z_size * the_grid->y_size * x)].id =
+						-1 * array_index;
 
 				// For each cell, loop through every given particle
 				for (index = 0; index < the_grid->particle_number; index++) {
@@ -229,10 +207,6 @@ void grid_particles(grid* the_grid, particle* particles, int particle_number,
 						
 						the_grid->particles[array_index] = particles[index];
 						
-						// TODO: Do we want to assign IDs here or in an
-						// input file?
-						the_grid->particles[array_index].id = array_index;
-						
 						array_index++;
 					}
 				}
@@ -242,12 +216,6 @@ void grid_particles(grid* the_grid, particle* particles, int particle_number,
 	}
 	
 	// POSTCONDITIONS
-	assert(get_sentinel_number(the_grid) ==
-		the_grid->x_size * the_grid->y_size * the_grid->z_size);
-	assert((array_index == the_grid->particle_number +
-			get_sentinel_number(the_grid)) ||
-		(array_index == the_grid->particle_number +
-			get_sentinel_number(the_grid) + 1));
 
 }
 
@@ -268,41 +236,16 @@ void get_cell_contents(grid* the_grid, int x, int y, int z,
 	assert(z < the_grid->z_size);
 	assert(length != NULL);
 	assert(start != NULL);
-	
-	// Initialise variables
-	int index = 0;		// Stores where we're up to in the particle array
-	int sentinel_count = 0;
-	int start_sentinel = (the_grid->y_size * the_grid->z_size)*x +
-		(the_grid->z_size)*y + z;
-	*start = NULL;
 
-	// Initialise our length counter
-	*length = 0;
+	// Our location in the dummies
+	int i;
+	i = z + (the_grid->z_size * y) + (the_grid->z_size * the_grid->y_size * x);
 
-	// Loop through the particles
-	while ((index < the_grid->particle_number +
-		(the_grid->x_size * the_grid->y_size * the_grid->z_size)) &&
-			(sentinel_count < start_sentinel + 2)) {
+	// Now we know where to start from, so set it
+	*start = &(the_grid->particles[i]);
 
-		// If we've found a sentinel, increment our sentinel counter
-		if (the_grid->particles[index].id == -1) {
-			// If we've just found the right cell, set the start to the next
-			// particle
-			if (sentinel_count == start_sentinel) {
-				*start = &(the_grid->particles[index+1]);
-			}
-			
-			sentinel_count++;
-		}
-
-		// Otherwise, if we're in the right cell, increment the particle counter
-		else if (*start != NULL) {
-			*length = *length + 1;
-		}
-
-		// Move on to the next particle
-		index++;
-	}
+	// Now work out how many there are
+	*length = count_cell_contents(the_grid, x, y, z);
 
 	// POSTCONDITIONS
 	assert(*length >= 0);
