@@ -7,29 +7,6 @@
  * Facilities for reading particle data from STDIN
  */
 
-float decimals_to_float(int decimals) {
-	/*
-	* Returns a float between 0 and 1, with the given integer appearing after
-	* the decimal point.
-	*/
-
-	// PRECONDITIONS
-	assert(decimals >= 0);
-	
-	// First we need to find the power of 10 to work with
-	int divisor = 10;
-	while (divisor < decimals) {
-		divisor = divisor * 10;
-	}
-
-	// POSTCONDITIONS
-	assert(decimals < divisor);
-	assert(((float)decimals) / ((float)divisor) > (float)0.0);
-	assert(((float)decimals) / ((float)divisor) < (float)1.0);
-
-	return ((float)decimals) / ((float)divisor);
-}
-
 int count_commas(char* c_array, int max_length) {
 	/*
 	* Counts the number of commas in the given array of characters
@@ -95,8 +72,6 @@ int read_natural(char* c_array, int max_length) {
 	comma = (char)44;
 	null_end = (char)0;
 	dot = (char)46;
-
-	fprintf(stderr, "N\n");
 	
 	// This keeps track of the number we've read
 	int stored_number = 0;
@@ -148,6 +123,111 @@ int read_natural(char* c_array, int max_length) {
 	
 }
 
+int power_of_ten(int power) {
+	/*
+	 * Returns 10 to the power of the argument.
+	 */
+
+	// PRECONDITIONS
+	assert(power >= 0);
+	
+	int result = 1;
+
+	int index;
+	for (index=0; index < power; index++) {
+		result = result * 10;
+	}
+
+	return result;
+}
+
+float read_fraction(char* c_array, int max_length) {
+	/*
+	 * Reads a decimal natural number from an array of characters,
+	 * encoded as ASCII.
+	 */
+
+	// PRECONDITIONS
+	assert(c_array != NULL);
+	assert(max_length > 0);
+
+	// Define ASCII codes for numbers, in decimal
+	char zero, one, two, three, four, five, six, seven, eight, nine, linefeed,
+		comma, null_end, dot;
+	zero = (char)48;
+	one = (char)49;
+	two = (char)50;
+	three = (char)51;
+	four = (char)52;
+	five = (char)53;
+	six = (char)54;
+	seven = (char)55;
+	eight = (char)56;
+	nine = (char)57;
+	linefeed = (char)10;
+	comma = (char)44;
+	null_end = (char)0;
+	dot = (char)46;
+	
+	// This keeps track of the number we've read
+	float stored_number = (float)0.0;
+	int index;
+	for (index=0; index<max_length; index++) {
+		if (c_array[index] == zero) {
+			// No change
+		}
+		else if (c_array[index] == one) {
+			stored_number = stored_number +
+				(((float)1)/(float)power_of_ten(index+1));
+		}
+		else if (c_array[index] == two) {
+			stored_number = stored_number +
+				(((float)2)/(float)power_of_ten(index+1));
+		}
+		else if (c_array[index] == three) {
+			stored_number = stored_number +
+				(((float)3)/(float)power_of_ten(index+1));
+		}
+		else if (c_array[index] == four) {
+			stored_number = stored_number +
+				(((float)4)/(float)power_of_ten(index+1));
+		}
+		else if (c_array[index] == five) {
+			stored_number = stored_number +
+				(((float)5)/(float)power_of_ten(index+1));
+		}
+		else if (c_array[index] == six) {
+			stored_number = stored_number +
+				(((float)6)/(float)power_of_ten(index+1));
+		}
+		else if (c_array[index] == seven) {
+			stored_number = stored_number +
+				(((float)7)/(float)power_of_ten(index+1));
+		}
+		else if (c_array[index] == eight) {
+			stored_number = stored_number +
+				(((float)8)/(float)power_of_ten(index+1));
+		}
+		else if (c_array[index] == nine) {
+			stored_number = stored_number +
+				(((float)9)/(float)power_of_ten(index+1));
+		}
+		else if (c_array[index] == linefeed ||
+			c_array[index] == comma ||
+			c_array[index] == null_end ||
+			c_array[index] == dot) {
+
+			return stored_number;
+		}
+		else {
+			// ERROR
+			assert(c_array[index] == linefeed);
+		}
+	}
+
+	return stored_number;
+}
+	
 float read_decimal(char* c_array, int max_length) {
 	/*
 	*
@@ -183,17 +263,16 @@ float read_decimal(char* c_array, int max_length) {
 	// If decimal is still -1 then we found no decimal point, so look for a
 	// natural number
 	if (decimal == -1) {
-		fprintf(stderr, "NODEC\n");
 		return (float)read_natural(c_array, max_length);
 	}
 	else {
-		fprintf(stderr, "DEC\n");
 		// Otherwise, we've got a decimal so we need to look for two natural
 		// numbers
 		int whole = read_natural(c_array, max_length);
-		int fraction = read_natural(&(c_array[decimal+1]), max_length-decimal);
-		fprintf(stderr, "whole %i fraction %i\n", whole, fraction);
-		return (float)whole + decimals_to_float(fraction);
+		float fraction = read_fraction(
+			&(c_array[decimal+1]), max_length-decimal
+		);
+		return (float)whole + fraction;
 	}
 }
 
@@ -214,13 +293,9 @@ float read_positive_or_negative(char* c_array, int max_length) {
 
 		// DEBUG
 		assert(max_length > 1);
-
-		fprintf(stderr, "Neg\n");
 		
 		return -1 * read_decimal(&(c_array[1]), max_length - 1);
 	}
-
-	fprintf(stderr, "Pos\n");
 	
 	return read_decimal(c_array, max_length);
 
