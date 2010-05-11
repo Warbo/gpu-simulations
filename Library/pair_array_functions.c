@@ -151,68 +151,48 @@ void grid_particles(grid* the_grid, particle* particles, int particle_number,
 	// DEBUG
 	assert(the_grid->x_size == x_size);
 
+	// Get the size of each cell
 	int* cell_sizes;
 	count_particles_in_cells(the_grid, particles, &cell_sizes);
 
+	// Fill the grid with relevant dummies
 	int running_total = the_grid->x_size*the_grid->y_size*the_grid->z_size;
 	int index;
 	for (index=0; index<the_grid->x_size*the_grid->y_size*the_grid->z_size;
 		index++) {
 		the_grid->particles[index].id = -1 * running_total;
 		running_total = running_total + cell_sizes[index];
-	}
 
-	// Stores our particle array position (particles start after dummies)
-	int array_index = the_grid->x_size * the_grid->y_size * the_grid->z_size;
-	int x;		// Used to loop through cell x coordinates
-	int y;		// Ditto for y
-	int z;		// Ditto for z
+		// Reuse the cell_sizes array for offsets
+		cell_sizes[index] = 0;
+	}
+	
 	int px;	// Particle's cell position
 	int py;	// ditto
 	int pz;	// ditto
+	int lookup; // The offset of a cell in the array
 	
-	// Go through every cell location
-	for (x = 0; x < the_grid->x_size; x++) {
-		for (y = 0; y < the_grid->y_size; y++) {
-			for (z = 0; z < the_grid->z_size; z++) {
+	// Loop through every given particle
+	for (index = 0; index < the_grid->particle_number; index++) {
 
-				// To begin with, save our starting position
-				the_grid->particles[
-					z + (the_grid->z_size * y) +
-					(the_grid->z_size * the_grid->y_size * x)].id =
-						-1 * array_index;
-
-				// For each cell, loop through every given particle
-				for (index = 0; index < the_grid->particle_number; index++) {
-					// Initialise particle's position to a nonsense value
-					px = -1;
-					py = -1;
-					pz = -1;
-
-					// If the particle is in this cell, add it to the grid
-					get_index_from_position(the_grid, &(particles[index]),
-						&px, &py, &pz);
+		// Get this particle's cell
+		get_index_from_position(the_grid, &(particles[index]),
+			&px, &py, &pz);
 					
-					// DEBUG
-					assert(px >= 0);
-					assert(py >= 0);
-					assert(pz >= 0);
-					
-					if (x == px && y == py && z == pz) {
-						
-						// DEBUG
-						assert(array_index < the_grid->particle_number +
-							(the_grid->x_size * the_grid->y_size *
-								the_grid->z_size));
-						
-						the_grid->particles[array_index] = particles[index];
-						
-						array_index++;
-					}
-				}
-			
-			}
-		}
+		// DEBUG
+		assert(px >= 0);
+		assert(py >= 0);
+		assert(pz >= 0);
+
+		lookup = pz + (the_grid->z_size * py) +
+				(the_grid->z_size * the_grid->y_size * px);
+
+		the_grid->particles[
+			(-1 * the_grid->particles[lookup].id) + cell_sizes[lookup]
+		] = particles[index];
+
+		cell_sizes[lookup]++;
+		
 	}
 	
 	// POSTCONDITIONS

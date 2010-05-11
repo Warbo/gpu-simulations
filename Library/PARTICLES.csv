@@ -1,5 +1,5 @@
 ID,x,y,z,x_vel,y_vel,z_vel,x_acc,y_acc,z_acc,mass
-20, <- Particle Number
+1000000, <- Particle Number
 1, <- Particle size
 0,35.74325161,44.5858982817,99.4237624866,0,0,0,0,0,0,0
 1,66.1324711746,23.9977119232,87.2617567901,0,0,0,0,0,0,0

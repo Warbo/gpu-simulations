@@ -117,10 +117,8 @@ int main() {
 	// DEBUG
 	assert(size > (float)0.0);
 	assert(particle_number > 0);
-	
 	grid the_grid;
 	grid_particles(&the_grid, p_array, particle_number, size);
-	
 	return 0;
 }
 /*

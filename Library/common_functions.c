@@ -658,8 +658,13 @@ void count_particles_in_cells(grid* the_grid, particle* p_array, int** cells) {
 	// Loop through the particles and increment their cells
 	for (index = 0; index<the_grid->particle_number; index++) {
 		get_index_from_position(the_grid, &(p_array[index]), &x, &y, &z);
-		cells[0][z + (the_grid->z_size * y) +
-			(the_grid->z_size * the_grid->y_size * x)]++;
+		cells[0][
+			z + (the_grid->z_size * y) +
+				(the_grid->z_size * the_grid->y_size * x)
+		] = cells[0][
+			z + (the_grid->z_size * y) +
+				(the_grid->z_size * the_grid->y_size * x)
+		] + 1;
 	}
 
 	// POSTCONDITIONS
