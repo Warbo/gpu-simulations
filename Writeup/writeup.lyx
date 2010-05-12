@@ -36,6 +36,7 @@
 \tracking_changes false
 \output_changes false
 \author "" 
+\author "" 
 \end_header
 
 \begin_body
@@ -56,42 +57,63 @@ Introduction
 Typical Physics Simulations
 \end_layout
 
+\begin_layout Standard
+Physics, indeed the whole of science, is the attempt to describe the world
+ with Mathematics.
+ Computers have become an invaluable tool in this endeavour not only by
+ offering quick results to calculations, instant communication between scientist
+s around the world, mass storage and retrieval of knowledge on a scale much
+ grander than the brain and as the only capable observers of our experiments
+ beyond the microscopic and macroscopic; at a much more fundamental level,
+ the operation of a computing device is isomorphic to the proof of a theorem
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Curry-Howard isomorphism
+\end_layout
+
+\end_inset
+
+, the defining characteristic of Mathematics.
+ Thus computers, by their very existence, provide the Physicist with all
+ of the Maths
+\end_layout
+
 \begin_layout Subsection
 GPU Overview
 \end_layout
 
 \begin_layout Standard
-The world of computing is abound with acronyms, and the arena of graphics
- is no different.
- A typical commodity computer (ie.
+A typical commodity computer (ie.
  not intended for embedded or server use) will contain a graphics card,
- which is either a plug-in circuit board or combined with the main motherboard.
- The reason for this is historical, since IBM-compatible machines were originall
-y incapable of displaying bit-mapped graphics, and thus required an add-on,
- and as the computer game industry kept up pressure for ever-greater rendering
- throughput it was sensible to keep these co-processors separate so that
- they could be upgraded on their own without having to design and build
- new motherboards at the relentless pace demanded by the gaming world.
+ either as a plug-in circuit board or integrated into the main motherboard.
+ The reason for this is historical, since graphical applications like games
+ can always make full use of a computer's resources no matter how extensive
+ they are, eg.
+ by increasing the resolution or frame-rate of the display, and are thus
+ always demanding more powerful hardware.
+ To keep down the cost of satiating this demand, it was sensible to offload
+ graphics tasks to a co-processor which could be upgraded without having
+ to buy a whole new computer.
+ These co-processors are called GPUs (Graphics Processing Units) and they
+ are housed along with their life-support components on the graphics card.
 \end_layout
 
 \begin_layout Standard
 Real-time 3D rendering was certainly the main driving force for graphics
- card development (for example, most modern graphics cards no longer contain
- explicit circuitry for 2D rendering, instead opting to use the bloated
- 3D engines to emulate it).
- The most striking difference between this and other common computing tasks
- is that it is 
+ card development, for example most modern GPUs no longer contain explicit
+ circuitry for 2D rendering, instead using the space to expand the 3D engine
+ and emulating any 2D processing calls.
+ The most striking difference between 3D graphics and other common computing
+ tasks is that it is an 
 \emph on
 embarassingly parallel
 \emph default
-.
+ problem.
  In other words, it is trivial to get a near 100% increase in performance
  simply by doubling the number of computers that are working on the task
- at once (in 
-\emph on
-parallel
-\emph default
-).
+ at once.
 \end_layout
 
 \begin_layout Standard
@@ -117,11 +139,75 @@ deadlock
 
 \begin_layout Standard
 The reason 3D is so inherently parallel is that there is very little dependence
- between the calculations being performed, so any extra resources can simply
- have part of the input sent there, calculated and the results sent back.
- Sections of a 3D scene can be rendered largely in isolation, and more commonly
- the final image for screencertainly therendering routines can have their
- input divided up, processed
+ between the calculations being performed.
+ This means, for example, that the screen can be split into sections, each
+ sent to a different processor for rendering, then the results collected
+ and displayed together.
+ Any additional resources can be utilised by splitting the screen into more
+ sections.
+ This put GPU manufacturers in a much better position than their rival CPU
+ manufacturers: instead of having to squeeze more performance out of already
+ extensively optimised processors, by focusing on an embarassingly parallel
+ task they could get more performance by just adding more of the existing
+ processors, creating so-called 
+\emph on
+multiprocessors
+\emph default
+.
+ Modern GPUs contain a number of multiprocessors, each with several 
+\emph on
+cores
+\emph default
+ (processing units), typically 8 per multiprocessor.
+ In comparison, mainstream CPUs have only recently become multi-core, and
+ quad-core machines are still considered high-end computers despite having
+ half the processing cores of a single graphics multiprocessor, of which
+ there are several in a cheap GPU.
+\end_layout
+
+\begin_layout Standard
+The processing capabilities of GPUs have been considered for scientific
+ computing for several years 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Cite something
+\end_layout
+
+\end_inset
+
+ but until recently calculations would have to be translated into an analogous
+ graphical task, sent to the GPU for processing, the results transferred
+ back then translated into the original context.
+ The overhead of conversion and transfering back and forth between the graphics
+ card and the motherboard made this approach too inefficient for practical
+ use, and the numerical precision of GPUs was insufficient to make large
+ calculations worthwhile
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Cite that paper which sent calculations back and forth
+\end_layout
+
+\end_inset
+
+.
+ Recently these limitations have been overcome by the emergence of General-Purpo
+se Graphics Processing Units (
+\emph on
+GPGPUs
+\emph default
+), capable of running arbitrary code rather than just graphics tasks.
+ Complementary programming interfaces, like Nvidia's CUDA and the less vendor-sp
+ecific OpenCL, have become available for accessing the cards from mainstream
+ programming languages like C, and with this integration the device specificatio
+ns have been brought up to meet the precision standards required by these
+ language's compilers.
+ This has spurred a stream of researchers to offload their intensive computation
+s to graphics cards as a more cost-effective alternative to clusters and
+ conventional supercomputers.
 \end_layout
 
 \end_body

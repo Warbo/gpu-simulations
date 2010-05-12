@@ -21,7 +21,7 @@ int main() {
 	
 	// Cell maximum size
 	grid the_grid;
-	grid_particles(&the_grid, p_array, particle_number, size);
+	grid_particles(&the_grid, p_array, particle_number, particle_size);
 	int cell_size = get_biggest_cell_size(&the_grid, p_array);
 
 	// The cell size used by CUDA must be #defined at pre-processor time, so we
@@ -81,7 +81,7 @@ int main() {
 	for (index=0; index <
 		(the_grid.x_size * the_grid.y_size * the_grid.z_size) * CELLSIZE;
 	i++) {
-		printf("%G\n", all_particles_host[i].x_acc);
+		printf("%G\n", all_particles_host[index].x_acc);
 	}
 
 	// Exit
