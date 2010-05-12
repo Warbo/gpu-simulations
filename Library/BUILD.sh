@@ -58,10 +58,12 @@ case "$1" in
 		;;
 
 	cuda)
-		gcc -c -Wall -W -Wextra -Wshadow -Wconversion -Wcast-qual -Wwrite-strings -Werror linkedlists.c -lm -o linkedlists.o
-		nvcc -c macro_kernel.cu -o macro_kernel.o
-		gcc -c tests.c -Wall -W -Wextra -Wshadow -Wconversion -Wcast-qual -Wwrite-strings -Werror -lm -o tests.o
-		nvcc tests.o -lm -o tests
+		gcc -c datatypes.c -Wall -W -Wextra -Wconversion -Wshadow -Wcast-qual -Wwrite-strings -Werror -lm -o datatypes.o
+		gcc -c file_reading.c -Wall -W -Wextra -Wconversion -Wshadow -Wcast-qual -Wwrite-strings -Werror -lm -o file_reading.o
+		gcc -c common_functions.c -Wall -W -Wextra -Wconversion -Wshadow -Wcast-qual -Wwrite-strings -Werror -lm -o common_functions.o
+		nvcc -c cuda_functions.cu -o cuda_functions.o
+		nvcc -c cuda_tests.cu -o cuda_tests.o
+		nvcc cuda_tests.o -o cuda_tests
 		;;
 	
 	*)

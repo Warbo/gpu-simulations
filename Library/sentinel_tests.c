@@ -1,114 +1,14 @@
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <math.h>
-//#include "common_functions.c"
+/*
+ * Stores tests for the sentinels implementation.
+ */
+
+// Drag in everything we need
 #include "sentinel_functions.c"
 
-// Include CUDA version
-//#include "macro_kernel.cu"
-
-//void dump_grid(grid* the_grid, float dx, float dy, float dz) {
-	/*
-	 * This function will dump the entire memory representation of the
-	 * grid at the given pointer to stdout. This can be piped in to a
-	 * sanity checking program to aid in debugging.
-	 * 
-	 * The other arguments instruct the function to refrain or not from
-	 * printing out grid properties (since it is useless to output the
-	 * memory of a particle if it is yet to be defined).
-	 * These values are simply 0 for no and nonzero for yes.
-	 */
-/*	
-
-}*/
-
-
-
-
-
-/*int check_particles(grid* the_grid, int particle_number) {
-	
-}*/
-
-/*int count_all_particles(grid* the_grid, int x, int y, int z) {
-	
-	
-}*/
-
-//int check_for_dupes(particle** particles, int length) {
-	/*
-	 * This checks the given array of particles, with a length "length",
-	 * to see whether it contains two pointers to the same address.
-	 * If duplicates are found return 1, else return 0.
-	 */
-/*	
-	
-}*/
-
-/*void sort_array(grid* the_grid, particle* p_array, particle** out_array) {
-
-	// PRECONDITIONS
-	assert(the_grid != NULL);
-	assert(p_array != NULL);
-	assert(out_array != NULL);
-	
-	// Make an array to store how many we've added to each cell
-	int* positions = malloc((unsigned int)
-			(the_grid->x_size*the_grid->y_size*the_grid->z_size)*sizeof(int));
-
-	// Initialise to zero
-	int index;
-	for (index=0; index < (the_grid->x_size*the_grid->y_size*the_grid->z_size);
-		index++) {
-		positions[index] = 0;
-	}
-
-	// Make the output array
-	*out_array = malloc((unsigned int) (CELLSIZE *
-		(the_grid->x_size*the_grid->y_size*the_grid->z_size)) *
-		sizeof(particle));
-
-	// DEBUG
-	assert(CELLSIZE * (the_grid->x_size*the_grid->y_size*the_grid->z_size) >
-		the_grid->particle_number);
-
-	// Populate the output array
-	
-	// These will store out cell position
-	int x, y, z;
-
-	for (index = 0; index < the_grid->particle_number; index++) {
-		// Set x, y and z to the cell of this particle
-		get_index_from_position(the_grid, &(p_array[index]), &x, &y, &z);
-
-		// DEBUG
-		assert(x >= 0);
-		assert(y >= 0);
-		assert(z >= 0);
-
-		// Put this particle in the output array, at a point corresponding to
-		// the correct cell, offset by that cell's value in 'positions'
-		*out_array[(x*(the_grid->y_size*the_grid->z_size) + y*(the_grid->z_size)
-				+ z)*CELLSIZE + positions[
-					x*(the_grid->y_size*the_grid->z_size) + y*(the_grid->z_size)
-					+ z]
-		] = p_array[index];
-
-		// Increment the cell's offset
-		positions[x*(the_grid->y_size*the_grid->z_size) + y*(the_grid->z_size)
-			+ z] = positions[
-				x*(the_grid->y_size*the_grid->z_size) + y*(the_grid->z_size)
-				+ z] + 1;
-	}
-
-	// Garbage collect
-	free(positions);
-	// POSTCONDITIONS
-	assert(*out_array != NULL);
-}*/
-
 int main() {
-
+	/*
+	 * The tests themselves.
+	 */
 	particle* p_array;
 	int particle_number;
 	float size;
