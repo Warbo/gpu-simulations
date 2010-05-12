@@ -8,6 +8,8 @@
 #include <math.h>
 #include "pair_array_functions.c"
 
+#define CELLSIZE (32)
+
 __device__ int get_global_offset(int bIdx_x, int grid_x, int grid_y,
 	int grid_z) {
 	// This gets the offset of the current thread in the global particle array
