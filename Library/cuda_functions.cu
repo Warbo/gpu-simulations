@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "common_functions.c"
+#include "pair_array_functions.c"
 
 __device__ int get_global_offset(int bIdx_x, int grid_x, int grid_y,
 	int grid_z) {

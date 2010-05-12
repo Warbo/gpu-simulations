@@ -3,8 +3,6 @@
  */
 
 // Drag in what we need
-// In this case the serial code will be of the pair-array type
-#include "pair_array_functions.c"
 #include "cuda_functions.cu"
 
 int main() {
