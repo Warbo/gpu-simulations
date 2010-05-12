@@ -210,5 +210,36 @@ s to graphics cards as a more cost-effective alternative to clusters and
  conventional supercomputers.
 \end_layout
 
+\begin_layout Section
+The CUDA Model
+\end_layout
+
+\begin_layout Standard
+This project focuses specifically on the use of Nvidia's CUDA (Compute Unified
+ Device Architecture
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+is that right?
+\end_layout
+
+\end_inset
+
+) interface, so a more specific description of its operation, and its use
+ from C, is given here.
+\end_layout
+
+\begin_layout Standard
+In CUDA, the graphics card is not directly accessible in the way that RAM
+ and registers are accessible.
+ Instead, CUDA provides regular C functions to handle the device, for example
+ a call to 
+\family typewriter
+cudaMemcpy(void* destination, void* source, int size, cudaMemcpyHostToDevice)
+\family default
+ an be declared to
+\end_layout
+
 \end_body
 \end_document
