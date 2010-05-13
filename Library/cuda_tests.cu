@@ -80,7 +80,7 @@ int main() {
 	// DEBUG
 	for (index=0; index <
 		(the_grid.x_size * the_grid.y_size * the_grid.z_size) * CELLSIZE;
-	i++) {
+	index++) {
 		printf("%G\n", all_particles_host[index].x_acc);
 	}
 
