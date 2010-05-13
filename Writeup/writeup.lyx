@@ -60,12 +60,14 @@ Typical Physics Simulations
 \begin_layout Standard
 Physics, indeed the whole of science, is the attempt to describe the world
  with Mathematics.
- Computers have become an invaluable tool in this endeavour not only by
- offering quick results to calculations, instant communication between scientist
-s around the world, mass storage and retrieval of knowledge on a scale much
- grander than the brain and as the only capable observers of our experiments
+ Computers have become an invaluable tool in this endeavour not only through
+ the secondary side-effects of the programs they run, which give us quick
+ results to calculations, instant communication between collaborators around
+ the world, mass storage and retrieval of knowledge on a scale much grander
+ than the brain and act as the only capable observers of our experiments
  beyond the microscopic and macroscopic; at a much more fundamental level,
- the operation of a computing device is isomorphic to the proof of a theorem
+ the principle of operation of a computing device is isomorphic to the proof
+ of a theorem
 \begin_inset Note Note
 status open
 
@@ -75,9 +77,24 @@ Curry-Howard isomorphism
 
 \end_inset
 
-, the defining characteristic of Mathematics.
- Thus computers, by their very existence, provide the Physicist with all
- of the Maths
+.
+\end_layout
+
+\begin_layout Standard
+Since the defining characteristic of Mathematics is the discovery and proof
+ of theorems, computers, by their very existence, provide the Physicist
+ with all of the proving power needed to tackle many interesting problems.
+ The role of the Scientist and Mathematician is now solely as the discovery,
+ and only because computers care only that a proof is syntactically correct
+ difficult for computers since they see no difference between 
+\begin_inset Quotes eld
+\end_inset
+
+interesting
+\begin_inset Quotes erd
+\end_inset
+
+ theorems and every other tautology.
 \end_layout
 
 \begin_layout Subsection
