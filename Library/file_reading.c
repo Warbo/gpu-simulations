@@ -115,6 +115,8 @@ int read_natural(char* c_array, int max_length) {
 		}
 		else {
 			// ERROR
+			fprintf(stderr, "ERROR READING NATURAL: GOT AS FAR AS: %i\n",
+				stored_number);
 			assert(c_array[index] == linefeed);
 		}
 	}
@@ -221,6 +223,8 @@ float read_fraction(char* c_array, int max_length) {
 		}
 		else {
 			// ERROR
+			fprintf(stderr, "ERROR READING FRACTION! GOT AS FAR AS: %G\n",
+				stored_number);
 			assert(c_array[index] == linefeed);
 		}
 	}

@@ -60,8 +60,8 @@ int main() {
 	);
 
 	// Run the interactions
-	/*int index;
-	for (index=0; index < interaction_number; index++) {
+	int index;
+	/*for (index=0; index < interaction_number; index++) {
 		// Calculate the interactions
 		do_cell<<<dimGrid, CELLSIZE>>>(all_particles_device, CELLSIZE,
 			the_grid.x_size, the_grid.y_size, the_grid.z_size);
@@ -78,11 +78,11 @@ int main() {
 	cudaFree(all_particles_device);
 
 	// DEBUG
-	/*for (index=0; index <
+	for (index=0; index <
 		(the_grid.x_size * the_grid.y_size * the_grid.z_size) * CELLSIZE;
 	index++) {
 		printf("%G\n", all_particles_host[index].x_acc);
-	}*/
+	}
 
 	// Exit
 	return 0;

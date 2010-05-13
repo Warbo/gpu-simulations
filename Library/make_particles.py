@@ -26,5 +26,6 @@ zmin = float(zmin)
 zmax = float(zmax)
 
 for p in range(int(number)):
-	outfile.write(str(p)+','+str(rand(xmin,xmax))+','+str(rand(ymin,ymax))+',' \
-		+str(rand(zmin,zmax))+',0,0,0,0,0,0,0\n')
+	outfile.write(str(p)+','+str(round(rand(xmin,xmax), 5))+','+\
+	str(round(rand(ymin,ymax), 5))+','+str(round(rand(zmin,zmax), 5))+\
+	',0,0,0,0,0,0,0\n')
