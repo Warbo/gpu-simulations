@@ -233,3 +233,60 @@ void get_cell_contents(grid* the_grid, int x, int y, int z,
 
 }
 
+void make_padded_array(grid* the_grid, particle* in_array, particle** out_array,
+	int* length, int cellsize) {
+	/*
+	 * Assigns a new array of particles at out_array, then takes the particles
+	 * from the_grid and inserts them into this new array, leaving space between
+	 * each cell such that each is cellsize particles.
+	 */
+
+	// PRECONDITIONS
+	assert(the_grid != NULL);
+	assert(out_array != NULL);
+	assert(length != NULL);
+	assert(cellsize >= get_biggest_cell_size(the_grid, in_array));
+	
+	// Allocate the array
+	*out_array = (particle*) malloc((unsigned int)(
+		(the_grid->x_size * the_grid->y_size * the_grid->z_size) * cellsize
+	) * sizeof(particle));
+
+	// We know the length (it's the cell count * cell size)
+	*length = (the_grid->x_size * the_grid->y_size * the_grid->z_size) *
+		cellsize;
+
+	// Get each cell's size, so we know when to start adding dummies
+	int* cell_sizes;
+	count_particles_in_cells(the_grid, in_array, &cell_sizes);
+
+	// Now loop through every cell
+	int particle_index;
+	int cell_index;
+	for (cell_index=0; cell_index < (
+		the_grid->x_size * the_grid->y_size * the_grid->z_size
+	); cell_index++) {
+		// For each cell, loop through "cellsize" particles
+		for (particle_index=0; particle_index < cellsize; particle_index++) {
+
+			// Only add particles if they're not padding
+			if (particle_index < cell_sizes[cell_index]) {
+				// Grab the next particle from the array
+				out_array[0][(cell_index * cellsize)+particle_index] =
+					the_grid->particles[-1*(the_grid->particles[cell_index].id)+
+						particle_index];
+			}
+			else {
+				// Otherwise add a dummy for padding
+				out_array[0][(cell_index * cellsize)+particle_index].id = -1;
+			}
+		}
+	}
+
+	// Garbage collection
+	free(cell_sizes);
+
+	// POSTCONDITIONS
+	assert(out_array[0] != NULL);
+	assert(*length > 0);
+}

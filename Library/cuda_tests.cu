@@ -18,10 +18,12 @@ int main() {
 	particle* p_array;
 	float particle_size;
 	read_particles(&p_array, &particle_number, &particle_size);
-	
-	// Cell maximum size
+
+	// Build a grid from them
 	grid the_grid;
 	grid_particles(&the_grid, p_array, particle_number, particle_size);
+
+	// Now we can check a cell's maximum size
 	int cell_size = get_biggest_cell_size(&the_grid, p_array);
 
 	// The cell size used by CUDA must be #defined at pre-processor time, so we
@@ -29,16 +31,20 @@ int main() {
 	// error and exit.
 	if (cell_size > CELLSIZE) {
 		fprintf(stderr,
-			"Error: Cells need at least %i particles, only got %i\n",
-			cell_size, CELLSIZE);
+				"Error: Cells need at least %i particles, only got %i\n",
+	cell_size, CELLSIZE);
 		fprintf(stderr, "Change #define CELLSIZE in cuda_functions.cu\n");
 		return 1;
 	}
 	
-	// Allocate room for a padded grid
-	particle* all_particles_host = (particle*)malloc((unsigned int)(
-		the_grid.x_size * the_grid.y_size * the_grid.z_size * CELLSIZE
-	) * sizeof(particle));
+	// Now get the particles in the padded format required by our CUDA kernel
+	particle* padded_particles;
+	int array_length;
+	make_padded_array(&the_grid, p_array, &padded_particles,
+		&array_length, CELLSIZE);
+
+	// We no longer need the p_array
+	free(p_array);
 
 	// Allocate memory on the GPU
 	particle* all_particles_device;
@@ -49,7 +55,7 @@ int main() {
 	);
 
 	// Copy across our particles
-	cudaMemcpy(all_particles_device, all_particles_host,
+	cudaMemcpy(all_particles_device, padded_particles,
 		(the_grid.x_size * the_grid.y_size * the_grid.z_size) *
 			CELLSIZE * sizeof(particle),
 		cudaMemcpyHostToDevice
@@ -68,7 +74,7 @@ int main() {
 	}*/
 
 	// Get results back
-	cudaMemcpy(all_particles_host, all_particles_device,
+	cudaMemcpy(padded_particles, all_particles_device,
 		(the_grid.x_size * the_grid.y_size * the_grid.z_size) *
 			CELLSIZE * sizeof(particle),
 		cudaMemcpyDeviceToHost
@@ -78,11 +84,12 @@ int main() {
 	cudaFree(all_particles_device);
 
 	// DEBUG
-	for (index=0; index <
+	/*for (index=0; index <
 		(the_grid.x_size * the_grid.y_size * the_grid.z_size) * CELLSIZE;
 	index++) {
 		printf("%G\n", all_particles_host[index].x_acc);
-	}
+	}*/
+	printf("%G\n", padded_particles[0].x_acc);
 
 	// Exit
 	return 0;
