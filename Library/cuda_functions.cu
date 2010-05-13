@@ -8,7 +8,7 @@
 #include <math.h>
 #include "pair_array_functions.c"
 
-#define CELLSIZE (32)
+#define CELLSIZE (64)
 
 __device__ int get_global_offset(int bIdx_x, int grid_x, int grid_y,
 	int grid_z) {
