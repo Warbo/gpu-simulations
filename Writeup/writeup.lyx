@@ -432,14 +432,34 @@ add figure
 \end_inset
 
 .
- The 
+ The components are structured in a hierarchy focused on memory.
+ The graphics card's RAM is the root of the tree, globally accessible but
+ relatively slow 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+quote a number
+\end_layout
+
+\end_inset
+
+.
+ Below this is the shared memory of the multiprocessors, connected to global
+ memory through a cache.
+ This memory is accessible to every core in its multiprocessor, and this
+ ultimately determines the coarse-grain structure of the algorithms used.
+ Finally each core in a multiprocessor (there are 8) has its own registers,
+ directly read from and written to by the Arithmetic Logic Units (the mathematic
+al circuitry).
 \end_layout
 
 \begin_layout Standard
-In CUDA, the graphics card is not directly accessible in the way that RAM
- and registers are accessible.
- Instead, CUDA provides regular C functions to handle the device, for example
- a call to 
+CUDA separates CPU code from GPU code, and hides the graphics card from
+ the host.
+ Although it is not directly accessible in the way that RAM and registers
+ are accessible, CUDA does provide functions to handle the device.
+ For example a call to 
 \family typewriter
 cudaMemcpy(void* destination, void* source, int size, cudaMemcpyHostToDevice)
 \family default
@@ -464,18 +484,81 @@ cudaMemcpyHostToDevice
 \family typewriter
 source
 \family default
- points to a location in the motherboard's RAM whilst 
+ points to a location in the host's RAM whilst 
 \family typewriter
 destination
 \family default
  points to a location in the GPU's RAM.
  The set-up and tear-down for a calculation is completely accomplished through
- the use of these functions, whilst the definition of the calculation to
- perform is a modification of the usual C syntax.
+ the use of these functions, whilst the calculation is initiated using a
+ new syntax.
 \end_layout
 
 \begin_layout Standard
-Calculations to be performed on a CUDA GPU
+The GPU code is written in the usual C way, but there are several semantic
+ differences to be aware of.
+ Firstly, there are now three distinct kinds of function: 
+\emph on
+host functions
+\emph default
+ (regular C functions running on the host), 
+\emph on
+device functions
+\emph default
+ (run on the GPU and can only be called from there) and 
+\emph on
+kernel functions
+\emph default
+ (run on the GPU but callable from the host).
+ Host functions are specified in the usual way, whilst device and kernel
+ functions have their signatures augmented with the keywords 
+\family typewriter
+__device__
+\family default
+ and 
+\family typewriter
+__global__
+\family default
+ respectively.
+ In figure 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+what
+\end_layout
+
+\end_inset
+
+ we see a simple CUDA file with prototypes for a host function 
+\family typewriter
+main
+\family default
+ (our entry point), a kernel function 
+\family typewriter
+foo
+\family default
+ and two device functions 
+\family typewriter
+bar
+\family default
+ and 
+\family typewriter
+baz.
+ Figure 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+
+\family typewriter
+what
+\end_layout
+
+\end_inset
+
+ shows which functions can call each other.
+ Note that recursion is not allowed for device or kernel functions.
 \end_layout
 
 \end_body
