@@ -1,4 +1,4 @@
-#LyX 1.6.5 created this file. For more info see http://www.lyx.org/
+#LyX 1.6.4 created this file. For more info see http://www.lyx.org/
 \lyxformat 345
 \begin_document
 \begin_header
@@ -173,9 +173,11 @@ l computers.
 
 \begin_layout Standard
 Another disadvantage is the error introduced by numerically approximating
- Real values in the model with Rational values in the computer.
- The magnitude of these errors depend on the resolution of the simulation
- which, for each spacetime dimension, linearly affects the amount of computation
+ Real values of a model with the Rational values of the computer, requiring
+ extra care to be taken to ensure that the rules are being applied appropriately.
+ The magnitude of these errors is usually insignificant, however but the
+ magnitude of these errors depend on the resolution of the simulation which,
+ for each spacetime dimension, linearly affects the amount of computation
  to perform.
  High resolution is important for Physics simulations, as many Physical
  laws are defined as differential equations, and thus simulation becomes
@@ -226,8 +228,8 @@ Cite
 bignum
 \emph default
  (arbitrary-precision arithmetic) library, which stores Integers as a linear
- datastructure (such as an array) of machine numbers, and Rationals as two
- (a numerator and a denominator).
+ datastructure of machine numbers, and Rationals as two (a numerator and
+ a denominator).
  This severely impacts performance, as the computational complexity of every
  arithmetic operation changes from 
 \begin_inset Formula $O\left(1\right)$
@@ -259,9 +261,13 @@ Anindya De, Piyush P Kurur, Chandan Saha, Ramprasad Saptharishi.
 \end_layout
 
 \begin_layout Standard
-Given these constraints, simulations are amongst the most computationally
- intensive practical programs in the world, which keeps up the demand for
- clustering technology and supercomputers.
+Given these constraints, Physics simulations are amongst the most computationall
+y intensive programs with practical use (it common for worthwhile programs
+ to be limited by IO rather than available cycleslock for input and thus
+ not tax the CPU, and it is of course trivial to make intensive programs
+ which derive no meaningful results, making those cycles derive novel, without
+ stalling for more input is which keeps up the demand for clustering technology
+ and supercomputers.
  Rather than requiring such expensive technology, this project aims to implement
  Physics simulations on commonly available computer hardware by reimplementing
  algorithms to be parallel, implementing them in an efficient manner and
