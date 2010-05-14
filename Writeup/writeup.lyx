@@ -1,4 +1,4 @@
-#LyX 1.6.4 created this file. For more info see http://www.lyx.org/
+#LyX 1.6.5 created this file. For more info see http://www.lyx.org/
 \lyxformat 345
 \begin_document
 \begin_header
@@ -53,21 +53,19 @@ Abstract
 Introduction
 \end_layout
 
-\begin_layout Subsection
-Typical Physics Simulations
-\end_layout
-
 \begin_layout Standard
 Physics, indeed the whole of science, is the attempt to describe the world
  with Mathematics.
- Computers have become an invaluable tool in this endeavour not only through
- the secondary side-effects of the programs they run, which give us quick
- results to calculations, instant communication between collaborators around
- the world, mass storage and retrieval of knowledge on a scale much grander
- than the brain and act as the only capable observers of our experiments
- beyond the microscopic and macroscopic; at a much more fundamental level,
- the principle of operation of a computing device is isomorphic to the proof
- of a theorem
+ Computers have become an invaluable tool in this endeavour.
+ Not only through the secondary, Model Theoretic, semantic interpretation
+ of the side-effects caused by their programs: results to calculations,
+ instant communication between collaborators around the world, mass storage
+ and retrieval of knowledge on a scale much grander than the human brain
+ and observations from experiments beyond the microscopic and macroscopic,
+ impossible to percieve manually.
+ At a much more fundamental level, the principle of operation of a computing
+ device, the syntactic manipulation of symbols, is isomorphic to the application
+ of Proof Theory to a deductive system
 \begin_inset Note Note
 status open
 
@@ -82,19 +80,193 @@ Curry-Howard isomorphism
 
 \begin_layout Standard
 Since the defining characteristic of Mathematics is the discovery and proof
- of theorems, computers, by their very existence, provide the Physicist
- with all of the proving power needed to tackle many interesting problems.
- The role of the Scientist and Mathematician is now solely as the discovery,
- and only because computers care only that a proof is syntactically correct
- difficult for computers since they see no difference between 
-\begin_inset Quotes eld
+ of theorems, by their very existence computers provide the Scientist with
+ a physical manifestation of Mathematics, in fact the most powerful there
+ can be
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Church-Turing thesis
+\end_layout
+
 \end_inset
 
-interesting
-\begin_inset Quotes erd
+, and thus the most useful tool there is in the endeavour to formalise the
+ Universe.
+ This is especially elegant for the Physicist, who's attempts to describe
+ reality with Mathematical laws are thus enabled by the exploitation of
+ those laws in their own derivation.
+ Despite the ultimate limitations to Science formalised in this way
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Godel's second incompleteness theorem
+\end_layout
+
 \end_inset
 
- theorems and every other tautology.
+, there is still far more we have yet to discover, and with the aid of computers
+ we can advance our understanding at an unprecedented rate.
+\end_layout
+
+\begin_layout Standard
+With the mechanisation of proof, the role of the Scientist is now solely
+ that of the discoverer.
+ The exploration space is theorems and the goal is surprise.
+ Since a Mathematical truth is a logical consequence of its axioms and rules,
+ the machine's operation makes no distinction between proving theorems and
+ proving tautologies, since they are the same concept and contain no more
+ information than their axioms.
+ Whilst there are formalisms for beauty and interestingness built on Information
+ Theory
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Cite compression guy
+\end_layout
+
+\end_inset
+
+, these are not part of the inherent syntactic nature of computation, and
+ can only ever exist in the secondary, Model Theory realm built atop it.
+ Until we mechanise the limits of semantics, as we have done syntactically
+ with the Turing machine, humans will have a definite role to play in Science:
+ as the all-important heuristic which guides the search.
+\end_layout
+
+\begin_layout Subsection
+Physics with Computers
+\end_layout
+
+\begin_layout Standard
+Computers are only as useful as the theorems they prove, and it is the computer
+ program which defines the operations to take.
+ The job of the programmers is to define programs such that their algebra
+ encapsulates the model under investigation.
+ There are many ways to approach this task, from high-level interactive
+ theorem provers to low-level machine instructions.
+ Of course all are isomorphic, but are necessarily distinct in order to
+ minimise the transformation from our mental model to the programming paradigm.
+ In this project the simulation approach is taken, which is a low-level
+ implementation that uses machine components to numerically approximate
+ the objects described by the model.
+\end_layout
+
+\begin_layout Standard
+The main advantage to simulations is the simple correspondance between the
+ physical system of the model and the physical system of the machine.
+ This makes programming a simulation a relatively straightforward affair.
+ The main disadvantages of simulations are the large time and space requirements
+, compared to less intensive symbol manipulation such as statistical mechanics.
+ This inefficiency, caused by the massive redundancy of the system, is the
+ reason why the technique only became popular after the advent of fast mechanica
+l computers.
+ The ability to map objects to machine components, however, keeps the overhead
+ low such that available resources aren't wasted.
+ From a more practical point of view, being able to perform this mapping
+ manually at a low level is an advantage considering that language development
+ and pattern matching are still in their infancy as Mathematical disciplines.
+\end_layout
+
+\begin_layout Standard
+Another disadvantage is the error introduced by numerically approximating
+ Real values in the model with Rational values in the computer.
+ The magnitude of these errors depend on the resolution of the simulation
+ which, for each spacetime dimension, linearly affects the amount of computation
+ to perform.
+ High resolution is important for Physics simulations, as many Physical
+ laws are defined as differential equations, and thus simulation becomes
+ discrete summation as an approximation to the continuous integration of
+ the system under these laws.
+\end_layout
+
+\begin_layout Standard
+The chosen resolution also depends on the physical properties of the intended
+ machine, since machine instructions can only manipulate machine numbers
+ and thus anything outside that range requires algorithmic abstractions.
+ For example, on a 64-bit machine it is not possible to exactly represent,
+ as a machine number, a binary Natural 
+\begin_inset Formula $x\geq10^{1000000}+1$
+\end_inset
+
+
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Cite
+\end_layout
+
+\end_inset
+
+, and similarly machines following the IEEE 754-2008 floating point standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Cite
+\end_layout
+
+\end_inset
+
+ cannot store, as a machine number, a binary Rational such as 
+\begin_inset Formula $10^{10000101}+\frac{1}{10}$
+\end_inset
+
+ (decimal 
+\begin_inset Formula $2^{133}+\frac{1}{2}$
+\end_inset
+
+).
+ To do so requires a 
+\emph on
+bignum
+\emph default
+ (arbitrary-precision arithmetic) library, which stores Integers as a linear
+ datastructure (such as an array) of machine numbers, and Rationals as two
+ (a numerator and a denominator).
+ This severely impacts performance, as the computational complexity of every
+ arithmetic operation changes from 
+\begin_inset Formula $O\left(1\right)$
+\end_inset
+
+ (for machine numbers pipelined through the CPU's Arithmetic Logic Unit)
+ to 
+\begin_inset Formula $O\left(N_{bits}\right)$
+\end_inset
+
+ for addition and subtraction, whilst efficient multiplication algorithms
+ are still a research topic (for example the 
+\begin_inset Formula $O(N_{bits}\cdot\log N_{bits}\cdot2^{O(\log^{*}N_{bits})})$
+\end_inset
+
+ algorithm from
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Anindya De, Piyush P Kurur, Chandan Saha, Ramprasad Saptharishi.
+ Fast Integer Multiplication Using Modular Arithmetic.
+ Symposium on Theory of Computation (STOC) 2008.
+\end_layout
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Standard
+Given these constraints, simulations are amongst the most computationally
+ intensive practical programs in the world, which keeps up the demand for
+ clustering technology and supercomputers.
+ Rather than requiring such expensive technology, this project aims to implement
+ Physics simulations on commonly available computer hardware by reimplementing
+ algorithms to be parallel, implementing them in an efficient manner and
+ distributing them to run concurrently on the graphics processors found
+ in modern PCs.
 \end_layout
 
 \begin_layout Subsection
@@ -248,6 +420,22 @@ is that right?
 \end_layout
 
 \begin_layout Standard
+CUDA is an interface to Nvidia graphics cards, a schematic of which can
+ be seen in
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+add figure
+\end_layout
+
+\end_inset
+
+.
+ The 
+\end_layout
+
+\begin_layout Standard
 In CUDA, the graphics card is not directly accessible in the way that RAM
  and registers are accessible.
  Instead, CUDA provides regular C functions to handle the device, for example
@@ -255,7 +443,39 @@ In CUDA, the graphics card is not directly accessible in the way that RAM
 \family typewriter
 cudaMemcpy(void* destination, void* source, int size, cudaMemcpyHostToDevice)
 \family default
- an be declared to
+ will transfer 
+\family typewriter
+size
+\family default
+ dereferenced values from the pointer 
+\family typewriter
+source
+\family default
+ to the pointer 
+\family typewriter
+destination
+\family default
+.
+ In this case the flag 
+\family typewriter
+cudaMemcpyHostToDevice
+\family default
+ is passed, indicating that 
+\family typewriter
+source
+\family default
+ points to a location in the motherboard's RAM whilst 
+\family typewriter
+destination
+\family default
+ points to a location in the GPU's RAM.
+ The set-up and tear-down for a calculation is completely accomplished through
+ the use of these functions, whilst the definition of the calculation to
+ perform is a modification of the usual C syntax.
+\end_layout
+
+\begin_layout Standard
+Calculations to be performed on a CUDA GPU
 \end_layout
 
 \end_body
