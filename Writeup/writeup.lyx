@@ -142,30 +142,57 @@ Physics with Computers
 \end_layout
 
 \begin_layout Standard
-Computers are only as useful as the theorems they prove, and it is the computer
- program which defines the operations to take.
- The job of the programmers is to define programs such that their algebra
+Computers are only as useful as the theorems they prove, and it is the computer'
+s 
+\emph on
+program
+\emph default
+ (a combination of software and hardware) which defines the operations to
+ take.
+ The job of the programmer is to define programs such that their algebra
  encapsulates the model under investigation.
- There are many ways to approach this task, from high-level interactive
- theorem provers to low-level machine instructions.
+ There are many ways to approach this task, arbitrarily categorised as 
+\emph on
+high-level
+\emph default
+ (bearing little relation to the machine, requiring pattern matching to
+ implement) such 
+\begin_inset Quotes eld
+\end_inset
+
+interactive theorem provers
+\begin_inset Quotes erd
+\end_inset
+
+ (, virtual machines and functional to low-level machine instructions.
  Of course all are isomorphic, but are necessarily distinct in order to
  minimise the transformation from our mental model to the programming paradigm.
- In this project the simulation approach is taken, which is a low-level
- implementation that uses machine components to numerically approximate
- the objects described by the model.
+ In this project the simulation approach is taken, which is a 
+\emph on
+low-level
+\emph default
+ (complementary to the circuitry) implementation that uses machine components
+ to numerically approximate the objects described by the model.
 \end_layout
 
 \begin_layout Standard
-The main advantage to simulations is the simple correspondance between the
+The main advantage to simulations is the lack of abstractions such as sets,
+ ranges, derivatives, etc.
+ which are often used to model the behaviour of large systems.
+ In a simulation, a (usually) simple correspondance is made between the
  physical system of the model and the physical system of the machine.
- This makes programming a simulation a relatively straightforward affair.
- The main disadvantages of simulations are the large time and space requirements
-, compared to less intensive symbol manipulation such as statistical mechanics.
- This inefficiency, caused by the massive redundancy of the system, is the
- reason why the technique only became popular after the advent of fast mechanica
-l computers.
- The ability to map objects to machine components, however, keeps the overhead
- low such that available resources aren't wasted.
+ This makes programming a simulation a relatively straightforward affair,
+ and the results contain much more information than the existential and
+ aggregate output obtained from more abstract models.
+ The proof is also stronger as it depends on the validity of fewer assumptions.
+ However, this inevitably leads to the biggest problem of simulations: their
+ consumption of resources.
+ Less intensive symbol manipulation, such as statistical mechanics, is simple
+ enough to perform manually, whereas simulation had to wait for the advent
+ of fast mechanical computers before it could tackle systems of similar
+ complexity.
+ Despite the inefficiency of the technique, being able to act relatively
+ safely at a low level keeps overhead low, such that few resources are wasted.
  From a more practical point of view, being able to perform this mapping
  manually at a low level is an advantage considering that language development
  and pattern matching are still in their infancy as Mathematical disciplines.
@@ -263,16 +290,12 @@ Anindya De, Piyush P Kurur, Chandan Saha, Ramprasad Saptharishi.
 \begin_layout Standard
 Given these constraints, Physics simulations are amongst the most computationall
 y intensive programs with practical use (it common for worthwhile programs
- to be limited by IO rather than available cycleslock for input and thus
- not tax the CPU, and it is of course trivial to make intensive programs
- which derive no meaningful results, making those cycles derive novel, without
- stalling for more input is which keeps up the demand for clustering technology
- and supercomputers.
- Rather than requiring such expensive technology, this project aims to implement
- Physics simulations on commonly available computer hardware by reimplementing
- algorithms to be parallel, implementing them in an efficient manner and
- distributing them to run concurrently on the graphics processors found
- in modern PCs.
+ to be limited by I/O rather than available cycles, and it is of course
+ trivial to make intensive programs which derive no meaningful results).
+ This keeps up the demand for clustering technology and supercomputers.
+ Rather than relying on such expensive technology, this project aims to
+ implement Physics simulations on commonly available computer graphics hardware,
+ to ascertain.
 \end_layout
 
 \begin_layout Subsection
@@ -303,7 +326,7 @@ Real-time 3D rendering was certainly the main driving force for graphics
  The most striking difference between 3D graphics and other common computing
  tasks is that it is an 
 \emph on
-embarassingly parallel
+embarrassingly parallel
 \emph default
  problem.
  In other words, it is trivial to get a near 100% increase in performance
