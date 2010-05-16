@@ -3,6 +3,9 @@
 \begin_document
 \begin_header
 \textclass article
+\begin_preamble
+\usepackage{algorithmic}
+\end_preamble
 \use_default_options true
 \language english
 \inputencoding auto
@@ -17,6 +20,7 @@
 
 \graphics default
 \paperfontsize default
+\spacing single
 \use_hyperref false
 \papersize default
 \use_geometry false
@@ -289,13 +293,12 @@ Anindya De, Piyush P Kurur, Chandan Saha, Ramprasad Saptharishi.
 
 \begin_layout Standard
 Given these constraints, Physics simulations are amongst the most computationall
-y intensive programs with practical use (it common for worthwhile programs
+y intensive programs with practical use (it is common for worthwhile programs
  to be limited by I/O rather than available cycles, and it is of course
  trivial to make intensive programs which derive no meaningful results).
- This keeps up the demand for clustering technology and supercomputers.
- Rather than relying on such expensive technology, this project aims to
- implement Physics simulations on commonly available computer graphics hardware,
- to ascertain.
+ This project aims to research the computational potential of graphics rendering
+ hardware to this expensive task, rather than more traditional (and costly)
+ alternatives such as supercomputers and clusters.
 \end_layout
 
 \begin_layout Subsection
@@ -426,6 +429,153 @@ ns have been brought up to meet the precision standards required by these
  This has spurred a stream of researchers to offload their intensive computation
 s to graphics cards as a more cost-effective alternative to clusters and
  conventional supercomputers.
+\end_layout
+
+\begin_layout Section
+Parallel Programming
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float algorithm
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{algorithmic}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+STATE $continue
+\backslash
+gets True$
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+WHILE {$continue$}
+\end_layout
+
+\begin_layout Plain Layout
+
+ 
+\backslash
+IF {$jobs > 0$}
+\end_layout
+
+\begin_layout Plain Layout
+
+  
+\backslash
+STATE $current_task
+\backslash
+gets jobs.pop()$
+\end_layout
+
+\begin_layout Plain Layout
+
+  
+\backslash
+STATE execute $current_task$
+\end_layout
+
+\begin_layout Plain Layout
+
+ 
+\backslash
+ENDIF
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+ENDWHILE
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{algorithmic}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Naive handling of three tasks: running 
+\begin_inset Quotes eld
+\end_inset
+
+jobs
+\begin_inset Quotes erd
+\end_inset
+
+, receiving user input and receiving network input.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Parallel programming has existed for decades, but outside the realms of
+ research and supercomputers has not been pervasive.
+ The limited use of multiple 
+\emph on
+threads
+\emph default
+ of execution has become well established in areas such as interactive (includin
+g graphical) programs and networked software, however this is mainly stylistic
+ as it overcomes the problem of 
+\emph on
+blocking
+\emph default
+ (waiting for a piece of code to finish its task).
+ Consider an algorithm which runs calculations in the list jobs, which can
+ add new jobs received over the network or from a user.
+ We might implement with code similar to figure 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+what
+\end_layout
+
+\end_inset
+
+be on the order of seconds for the transmission of network packets and human
+ input.
+ Whilst the problem of blocking is artificial, introduced by the programmer,
+ it These implementations use threads to keep the 
 \end_layout
 
 \begin_layout Section
@@ -573,7 +723,9 @@ bar
 \family default
  and 
 \family typewriter
-baz.
+baz
+\family default
+.
  Figure 
 \begin_inset Note Note
 status open
