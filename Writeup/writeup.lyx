@@ -1366,9 +1366,24 @@ blockIdx.y
 \end_layout
 
 \begin_layout Standard
-To specify these dimensions, the two arguments within the triple arrows
- are used.
- The first gives the grid dimensions and the second gives the block dimensions.
+To specify these dimensions, the extended syntax for the kernel function
+ invocation is used.
+ The first argument gives the grid dimensions and the second gives the block
+ dimensions.
+ These have the type dim3 (part of the CUDA libraries) and unspecified dimension
+s default to 1.
+ Thus a single integer specifies a one-dimensional structure, whilst a call
+ such as dim3(x,y) specifies a two dimensional 
+\begin_inset Formula $x\times y$
+\end_inset
+
+ structure and dim3(x,y,z) gives a three dimensional 
+\begin_inset Formula $x\times y\times z$
+\end_inset
+
+ structure.
+ These can be used within the triple arrows, but remember that grids (the
+ first argument) can be a maximum of two dimensional.
 \end_layout
 
 \begin_layout Standard
@@ -1417,8 +1432,8 @@ end{lstlisting}
 \end_layout
 
 \begin_layout Standard
-These unique IDs are very useful for distributing a workload, as they allow
- unique indexing of an array.
+The unique IDs defined in this way are very useful for distributing a workload,
+ as they allow unique indexing of an array.
  For example, consider the simple kernel function in
 \begin_inset Note Note
 status open
@@ -1451,7 +1466,8 @@ foo<<<1,N>>>(A, B, C);
 \begin_inset Formula $C$
 \end_inset
 
- will be calculated in its own thread (N in total).
+ will be calculated in its own thread (with N threads in total, requiring
+ at least N elements).
  This usage of CUDA is typical, and allows a stream processing/dataflow
  style within the threaded model.
  Moreover, allowing threads to obtain unique indices prevents conflicts,
