@@ -468,7 +468,7 @@ context switching
 \emph default
 
 \begin_inset Foot
-status open
+status collapsed
 
 \begin_layout Plain Layout
 This is managed by the operating system kernel, which stops and starts threads
@@ -625,7 +625,7 @@ s; Actor models, which extend the Object Oriented paradigm of message passing
 \begin_inset Float algorithm
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset ERT
@@ -788,7 +788,7 @@ A subtley flawed banking system, with simple algorithms for the server and
 \begin_inset Float algorithm
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset ERT
@@ -1122,7 +1122,7 @@ dimBlock
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset ERT
@@ -1202,7 +1202,7 @@ Definition of four CUDA functions: main is a host function, foo is a kernel
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset space \hfill{}
@@ -1387,6 +1387,12 @@ s default to 1.
 \end_layout
 
 \begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
 \begin_inset ERT
 status open
 
@@ -1424,6 +1430,23 @@ __global__ void foo(float* A, float* B, float* C) {
 
 \backslash
 end{lstlisting}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Simple CUDA kernel function to add two vectors in parallel.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -1473,6 +1496,155 @@ foo<<<1,N>>>(A, B, C);
  Moreover, allowing threads to obtain unique indices prevents conflicts,
  since there is a simple way to ensure threads are accessing different areas
  of memory and thus not overwriting each other.
+\end_layout
+
+\begin_layout Section
+Smoothed-Particle Hydrodynamics
+\end_layout
+
+\begin_layout Standard
+The Physical model being simulated in this project is a 
+\emph on
+Smoothed-Particle Hydrodynamics
+\emph default
+ system.
+ In this model, the behaviour of large numbers of atoms and molecules in
+ a fluid is approximated with a much smaller number of particles with large
+ spatial extent.
+ Various properties are attributed to the particles for use in the simulation,
+ but the most important are the coordinates and characteristic size, known
+ as the 
+\emph on
+smoothing length
+\emph default
+, as these determine which particles will interact with each other.
+\end_layout
+
+\begin_layout Standard
+In a perfect SPH model, every particle will interact with every other particle,
+ making calculations of these interactions an 
+\begin_inset Formula $O\left(N_{particles}^{2}\right)$
+\end_inset
+
+ operation.
+ The magnitude of the interactions, however, is governed by a 
+\emph on
+kernel function
+\emph default
+ (not to be confused with the concept of a kernel function in CUDA!) which
+ gives each particle a shape.
+ This can be any function which falls off over distance, but typical functions
+ are Gaussians and cubic splines.
+ This limits the strength of interactions, but in the case of a Gaussian
+ it never quite reaches zero.
+ Hence in general every particle should interact with all of the others,
+ yet these contributions become negligible over a distance and thus it is
+ a safe approximation to limit the interactions to those particles falling
+ within a given radius, the 
+\emph on
+nearest neighbours
+\emph default
+.
+ This brings down the computation time, however the number of nearest neighbours
+ is still a linear function of 
+\begin_inset Formula $N_{particles}$
+\end_inset
+
+ so our order of magnitude remains 
+\begin_inset Formula $O\left(N_{particles}^{2}\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+If we refine our SPH simulation, we can derive more accurate results if
+ the volume containing nearest neighbours is inversely proportional to the
+ particle density.
+ This allows us to more efficiently concentrate out simulation efforts,
+ as we can waste as few particles as possible in boring, sparsely populated
+ regions, then get a higher resolution for the areas containing more interaction
+s.
+ This refinement, as well as bringing efficiency in particle rationing,
+ also brings down the number of nearest neighbours.
+ In fact:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{eqnarray*}
+N_{nearestneighbours} & \propto & density\times smoothinglength\left(density\right)^{3}\\
+ & \propto & \frac{N_{particles}}{V_{space}}\times V_{nearestneighbours}\left(density\right)\\
+ & \propto & \frac{N_{particles}}{V_{space}}\times V_{nearestneighbours}\left(\frac{N_{particles}}{V_{space}}\right)\\
+ & \propto & \frac{N_{particles}}{V_{space}}\times\frac{V_{space}}{N_{particles}}\\
+ & \propto & 1\end{eqnarray*}
+
+\end_inset
+
+Hence the number of neighbours is on the order of constant, making each
+ particle's interactions 
+\begin_inset Formula $O\left(1\right)$
+\end_inset
+
+ and thus the whole lot's interactions 
+\begin_inset Formula $O\left(N_{particles}\right)$
+\end_inset
+
+.
+ This means we can save a factor of 
+\begin_inset Formula $N_{particles}$
+\end_inset
+
+ calculations if we restrict ourselves to nearest neighbours.
+\end_layout
+
+\begin_layout Standard
+Whilst this speedup seems simple, in fact it is deceptive.
+ In order to work out which particles are nearest neighbours, we need to
+ compare them.
+ To find all of the nearest neighbours for a particle is thus 
+\begin_inset Formula $O\left(N_{particles}\right)$
+\end_inset
+
+, to find all of the nearest neighbours of every particle is 
+\begin_inset Formula $O\left(N_{particles}^{2}\right)$
+\end_inset
+
+ and we are back to where we started.
+ However there are algorithms to help us find these neighbours with fewer
+ comparisons, which this project implements.
+\end_layout
+
+\begin_layout Subsection
+The Gridding Algorithm
+\end_layout
+
+\begin_layout Standard
+If we partition our space into a uniform grid 
+\begin_inset Formula $x_{size}\times y_{size}\times z_{size}$
+\end_inset
+
+ cells in extent, with the physical size of each cell being a cube of sides
+ equal to the maximum interaction length, we can know with certainty that
+ the nearest neighbours of a particle are no more than one grid cell away
+ in any direction.
+ This narrows down our search for nearest neighbours considerably, and works
+ well for systems with roughly uniform density.
+ It is important to note the difference here between the grid of particles
+ and CUDA's grid of thread blocks.
+ They have no relation in this implementation
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+An attempt was made to model the SPH grid directly with a CUDA grid, but
+ the two-dimensional limitation of CUDA grids made it unnecessarily complex
+ to represent a three dimensional particle grid compared to the conceptually
+ simpler one-dimensional grid (array) of blocks.
+\end_layout
+
+\end_inset
+
+.
 \end_layout
 
 \end_body
