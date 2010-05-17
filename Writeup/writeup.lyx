@@ -1,10 +1,11 @@
-#LyX 1.6.4 created this file. For more info see http://www.lyx.org/
+#LyX 1.6.5 created this file. For more info see http://www.lyx.org/
 \lyxformat 345
 \begin_document
 \begin_header
 \textclass article
 \begin_preamble
-\usepackage{algorithmic}
+\usepackage{program}
+\usepackage{listings}
 \end_preamble
 \use_default_options true
 \language english
@@ -436,6 +437,191 @@ Parallel Programming
 \end_layout
 
 \begin_layout Standard
+Parallel programming has existed for decades, but outside the realms of
+ research and supercomputers has not been pervasive.
+ The limited use of multiple 
+\emph on
+threads
+\emph default
+ of execution has become well established in areas such as interactive (includin
+g graphical) programs and networked software, however this is mainly for
+ stylistic reasons rather than raw performance.
+ Rather than combining all of the program logic into a 
+\begin_inset Quotes eld
+\end_inset
+
+main loop
+\begin_inset Quotes erd
+\end_inset
+
+, different subsystems are segregated to their own functions to keep down
+ code complexity.
+ To prevent blocking (waiting for a function to finish) these are then further
+ segregated to their own threads.
+ Calls to these subsystems then become asynchronous, the next instruction
+ is carried out without waiting for the call to finish.
+ The reason for this being stylistic is that the main targets for such software
+ are microcomputers, which until recently only had one processing core and
+ thus only run one thread at a time, interleaving instructions by 
+\emph on
+context switching
+\emph default
+
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+This is managed by the operating system kernel, which stops and starts threads
+ one at a time to simulate concurrent execution.
+ To prevent threads from breaking each other, the execution environment
+ (or context) for each thread is stored alongside it.
+ Switching between threads thus requires switching the execution context,
+ which may need to fetch values from RAM and is thus costly.
+ In modern 
+\emph on
+preemptive multitasking
+\emph default
+ systems, context switching is managed by the kernel and its scheduler,
+ based on thread priorities.
+ The threads themselves have no control over their execution.
+\end_layout
+
+\end_inset
+
+.
+ Thus there is no direct gain in performance between multiple threads and
+ one main loop, it is merely simpler and more scalable to implement multiple
+ blocking services via threads.
+ In fact the overhead of context switching may even incur a performance
+ penalty for the threaded approach, but only if the main loop implementation
+ were near-optimal (which is usually not the case).
+\end_layout
+
+\begin_layout Standard
+This simple use of threads is still a useful way to express the difficulties
+ in parallel programming.
+ The major obstacle is that very few assumptions can be made about a parallel
+ program: the interleaving of threads (or equivalent) is completely nondetermini
+stic, so definitions and values may be changed by another thread at any
+ point, and the granularity of this interleaving can be incredibly fine.
+ A classic example to demonstrate this can be seen in 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+where
+\end_layout
+
+\end_inset
+
+, which implements a hypothetical banking system.
+ The top program runs on a bank server and makes payments from an account,
+ whilst the bottom one runs on an ATM and allows withdrawals.
+ The flaws in this are numerous, but to spot them requires a knowledge of
+ this language's 
+\emph on
+atomic transactions
+\emph default
+.
+ An atomic transaction is an instruction which cannot be divided into further
+ instructions, hence it is atomic in the democratic sense, and it is a transacti
+on since it will either be carried out or not, it cannot fail at a half-complete
+d stage (otherwise it would not be atomic).
+ The implementation of high-level atomic transactions (such as atomic functions)
+ is an area of parallel programming research, although is difficult to realise
+ due to the Two Generals problem
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+cite
+\end_layout
+
+\end_inset
+
+.
+ Atomic transactions are thus usually very low level and reflect the architectur
+e of the machine.
+ The reason this becomes problematic is that if this banking system were
+ compiled into machine code then the atomic transactions can not be found
+ anywhere in the source code: to spot them requires knowledge of how it
+ will compile!
+\end_layout
+
+\begin_layout Standard
+In this example, the most damning flaws are the balance modifications.
+ The reassignment of the balance by the ATM looks straighforward: the new
+ balance is the old balance minus the amount withdrawn.
+ However, that is certainly not what this line of code actually means.
+ This becomes clearer when we see it in terms of the equivalent atomic transacti
+ons, which look something like 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+what
+\end_layout
+
+\end_inset
+
+.
+ All values must be loaded into registers inside the CPU before they can
+ be processed, but by copying the values in this way we destroy their meaning
+ within our program.
+ The value of 
+\family typewriter
+registerA
+\family default
+ is not the account balance, it is the account balance 
+\emph on
+at the time it was loaded
+\emph default
+.
+ It is perfectly acceptable for the server to modify the balance half-way
+ through an ATM withdrawal, since that's the whole point of parallel, concurrent
+ execution; yet that modification will be lost when the ATM finishes the
+ withdrawal, as it will set the balance to the new contents of 
+\family typewriter
+registerA
+\family default
+, which has been calculated with no knowledge of the interest payment.
+ Thus a possible execution of these threads may be: The ATM loads the current
+ balance in preparation for a deduction, the server sends a £200 rent payment
+ to the account-holder's landlord, the ATM takes £10 from its copy of the
+ balance, the server loads the account balance, takes £200 from it and stores
+ the new value, the ATM stores its value then gives out £10.
+ In this scenario there has been £210 taken out of the account, but only
+ £10 has been deducted from the balance.
+ For the computer this is perfectly valid code, however our assumptions
+ about what it proves are severely at fault: the system modelled by the
+ program's algebra is not isomorphic to a banking system.
+\end_layout
+
+\begin_layout Standard
+This example shows how dangerous it can be to make assumptions in a parallel
+ environment; how seemingly simple constructs such as 
+\family typewriter
+x++
+\family default
+ actually decompose into multiple statements, any of which can be preempted
+ (and invalidated) by another thread; and why parallel programming with
+ mutable, shared memory is a hard problem with hidden pitfalls.
+ This is of course not the only way to program in parallel.
+ Other approaches include: Software Transactional Memory, which abstracts
+ memory accesses through a software library to facilitate high-level transaction
+s; Actor models, which extend the Object Oriented paradigm of message passing
+ to make each object a standalone Actor, which all run in parallel; Dataflow
+ languages, where computations are built as networks of operations through
+ which data is passed; Concurrent Functional Programming, which exploits
+ pure functional programming's lack of mutability and execution order to
+ distribute programs without the need for synchronisation; and Futures (or
+ Promises), where values can be used in calculations even if they haven't
+ been worked out yet (a kind of explicit lazy evaluation).
+ The model adopted by CUDA, which will be used in this project, is threaded,
+ although its usage is similar to a dataflow language.
+\end_layout
+
+\begin_layout Standard
 \begin_inset Float algorithm
 wide false
 sideways false
@@ -449,67 +635,130 @@ status open
 
 
 \backslash
-begin{algorithmic}
+begin{program}
 \end_layout
 
 \begin_layout Plain Layout
 
 
 \backslash
-STATE $continue
-\backslash
-gets True$
+mbox{A simple bank server which provides monthly services:}
 \end_layout
 
 \begin_layout Plain Layout
 
 
 \backslash
-WHILE {$continue$}
-\end_layout
-
-\begin_layout Plain Layout
-
- 
+WHILE |keepRunning| 
 \backslash
-IF {$jobs > 0$}
-\end_layout
-
-\begin_layout Plain Layout
-
-  
-\backslash
-STATE $current_task
-\backslash
-gets jobs.pop()$
-\end_layout
-
-\begin_layout Plain Layout
-
-  
-\backslash
-STATE execute $current_task$
+DO
 \end_layout
 
 \begin_layout Plain Layout
 
  
 \backslash
-ENDIF
+COMMENT{See if this month's payments have been made}
+\end_layout
+
+\begin_layout Plain Layout
+
+ 
+\backslash
+IF |lastPayments| < |thisMonth|
+\end_layout
+
+\begin_layout Plain Layout
+
+  |balance| := |balance| 
+\backslash
+times (1+|rate|) 
+\backslash
+rcomment{Add on interest}
+\end_layout
+
+\begin_layout Plain Layout
+
+  
+\backslash
+FOR |order | in | standingOrders| 
+\backslash
+DO
+\end_layout
+
+\begin_layout Plain Layout
+
+   |pay|(|order|.|recipient|,|order|.|amount|)
+\end_layout
+
+\begin_layout Plain Layout
+
+   |balance| := |balance|-|order|.|amount|
+\end_layout
+
+\begin_layout Plain Layout
+
+  |lastPayments|++
 \end_layout
 
 \begin_layout Plain Layout
 
 
 \backslash
-ENDWHILE
+end{program}
 \end_layout
 
 \begin_layout Plain Layout
 
 
 \backslash
-end{algorithmic}
+begin{program}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+mbox{A complementary program for an ATM:}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+WHILE |keepRunning| 
+\backslash
+DO
+\end_layout
+
+\begin_layout Plain Layout
+
+ 
+\backslash
+IF |pin| = |accountPin| 
+\backslash
+land |action| = |withdraw|
+\end_layout
+
+\begin_layout Plain Layout
+
+  |balance| := |balance| - |amount|
+\end_layout
+
+\begin_layout Plain Layout
+
+  |give|(|amount|)
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{program}
+\end_layout
+
+\begin_layout Plain Layout
+
 \end_layout
 
 \end_inset
@@ -521,23 +770,12 @@ end{algorithmic}
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Naive handling of three tasks: running 
-\begin_inset Quotes eld
-\end_inset
-
-jobs
-\begin_inset Quotes erd
-\end_inset
-
-, receiving user input and receiving network input.
+A subtley flawed banking system, with simple algorithms for the server and
+ ATM 
 \end_layout
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Plain Layout
 
 \end_layout
 
@@ -547,35 +785,80 @@ jobs
 \end_layout
 
 \begin_layout Standard
-Parallel programming has existed for decades, but outside the realms of
- research and supercomputers has not been pervasive.
- The limited use of multiple 
-\emph on
-threads
-\emph default
- of execution has become well established in areas such as interactive (includin
-g graphical) programs and networked software, however this is mainly stylistic
- as it overcomes the problem of 
-\emph on
-blocking
-\emph default
- (waiting for a piece of code to finish its task).
- Consider an algorithm which runs calculations in the list jobs, which can
- add new jobs received over the network or from a user.
- We might implement with code similar to figure 
-\begin_inset Note Note
+\begin_inset Float algorithm
+wide false
+sideways false
 status open
 
 \begin_layout Plain Layout
-what
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{program}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+mbox{Atomic instructions in pseudo-x86 machine language}
+\end_layout
+
+\begin_layout Plain Layout
+
+|loadValue|(|balance|,|registerA|)
+\end_layout
+
+\begin_layout Plain Layout
+
+|loadValue|(|amount|,|registerB|)
+\end_layout
+
+\begin_layout Plain Layout
+
+|subtract|(|registerA|,|registerB|)
+\end_layout
+
+\begin_layout Plain Layout
+
+|storeValue|(|balance|,|registerA|)
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{program}
 \end_layout
 
 \end_inset
 
-be on the order of seconds for the transmission of network packets and human
- input.
- Whilst the problem of blocking is artificial, introduced by the programmer,
- it These implementations use threads to keep the 
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+A deconstruction of the ATM's balance update line.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -583,8 +866,8 @@ The CUDA Model
 \end_layout
 
 \begin_layout Standard
-This project focuses specifically on the use of Nvidia's CUDA (Compute Unified
- Device Architecture
+Since this project focuses specifically on the use of Nvidia's CUDA (Compute
+ Unified Device Architecture
 \begin_inset Note Note
 status open
 
@@ -594,13 +877,17 @@ is that right?
 
 \end_inset
 
-) interface, so a more specific description of its operation, and its use
- from C, is given here.
+) interface, a more specific description of its operation and use from C
+ is given here.
+\end_layout
+
+\begin_layout Subsection
+Memory Hierarchy
 \end_layout
 
 \begin_layout Standard
-CUDA is an interface to Nvidia graphics cards, a schematic of which can
- be seen in
+CUDA is an interface to Nvidia graphics cards, a topological overview of
+ which can be seen in
 \begin_inset Note Note
 status open
 
@@ -611,9 +898,12 @@ add figure
 \end_inset
 
 .
- The components are structured in a hierarchy focused on memory.
- The graphics card's RAM is the root of the tree, globally accessible but
- relatively slow 
+ The components are structured in a hierarchy based around memory access:
+ The graphics card's RAM (
+\emph on
+global memory
+\emph default
+) is the root of the tree, globally accessible but relatively slow 
 \begin_inset Note Note
 status open
 
@@ -624,20 +914,68 @@ quote a number
 \end_inset
 
 .
- Below this is the shared memory of the multiprocessors, connected to global
- memory through a cache.
+ Below this is the 
+\emph on
+shared memory
+\emph default
+ of the multiprocessors, connected to global memory through a cache.
  This memory is accessible to every core in its multiprocessor, and this
  ultimately determines the coarse-grain structure of the algorithms used.
- Finally each core in a multiprocessor (there are 8) has its own registers,
- directly read from and written to by the Arithmetic Logic Units (the mathematic
-al circuitry).
+ Finally each core in a multiprocessor (there are 8) has its own 
+\emph on
+registers
+\emph default
+, directly read from and written to by the Arithmetic Logic Units (the mathemati
+cal circuitry) of each core.
+ Although important to keep in mind, registers will not be explicitly used
+ in the project as the access times are not too dissimilar to shared memory
+ access times
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+cite
+\end_layout
+
+\end_inset
+
+.
+ However, the difference in lookup time between shared and global memory
+ can be as much as 15,000%
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+cite
+\end_layout
+
+\end_inset
+
+, so this should be the main performance concern at the algorithm design
+ stage.
+ 
+\emph on
+Host memory
+\emph default
+, ie.
+ the motherboard's RAM, is so slow that it should not be considered an option
+ for storage during computations.
+ In fact, the usual bottleneck for CUDA programs is the bandwidth of copying
+ data between CPU and GPU.
+ Thus for any performance gains to be made, all computation should take
+ place solely on the GPU, with the results transferred back at the end.
+\end_layout
+
+\begin_layout Subsection
+Code Hierarchy
 \end_layout
 
 \begin_layout Standard
 CUDA separates CPU code from GPU code, and hides the graphics card from
  the host.
- Although it is not directly accessible in the way that RAM and registers
- are accessible, CUDA does provide functions to handle the device.
+ Although it is not directly accessible to C programs in the way that RAM
+ and registers are accessible, CUDA does provide functions to handle the
+ device.
  For example a call to 
 \family typewriter
 cudaMemcpy(void* destination, void* source, int size, cudaMemcpyHostToDevice)
@@ -663,20 +1001,30 @@ cudaMemcpyHostToDevice
 \family typewriter
 source
 \family default
- points to a location in the host's RAM whilst 
+ points to a location in the host's memory whilst 
 \family typewriter
 destination
 \family default
- points to a location in the GPU's RAM.
+ points to a location in the GPU's global memory.
  The set-up and tear-down for a calculation is completely accomplished through
- the use of these functions, whilst the calculation is initiated using a
- new syntax.
+ the use of these functions, and is necessarily performed from host-side
+ in (mostly) serial C.
+ Ideally no other work should be done by the host, but this may be difficult
+ in practice.
 \end_layout
 
 \begin_layout Standard
-The GPU code is written in the usual C way, but there are several semantic
- differences to be aware of.
- Firstly, there are now three distinct kinds of function: 
+Code destined for the GPU is written in regular C with a few deviations.
+ Firstly there can be no recursion, which unfortunately makes CUDA an unsuitable
+ target for many elegant recursive algorithms.
+ Secondly there can be no function pointers; this doesn't present too much
+ of a problem for small projects with known inputs.
+ More specific idiosyncracies will be covered where appropriate.
+\end_layout
+
+\begin_layout Standard
+To facilitate the massive parallelism, CUDA code is designated as one of
+ three distinct kinds of function: 
 \emph on
 host functions
 \emph default
@@ -684,11 +1032,11 @@ host functions
 \emph on
 device functions
 \emph default
- (run on the GPU and can only be called from there) and 
+ (which run on the GPU and can only be called from there) and 
 \emph on
 kernel functions
 \emph default
- (run on the GPU but callable from the host).
+ (which run on the GPU but are invoked by the host).
  Host functions are specified in the usual way, whilst device and kernel
  functions have their signatures augmented with the keywords 
 \family typewriter
@@ -699,7 +1047,7 @@ __device__
 __global__
 \family default
  respectively.
- In figure 
+ In listing 
 \begin_inset Note Note
 status open
 
@@ -709,7 +1057,7 @@ what
 
 \end_inset
 
- we see a simple CUDA file with prototypes for a host function 
+ we see a simple CUDA program with prototypes for a host function 
 \family typewriter
 main
 \family default
@@ -739,7 +1087,376 @@ what
 \end_inset
 
  shows which functions can call each other.
- Note that recursion is not allowed for device or kernel functions.
+ Note that since recursion is not allowed for device or kernel functions,
+ any dependency between 
+\family typewriter
+bar
+\family default
+ and 
+\family typewriter
+baz
+\family default
+ must be mutually exclusive.
+ To initiate computation on the GPU requires calling a kernel function from
+ some host code, which uses its own syntax of the form 
+\family typewriter
+function_name<<<dimGrid, dimBlock>>>(arguments);
+\family default
+ where 
+\family typewriter
+arguments
+\family default
+ is a normal comma-separated list of arguments for the function, whilst
+ 
+\family typewriter
+dimGrid
+\family default
+ and 
+\family typewriter
+dimBlock
+\family default
+ will be explained in the next section.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+lstset{language=C}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{lstlisting}[frame=single]
+\end_layout
+
+\begin_layout Plain Layout
+
+__device__ int bar(int arg1);
+\end_layout
+
+\begin_layout Plain Layout
+
+__device__ int baz(int arg1);
+\end_layout
+
+\begin_layout Plain Layout
+
+__global__ void foo(int arg1);
+\end_layout
+
+\begin_layout Plain Layout
+
+int main();
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{lstlisting}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Definition of four CUDA functions: main is a host function, foo is a kernel
+ function whilst bar and baz are device functions.
+ Return and argument types are arbitrary, except that kernel functions must
+ return void.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset space \hfill{}
+\end_inset
+
+
+\begin_inset Graphics
+	filename device_kernel_host_reachability.svg
+	height 25pheight%
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Function hierarchy: host code can call kernel functions, kernel functions
+ can call device functions and device functions can call each other (non-recursi
+vely)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Thread Hierarchy
+\end_layout
+
+\begin_layout Standard
+CUDA has several layers of organisation for threads.
+ Each 
+\emph on
+thread
+\emph default
+ is part of a 
+\emph on
+thread block
+\emph default
+, and each thread block is part of a 
+\emph on
+grid
+\emph default
+.
+ The grid and its blocks each have 
+\emph on
+dimensions
+\emph default
+, similar to an array; purportedly for convienience reasons, but actually
+ a necessity due to CUDA's in-built limitations.
+ The idea of block dimensions is to give each thread a location is a space.
+ For a one-dimensional block, each thread can get its location via the name
+ 
+\family typewriter
+threadIdx.x
+\family default
+.
+ In a two-dimensional block there is a non-unique 
+\family typewriter
+threadIdx.x
+\family default
+ specifying the 'column' and a non-unique 
+\family typewriter
+threadIdx.y
+\family default
+ specifying the 'row'.
+ These can be combined to give a unique ID for the thread if the size of
+ the block is known, which can be accessed as 
+\family typewriter
+blockDim.x
+\family default
+ and 
+\family typewriter
+blockDim.y
+\family default
+.
+ Thus 
+\begin_inset Formula $\text{{threadIdx.x}+\left(\text{{blockDim.x}\times}\text{{threadIdx.y}}\right)}$
+\end_inset
+
+is unique to each thread
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+right way around?
+\end_layout
+
+\end_inset
+
+.
+ Similarly in three dimensions there is a 
+\family typewriter
+threadIdx.z
+\family default
+ and a 
+\family typewriter
+blockDim.z
+\family default
+ which can give a unique ID via
+\family typewriter
+ 
+\begin_inset Formula $\text{{threadIdx.x}+\left(\text{{blockDim.x}\times}\text{{threadIdx.y}}\right)+\left(\text{\left(\text{{blockDim.x}\times}\text{{blockDim.y}}\right)\times}\text{{threadIdx.z}}\right)}$
+\end_inset
+
+
+\family default
+.
+ Note that these values are always defined, but are set to 1 if not used
+ (for example in a one dimensional block, 
+\begin_inset Formula $\text{{threadIdx.y}}=\text{{threadIdx.z}=\text{{blockDim.y}=\text{{blockDim.z}=}}}1$
+\end_inset
+
+.
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+is there a fourth?
+\end_layout
+
+\end_inset
+
+ The same is true for a grid of blocks, except it can only be one or two
+ dimensional.
+ The equivalent bindings are 
+\family typewriter
+gridDim.x
+\family default
+, 
+\family typewriter
+gridDim.y
+\family default
+, 
+\family typewriter
+blockIdx.x
+\family default
+ and 
+\family typewriter
+blockIdx.y
+\family default
+.
+ There are no grid index (Idx) bindings since there is only ever one grid.
+\end_layout
+
+\begin_layout Standard
+To specify these dimensions, the two arguments within the triple arrows
+ are used.
+ The first gives the grid dimensions and the second gives the block dimensions.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+lstset{language=C}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{lstlisting}[frame=single]
+\end_layout
+
+\begin_layout Plain Layout
+
+__global__ void foo(float* A, float* B, float* C) {
+\end_layout
+
+\begin_layout Plain Layout
+
+  C[threadIdx.x] = A[threadIdx.x] + B[threadIdx.x];
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{lstlisting}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+These unique IDs are very useful for distributing a workload, as they allow
+ unique indexing of an array.
+ For example, consider the simple kernel function in
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+what
+\end_layout
+
+\end_inset
+
+ for summing two vectors.
+ It calculates the vector 
+\begin_inset Formula $C$
+\end_inset
+
+ from the relationship 
+\begin_inset Formula $A_{i}+B_{i}=C_{i}$
+\end_inset
+
+, using the mapping 
+\begin_inset Formula $i\equiv\text{{threadIdx.x}}$
+\end_inset
+
+ to ensure that every element is calculated exactly once.
+ When invoked by a host function with a call such as 
+\family typewriter
+foo<<<1,N>>>(A, B, C);
+\family default
+, each element of 
+\begin_inset Formula $C$
+\end_inset
+
+ will be calculated in its own thread (N in total).
+ This usage of CUDA is typical, and allows a stream processing/dataflow
+ style within the threaded model.
+ Moreover, allowing threads to obtain unique indices prevents conflicts,
+ since there is a simple way to ensure threads are accessing different areas
+ of memory and thus not overwriting each other.
 \end_layout
 
 \end_body
