@@ -1507,10 +1507,13 @@ The Physical model being simulated in this project is a
 \emph on
 Smoothed-Particle Hydrodynamics
 \emph default
- system.
+ (SPH) system.
  In this model, the behaviour of large numbers of atoms and molecules in
- a fluid is approximated with a much smaller number of particles with large
- spatial extent.
+ a fluid is approximated with a much smaller number of 
+\emph on
+particles
+\emph default
+ with large spatial extent.
  Various properties are attributed to the particles for use in the simulation,
  but the most important are the coordinates and characteristic size, known
  as the 
@@ -1527,15 +1530,17 @@ In a perfect SPH model, every particle will interact with every other particle,
 \end_inset
 
  operation.
- The magnitude of the interactions, however, is governed by a 
+ We can trim this down considerably by noting that the interactions are
+ weighted by a 
 \emph on
 kernel function
 \emph default
  (not to be confused with the concept of a kernel function in CUDA!) which
- gives each particle a shape.
+ is centred on each particle and gives it a shape.
  This can be any function which falls off over distance, but typical functions
  are Gaussians and cubic splines.
- This limits the strength of interactions, but in the case of a Gaussian
+ The rate at which the function falls off depends on the smoothing length,
+ and limits the strength of interactions, but in the case of a Gaussian
  it never quite reaches zero.
  Hence in general every particle should interact with all of the others,
  yet these contributions become negligible over a distance and thus it is
