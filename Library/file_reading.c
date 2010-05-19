@@ -115,8 +115,21 @@ int read_natural(char* c_array, int max_length) {
 		}
 		else {
 			// ERROR
-			fprintf(stderr, "ERROR READING NATURAL: GOT AS FAR AS: %i\n",
-				stored_number);
+			fprintf(stderr, "ERROR READING NATURAL: GOT AS FAR AS: %i at %i\n",
+				stored_number, index);
+			int index2;
+			for (index2=0; index2<1024; index2++){
+				for (index2=0; index2 < 1024; index2++) {
+					if (index2 == index) {
+						fprintf(stderr, "!!!!!");
+					}
+					fprintf(stderr, "%c", c_array[index2]);
+					if (index2 == index) {
+						fprintf(stderr, "!!!!!");
+					}
+				}
+				fprintf(stderr,"\n#######################");
+			}
 			assert(c_array[index] == linefeed);
 		}
 	}
