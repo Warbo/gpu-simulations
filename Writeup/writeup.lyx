@@ -625,7 +625,7 @@ s; Actor models, which extend the Object Oriented paradigm of message passing
 \begin_inset Float algorithm
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \begin_inset ERT
@@ -788,7 +788,7 @@ A subtley flawed banking system, with simple algorithms for the server and
 \begin_inset Float algorithm
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \begin_inset ERT
@@ -1122,7 +1122,7 @@ dimBlock
 \begin_inset Float figure
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \begin_inset ERT
@@ -1202,7 +1202,7 @@ Definition of four CUDA functions: main is a host function, foo is a kernel
 \begin_inset Float figure
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \begin_inset space \hfill{}
@@ -1503,59 +1503,336 @@ Smoothed-Particle Hydrodynamics
 \end_layout
 
 \begin_layout Standard
+\begin_inset Float algorithm
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{program}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+mbox{Serial SPH algorithm}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+FOR |particle1 | in | particles| 
+\backslash
+DO
+\end_layout
+
+\begin_layout Plain Layout
+
+ 
+\backslash
+FOR |particle2 | in | particles| 
+\backslash
+DO
+\end_layout
+
+\begin_layout Plain Layout
+
+  
+\backslash
+IF |particle1| 
+\backslash
+neq |particle2|
+\end_layout
+
+\begin_layout Plain Layout
+
+   |interact|(|particle1|, |particle2|)
+\end_layout
+
+\begin_layout Plain Layout
+
+  
+\backslash
+FI
+\end_layout
+
+\begin_layout Plain Layout
+
+ 
+\backslash
+OD
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+OD
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+FOR |particle | in | particles| 
+\backslash
+DO
+\end_layout
+
+\begin_layout Plain Layout
+
+ |update|(|particle|)
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+OD
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{program}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "alg:Naive-serial-implementation"
+
+\end_inset
+
+Naive serial implementation of Smoothed-Particle Hydrodynamics
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Float algorithm
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{program}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+mbox{Parallel SPH algorithm for NxN threads with sequential IDs}
+\end_layout
+
+\begin_layout Plain Layout
+
+|i| := |ID| 
+\backslash
+% N
+\end_layout
+
+\begin_layout Plain Layout
+
+|j| := (|ID| - |i|) / N
+\end_layout
+
+\begin_layout Plain Layout
+
+|interact|(|particles|[|i|], |particles|[|j|])
+\end_layout
+
+\begin_layout Plain Layout
+
+|sync|()
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+IF |i| = 0
+\end_layout
+
+\begin_layout Plain Layout
+
+ |update|(|particles|[|j|])
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+FI
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{program}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "alg:Naive-parallel-implementation"
+
+\end_inset
+
+Naive parallel implementation of Smoothed-Particle Hydrodynamics
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 The Physical model being simulated in this project is a 
 \emph on
 Smoothed-Particle Hydrodynamics
 \emph default
  (SPH) system.
- In this model, the behaviour of large numbers of atoms and molecules in
+ In this model, the behaviour of a large number of atoms and molecules in
  a fluid is approximated with a much smaller number of 
 \emph on
 particles
 \emph default
- with large spatial extent.
- Various properties are attributed to the particles for use in the simulation,
- but the most important are the coordinates and characteristic size, known
- as the 
+ with a much larger spatial extent.
+ These particles carry various bulk properties in their representation of
+ the fluid, which are mutated over time.
+ For this computational problem will only concern ourselves with the spatial
+ properties: the coordinates and the characteristic size, known as the 
 \emph on
 smoothing length
 \emph default
-, as these determine which particles will interact with each other.
+, of each particle.
+ In a perfect SPH model, the interactions between every particle with every
+ other particle are calculated, the properties are then updated based on
+ the results, then the process is repeated.
+ This models the time-evolution of the system by approximating a time integral
+ with steps.
 \end_layout
 
 \begin_layout Standard
-In a perfect SPH model, every particle will interact with every other particle,
- making calculations of these interactions an 
+To process these interactions requires 
 \begin_inset Formula $O\left(N_{particles}^{2}\right)$
 \end_inset
 
- operation.
- We can trim this down considerably by noting that the interactions are
- weighted by a 
+ operations, whilst to update the properties requires 
+\begin_inset Formula $O\left(N_{particles}\right)$
+\end_inset
+
+.
+ For a serial algorithm, such as the loop shown in algorithm 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "alg:Naive-serial-implementation"
+
+\end_inset
+
+, these translate directly into time.
+ However, there is no dependency between the calculations inside a step,
+ making this an embarassingly parallel problem.
+ Thus a parallel algorithm could work them all out at once using 
+\begin_inset Formula $N_{particles}^{2}$
+\end_inset
+
+ processors and do the same job in constant time, as seen in algorithm 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "alg:Naive-parallel-implementation"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+This is still incredibly wasteful, and we can trim down the calculations
+ to perform considerably by exploiting the nature of the model.
+ In SPH each particle has a 
+\begin_inset Quotes eld
+\end_inset
+
+shape
+\begin_inset Quotes erd
+\end_inset
+
+ defined by a 
 \emph on
 kernel function
 \emph default
- (not to be confused with the concept of a kernel function in CUDA!) which
- is centred on each particle and gives it a shape.
- This can be any function which falls off over distance, but typical functions
- are Gaussians and cubic splines.
- The rate at which the function falls off depends on the smoothing length,
- and limits the strength of interactions, but in the case of a Gaussian
- it never quite reaches zero.
- Hence in general every particle should interact with all of the others,
- yet these contributions become negligible over a distance and thus it is
- a safe approximation to limit the interactions to those particles falling
- within a given radius, the 
+ (not to be confused with the concept of a kernel function in CUDA!), which
+ governs the amplitude of particle interactions.
+ Typical functions are Gaussians and cubic splines, but can be anything
+ which falls off over distance.
+ The rate of fall off is governed by the smoothing length, but in the case
+ of something like a Gaussian it never quite reaches zero.
+ Hence every particle 
+\emph on
+should
+\emph default
+ interact with all of the others, but the individual contributions become
+ negligible after a long enough distance.
+ A safe approximation, therefore, is to limit the interactions to those
+ particles falling within this distance of each other, the 
 \emph on
 nearest neighbours
 \emph default
 .
- This brings down the computation time, however the number of nearest neighbours
- is still a linear function of 
+ This brings down the number of computations to perform, however the number
+ of nearest neighbours depends on the density and is thus still a linear
+ function of 
 \begin_inset Formula $N_{particles}$
 \end_inset
 
- so our order of magnitude remains 
+, keeping our order of magnitude at 
 \begin_inset Formula $O\left(N_{particles}^{2}\right)$
 \end_inset
 
@@ -1563,24 +1840,28 @@ nearest neighbours
 \end_layout
 
 \begin_layout Standard
-If we refine our SPH simulation, we can derive more accurate results if
- the volume containing nearest neighbours is inversely proportional to the
- particle density.
+Another insightful fact about SPH is that we can derive more accurate results
+ if the smoothing length becomes a function of the local density, with the
+ length contracting for more densely packed spaces.
  This allows us to more efficiently concentrate out simulation efforts,
  as we can waste as few particles as possible in boring, sparsely populated
- regions, then get a higher resolution for the areas containing more interaction
-s.
+ regions, and in return we get a higher resolution for the areas containing
+ more interactions.
  This refinement, as well as bringing efficiency in particle rationing,
  also brings down the number of nearest neighbours.
- In fact:
+ In fact, by making the smoothing length decrease with 
+\begin_inset Formula $N_{particles}$
+\end_inset
+
+:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{eqnarray*}
-N_{nearestneighbours} & \propto & density\times smoothinglength\left(density\right)^{3}\\
- & \propto & \frac{N_{particles}}{V_{space}}\times V_{nearestneighbours}\left(density\right)\\
- & \propto & \frac{N_{particles}}{V_{space}}\times V_{nearestneighbours}\left(\frac{N_{particles}}{V_{space}}\right)\\
- & \propto & \frac{N_{particles}}{V_{space}}\times\frac{V_{space}}{N_{particles}}\\
+N_{nearestneighbours}\left(N_{particles}\right) & \propto & \underset{\text{{density}}}{\underbrace{\frac{N_{particles}}{V_{space}}}}\times\underset{\text{(normalised) volume of interaction}}{\underbrace{\frac{L_{smoothing}\left(N_{particles}\right)^{3}}{V_{space}}}}\\
+ & \propto & N_{particles}\times L_{smoothing}\left(N_{particles}\right)^{3}\\
+ & \propto & N_{particles}\times V_{nearestneighbours}\left(N_{particles}\right)\\
+ & \propto & N_{particles}\times\frac{1}{N_{particles}}\\
  & \propto & 1\end{eqnarray*}
 
 \end_inset
@@ -1590,27 +1871,29 @@ Hence the number of neighbours is on the order of constant, making each
 \begin_inset Formula $O\left(1\right)$
 \end_inset
 
- and thus the whole lot's interactions 
+ and thus the whole system's interactions 
 \begin_inset Formula $O\left(N_{particles}\right)$
 \end_inset
 
 .
- This means we can save a factor of 
+ This saves us a factor of 
 \begin_inset Formula $N_{particles}$
 \end_inset
 
- calculations if we restrict ourselves to nearest neighbours.
+ calculations by restricting ourselves to the nearest neighbours, which
+ are the only non-negligible contributions.
 \end_layout
 
 \begin_layout Standard
 Whilst this speedup seems simple, in fact it is deceptive.
  In order to work out which particles are nearest neighbours, we need to
- compare them.
- To find all of the nearest neighbours for a particle is thus 
+ compare their positions.
+ To find all of the nearest neighbours of a particle is thus an 
 \begin_inset Formula $O\left(N_{particles}\right)$
 \end_inset
 
-, to find all of the nearest neighbours of every particle is 
+ operation, and to find all of the nearest neighbours for the system is
+ 
 \begin_inset Formula $O\left(N_{particles}^{2}\right)$
 \end_inset
 
@@ -1624,32 +1907,48 @@ The Gridding Algorithm
 \end_layout
 
 \begin_layout Standard
-If we partition our space into a uniform grid 
-\begin_inset Formula $x_{size}\times y_{size}\times z_{size}$
+It would seem useful to keep track of each particle's nearest neighbours
+ once they've been identified, but this would not help us since the particles
+ move between time steps, which changes their neighbours from step to step.
+ One method of tracking particles that isn't invalidated at each step is
+ to construct a grid and track each particle's grid cell.
+ By choosing a grid size equal to the largest interaction radius in the
+ system, we can ensure that a particle and its nearest neighbours are always
+ either in the same grid cell or at most one cell apart.
+ This narrows down our search for nearest neighbours considerably, since
+ we can concentrate our efforts on those neighbouring cells, and this works
+ well for systems with roughly uniform density (where there is little difference
+ between the largest interaction radius and the average interaction radius)
+ as seen in 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+what
+\end_layout
+
 \end_inset
 
- cells in extent, with the physical size of each cell being a cube of sides
- equal to the maximum interaction length, we can know with certainty that
- the nearest neighbours of a particle are no more than one grid cell away
- in any direction.
- This narrows down our search for nearest neighbours considerably, and works
- well for systems with roughly uniform density.
- It is important to note the difference here between the grid of particles
- and CUDA's grid of thread blocks.
+.
+ It is important at this point to note the difference between a grid of
+ cell containing particles, decribed in this paragraph, and CUDA's grid
+ of blocks containing threads, described previously.
  They have no relation in this implementation
 \begin_inset Foot
 status open
 
 \begin_layout Plain Layout
 An attempt was made to model the SPH grid directly with a CUDA grid, but
- the two-dimensional limitation of CUDA grids made it unnecessarily complex
- to represent a three dimensional particle grid compared to the conceptually
- simpler one-dimensional grid (array) of blocks.
+ the two-dimensional limitation of CUDA grids prevented this.
 \end_layout
 
 \end_inset
 
 .
+\end_layout
+
+\begin_layout Standard
+Comparisons between 
 \end_layout
 
 \end_body
