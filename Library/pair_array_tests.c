@@ -13,7 +13,8 @@ void interact(particle* p1, particle* p2) {
 	// PRECONDITIONS
 	assert(p1 != NULL);
 	assert(p2 != NULL);
-	
+
+	p2 = p2;
 	p1->x_acc = p1->x_acc + 1;
 
 	// POSTCONDITIONS
