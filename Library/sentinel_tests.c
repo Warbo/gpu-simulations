@@ -20,6 +20,9 @@ int main() {
 	
 	grid the_grid;
 	grid_particles(&the_grid, p_array, particle_number, size);
+
+	// Clean up
+	free(p_array);
 	
 	return 0;
 }

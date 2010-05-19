@@ -46,12 +46,7 @@ int get_index(float position, float interval_size) {
 	assert(position >= 0.0);
 	assert(interval_size > 0.0);
 	
-	// If the given position fits inside one interval then return 0
-	if (position < interval_size) {
-		return 0;
-	}
-	
-	// If not then we'll need to count the intervals
+	// Count the intervals
 	int count = 0;
 	float remaining = position;
 	while (remaining > interval_size) {
@@ -60,8 +55,9 @@ int get_index(float position, float interval_size) {
 	}
 	
 	// POSTCONDITIONS
-	assert( ((float)count) * interval_size < position);
-	assert( ((float)(count+1)) * interval_size >= position);
+	//assert( ((float)count) * interval_size <= position);
+	assert(((float)count) * interval_size <= position + (float)0.00003);
+	assert( ((float)(count+1)) * interval_size > position - (float)0.00003);
 	
 	return count;
 }
@@ -487,6 +483,9 @@ void get_true_neighbours_for_particle(grid* the_grid,
 			
 		}
 	}
+
+	// Clean up
+	free(potential_neighbours);
 	
 	// POSTCONDITIONS
 	assert(*length >= 0);
@@ -675,6 +674,11 @@ int get_biggest_cell_size(grid* the_grid, particle* p_array) {
 	 * This looks through the given array of particles and, using the values
 	 * defined in the_grid, gives back the largest population of any cell.
 	 */
+
+	// PRECONDITIONS
+	assert(the_grid != NULL);
+	assert(p_array != NULL);
+	
 	int* cell_totals;
 	count_particles_in_cells(the_grid, p_array, &cell_totals);
 
@@ -686,5 +690,9 @@ int get_biggest_cell_size(grid* the_grid, particle* p_array) {
 			biggest = cell_totals[index];
 		}
 	}
+
+	// Clean up
+	free(cell_totals);
+	
 	return biggest;
 }

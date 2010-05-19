@@ -234,6 +234,9 @@ void grid_particles(grid* the_grid, particle* particles, int particle_number,
 		cell_sizes[lookup]++;
 		
 	}
+
+	// Clean up
+	free(cell_sizes);
 	
 	// POSTCONDITIONS
 	assert(check_dummies(the_grid) == 0);
