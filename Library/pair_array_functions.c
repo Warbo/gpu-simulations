@@ -222,7 +222,7 @@ void get_cell_contents(grid* the_grid, int x, int y, int z,
 	i = z + (the_grid->z_size * y) + (the_grid->z_size * the_grid->y_size * x);
 
 	// Now we know where to start from, so set it
-	*start = &(the_grid->particles[i]);
+	*start = &(the_grid->particles[-1 * the_grid->particles[i].id]);
 
 	// Now work out how many there are
 	*length = count_cell_contents(the_grid, x, y, z);
