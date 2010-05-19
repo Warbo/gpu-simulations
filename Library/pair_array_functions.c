@@ -48,6 +48,7 @@ int count_cell_contents(grid* the_grid, int x, int y, int z) {
 	// First, work out where this cell's start index can be found
 	int index = z + (the_grid->z_size * y) +
 		(the_grid->z_size * the_grid->y_size * x);
+
 	int value;
 	// Slight complication: If we're the last cell then there is no next
 	// cell to compare with. Use the size of the array instead.
@@ -55,7 +56,8 @@ int count_cell_contents(grid* the_grid, int x, int y, int z) {
 		   y-1 == the_grid->y_size &&
 		   z-1 == the_grid->z_size) {
 		value = the_grid->particle_number +
-			(the_grid->x_size*the_grid->y_size*the_grid->z_size) - index;
+			(the_grid->x_size*the_grid->y_size*the_grid->z_size) +
+			the_grid->particles[index];
 	}
 	else {
 		value = (-1 * the_grid->particles[index+1].id) -
