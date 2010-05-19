@@ -1916,20 +1916,12 @@ It would seem useful to keep track of each particle's nearest neighbours
  system, we can ensure that a particle and its nearest neighbours are always
  either in the same grid cell or at most one cell apart.
  This narrows down our search for nearest neighbours considerably, since
- we can concentrate our efforts on those neighbouring cells, and this works
- well for systems with roughly uniform density (where there is little difference
- between the largest interaction radius and the average interaction radius)
- as seen in 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-what
-\end_layout
-
-\end_inset
-
-.
+ we can concentrate our efforts on those neighbouring cells.
+ It is important to note that the efficiency of this method is reduced when
+ the difference between the largest interaction radius and the average interacti
+on radius becomes large (this is due to overcrowded cells, where most of
+ the particles in neighbouring cells are not nearest neighbours and are
+ thus wasted comparisons), in other words when the density is highly non-uniform.
  It is important at this point to note the difference between a grid of
  cell containing particles, decribed in this paragraph, and CUDA's grid
  of blocks containing threads, described previously.
@@ -1947,8 +1939,145 @@ An attempt was made to model the SPH grid directly with a CUDA grid, but
 .
 \end_layout
 
+\begin_layout Section
+Implementation
+\end_layout
+
 \begin_layout Standard
-Comparisons between 
+There are many ways to implement the gridding algorithm for Smoothed-Particle
+ Hydrodynamics.
+ It was important to keep the solutions general, such that any datastructures
+ and algorithms could be used to model the particles and interactions, so
+ no assumptions could be made about either except that the particles contain
+ three-dimensional Cartesian coordinates and a size.
+\end_layout
+
+\begin_layout Standard
+Four different approaches have been taken for this project, which will be
+ referred to as the 
+\emph on
+linked list
+\emph default
+, 
+\emph on
+sentinel
+\emph default
+, 
+\emph on
+pair-array
+\emph default
+ and 
+\emph on
+padded
+\emph default
+ implementations.
+ Other possibilities were investigated but ultimately abandoned, the reasons
+ for this are explored in Appendix 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+what
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+\start_of_appendix
+Unworkable Solutions
+\end_layout
+
+\begin_layout Standard
+There were several approaches to the gridding algorithm considered but never
+ implemented.
+ These range from minor details to overarching conceptual shifts.
+ A few are explored here to illustrate what is and is not a reasonable course
+ to take when modelling parallel software in C and CUDA.
+\end_layout
+
+\begin_layout Subsection
+Pure Pointer Arithmetic
+\end_layout
+
+\begin_layout Standard
+In C the physical location of data is reified into data itself through the
+ concept of 
+\emph on
+pointers
+\emph default
+, invoked by the address-of operator &.
+ Pointers are pervasive in the C approach to programming, as they are the
+ only way to achieve certain tasks (short of Godel numbering).
+ A pointer is a positive (unsigned) integer which is an address in RAM which
+ holds a certain piece of data.
+ Pointers also have a 
+\emph on
+type
+\emph default
+ (in the loose, C sense of the term) which exists solely to provide a length.
+ Upon 
+\emph on
+dereference
+\emph default
+, written foo[index] where foo is a pointer and index an integer offset,
+ an amount of data is fetched from RAM starting at the location 
+\begin_inset Formula $\text{{foo}}+\left(\text{{sizeof}}\left(\text{{foo's}type}\right)\times\text{{index}}\right)$
+\end_inset
+
+ and of length sizeof(foo's type).
+ A shorthand for foo[0] is *foo.
+\end_layout
+
+\begin_layout Standard
+The direct manipulation of memory in this way allows an instantiation of
+ the array datastructure, a random-access, fixed-size construct for storing
+ a subset of the array's type.
+ The exploitation of these abstracted structures and their underlying pointer
+ implementation seemed immediately applicable to the problem of implementing
+ the grid: namely, how to specify the contents of a cell with as little
+ overhead as possible.
+ For zero- and one-dimensional grids, the implementation using an array
+ abstraction was obvious, along the lines of [cell 0, cell 1, cell 2, ...,
+ cell N], but the problem of unequal numbers of particles in each cell would
+ cause either an extra dimension to be used, which although conceptually
+ close would in fact cause non-contiguous storage in memory, or the loss
+ of constant-time lookups (by reading through the array).
+ The use of pointer arithmetic on 
+\begin_inset Quotes eld
+\end_inset
+
+arrays
+\begin_inset Quotes erd
+\end_inset
+
+ (pointers) can solve this, by using a small collection of integers to refer
+ to the various cell locations, and by incrementing and decrementing the
+ pointers to expand and shrink the borders of the cells.
+ In effect, the physical space of the grid can be implemented directly inside
+ the RAM, such that the only operations necessary for the entire gridding
+ algorithm are pointer increment and decrement.
+\end_layout
+
+\begin_layout Standard
+Unfortunately the main advantage of this method is lost when higher dimensions
+ are modelled, since contemporary RAM is one-dimensional which is insufficient
+ to represent cell boundaries of two or more dimensions.
+ Rather than achieving everything with fast ++ and -- operators on the grid
+ metadata, discontinuities would have to be taken into account when mutating
+ cell contents in a higher dimension, and even worse it would be necessary
+ to touch the particle data as it is shuffled from one cell (array) to another
+ (since the arrays cannot shuffle around the particles in more than the
+ x dimension).
+\end_layout
+
+\begin_layout Standard
+This approach was therefore abandoned, despite the obvious simplicity and
+ performance gains it would bring.
+ However, it is certainly a worthy option to consider for one-dimensional
+ models and machines with higher-dimensional memory.
 \end_layout
 
 \end_body
