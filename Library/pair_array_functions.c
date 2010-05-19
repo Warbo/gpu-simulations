@@ -57,7 +57,7 @@ int count_cell_contents(grid* the_grid, int x, int y, int z) {
 		   z-1 == the_grid->z_size) {
 		value = the_grid->particle_number +
 			(the_grid->x_size*the_grid->y_size*the_grid->z_size) +
-			the_grid->particles[index];
+			the_grid->particles[index].id;
 	}
 	else {
 		value = (-1 * the_grid->particles[index+1].id) -
