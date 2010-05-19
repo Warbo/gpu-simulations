@@ -52,9 +52,9 @@ int count_cell_contents(grid* the_grid, int x, int y, int z) {
 	int value;
 	// Slight complication: If we're the last cell then there is no next
 	// cell to compare with. Use the size of the array instead.
-	if (x-1 == the_grid->x_size &&
-		   y-1 == the_grid->y_size &&
-		   z-1 == the_grid->z_size) {
+	if (x+1 == the_grid->x_size &&
+			y+1 == the_grid->y_size &&
+			z+1 == the_grid->z_size) {
 		value = the_grid->particle_number +
 			(the_grid->x_size*the_grid->y_size*the_grid->z_size) +
 			the_grid->particles[index].id;
@@ -111,6 +111,44 @@ void initialise_grid(grid* the_grid, int x, int y, int z,
 	assert(the_grid->dz > 0);
 	assert(the_grid->particle_number > 0);
 	
+}
+
+int check_dummies(grid* the_grid) {
+	/*
+	 * Goes through the dummy particles in the given grid and does some sanity
+	 * checks.
+	 */
+	// PRECONDITIONS
+	assert(the_grid != NULL);
+
+	// Go through each dummy
+	int last_value = the_grid->particles[0].id * -1;
+	int index;
+	for (index=0; index<the_grid->x_size * the_grid->y_size * the_grid->z_size;
+		index++) {
+		// Make sure it's a dummy
+		assert(the_grid->particles[index].id < 0);
+		// Make sure it's pointing after the last one
+		assert((-1 * the_grid->particles[index].id) >= last_value);
+		// Make sure it's pointing to somewhere inside the grid
+		assert((-1 * the_grid->particles[index].id) >= (
+			the_grid->x_size * the_grid->y_size * the_grid->z_size
+		));
+		assert((-1 * the_grid->particles[index].id) < (
+			the_grid->x_size * the_grid->y_size * the_grid->z_size +
+				the_grid->particle_number
+		));
+		// Increment the previous dummy
+		last_value = -1 * the_grid->particles[index].id;
+	}
+	// Now go through real particles
+	for (index=the_grid->x_size * the_grid->y_size * the_grid->z_size;
+		index < the_grid->x_size * the_grid->y_size * the_grid->z_size +
+			the_grid->particle_number; index++) {
+		// Make sure they're not dummies
+		assert(the_grid->particles[index].id >= 0);
+	}
+	return 0;	
 }
 
 void grid_particles(grid* the_grid, particle* particles, int particle_number,
@@ -198,6 +236,7 @@ void grid_particles(grid* the_grid, particle* particles, int particle_number,
 	}
 	
 	// POSTCONDITIONS
+	assert(check_dummies(the_grid) == 0);
 
 }
 

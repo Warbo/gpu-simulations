@@ -30,7 +30,7 @@ int main() {
 			test_particle = &(the_grid.particles[test_probe]);
 		}
 	}
-
+	
 	// DEBUGGING ///////////////////////////////////////////////////////////////
 	int test_x, test_y, test_z;
 	get_index_from_position(&the_grid, test_particle,
