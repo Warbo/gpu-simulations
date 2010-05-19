@@ -20,9 +20,7 @@ int main() {
 	assert(particle_number > 0);
 	grid the_grid;
 	grid_particles(&the_grid, p_array, particle_number, size);
-	return 0;
-}
-/*
+
 	// Choose a particle randomly from the group
 	particle* test_particle = NULL;
 	int test_probe;
@@ -145,4 +143,3 @@ int main() {
 	return 0;
 	
 }
-*/
