@@ -2080,5 +2080,117 @@ This approach was therefore abandoned, despite the obvious simplicity and
  models and machines with higher-dimensional memory.
 \end_layout
 
+\begin_layout Subsection
+Boundless Grids
+\end_layout
+
+\begin_layout Standard
+A simplistic mapping of higher dimensions to one dimensional memory turns
+ spaces into planes by tiling the slices, and turns planes into lines by
+ concatenating the rows.
+ An example used throughout this project looks like [(0,0,0), (0,0,1), ...,
+ (0,0,z_max), (0,1,0), (0,1,1), ..., (0,y_max,z_max), (1,0,0), (1,0,1), ..., (x_max,y_
+max,z_max)].
+\end_layout
+
+\begin_layout Standard
+A problem inherent in this, however, is the requirement to bound the space.
+ Simply by giving the coordinates a single unique address we have incorporated
+ the artificial concepts of 
+\begin_inset Quotes eld
+\end_inset
+
+x_max
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+y_max
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+z_max
+\begin_inset Quotes erd
+\end_inset
+
+ which have no grounding in reality or the Smoothed-Particle Hydrodynamics
+ model.
+ We have also completely neglected negative cell positions, as such addresses
+ would not be unique and could not therefore be dereferenced or used as
+ identifiers.
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Negative particle positions are of course allowed in the four final implementati
+ons, and are accounted for by giving the grid an offset from the particles;
+ essentially locating the (0,0,0) cell such that its position is less than
+ those of every particle.
+ The existence of these offsets makes explicit the fact that we've artificially
+ truncated the lower bounds of the system.
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+An attempt was made to overcome these limitations by using a diagonal method
+ for addressing every coordinate in a countably infinite space.
+ The method is similar to the construction in Cantor's diagonal argument
+ for showing the different cardinalities of the Naturals and the Reals.
+ Rather than progressing solely in one dimension, reaching the 
+\begin_inset Quotes eld
+\end_inset
+
+end
+\begin_inset Quotes erd
+\end_inset
+
+ and then looping back to the 
+\begin_inset Quotes eld
+\end_inset
+
+start
+\begin_inset Quotes erd
+\end_inset
+
+, in this construction the array stores successive diagonal slices through
+ the octants of the space, enumerating the nodes of a space-filling tree.
+ An example would be [(0,0,0), (0,0,1), (0,1,0), (1,0,0), (0,0,2), (0,1,1),
+ (0,2,0), (1,0,1), (1,1,0), (2,0,0), ...] which includes three diagonal slices
+ through the positive octant, or equivalently the first three layers of
+ a space-filling tree with positive branches.
+ Since the number of octants making up the whole of a space is finite (8)
+ we can represent them all in a linear array by simply interleaving the
+ elements.
+\end_layout
+
+\begin_layout Standard
+This approach allows any cell coordinates to be addressed, thus there is
+ no need to implement tricks like offsets to allow negative positions and
+ the particles are free to move anywhere throughout the course of the simulation
+ without the grid having to be modified.
+ Storing an infinite number of cells in memory to facilitate this would
+ not be possible, of course, but that doesn't mean that it's not a useful
+ implementation for lazy (only when needed) evaluation.
+\end_layout
+
+\begin_layout Standard
+Having such a general coordinate system would be a useful property for the
+ grid, however the constraints imposed by CUDA on memory make access to
+ infinite data structures a low priority; certainly not worth the added
+ complexity in addressing for the limited uses it would see on an Nvidia
+ GPU.
+\end_layout
+
 \end_body
 \end_document
