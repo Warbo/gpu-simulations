@@ -43,10 +43,10 @@ int main() {
 	//int index2;		// Used for indexing the "brute" array
 	//int found;		// 0 means no match yet, 1 means match found
 	int test_x, test_y, test_z;
-	//particle* true_neighbour_array;
-	particle* brute_force_neighbours;
-	int total_neighbours = -1;
-	//int true_neighbour_number = -1;
+	particle* true_neighbour_array;
+	//particle* brute_force_neighbours;
+	//int total_neighbours = -1;
+	int true_neighbour_number = -1;
 	//float delta_x, delta_y, delta_z;
 	
 	particle* test_particle = NULL;
@@ -92,24 +92,24 @@ int main() {
 	
 		// Now find which of those are true neighbours
 		
-		//get_true_neighbours_for_particle(&the_grid, test_particle,
-		//	&true_neighbour_array, &true_neighbour_number);
+		get_true_neighbours_for_particle(&the_grid, test_particle,
+			&true_neighbour_array, &true_neighbour_number);
 
 		// INTERACT
-		//for (index1 = 0; index1 < true_neighbour_number; index1++) {
-		//	interact(test_particle, &(true_neighbour_array[index1]));
-		//}
+		for (index1 = 0; index1 < true_neighbour_number; index1++) {
+			interact(test_particle, &(true_neighbour_array[index1]));
+		}
 	
 		//fprintf(stderr, "True neighhbours: %i\n", true_neighbour_number);
 
 		
-		get_neighbours_brute_force(&the_grid, test_particle,
-			&(brute_force_neighbours), &total_neighbours);
+		//get_neighbours_brute_force(&the_grid, test_particle,
+		//	&(brute_force_neighbours), &total_neighbours);
 
 		// INTERACT
-		for (index1 = 0; index1 < total_neighbours; index1++) {
-			interact(test_particle, &(brute_force_neighbours[index1]));
-		}
+		//for (index1 = 0; index1 < total_neighbours; index1++) {
+		//	interact(test_particle, &(brute_force_neighbours[index1]));
+		//}
 	
 		//fprintf(stderr, "True neighbours from all: %i\n", total_neighbours);
 
@@ -174,8 +174,8 @@ int main() {
 		*/
 		
 		// Clean up
-		//free(true_neighbour_array);
-		free(brute_force_neighbours);
+		free(true_neighbour_array);
+		//free(brute_force_neighbours);
 		
 	}
 	// Success
