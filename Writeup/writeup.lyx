@@ -51,7 +51,28 @@ Physics Simulations on Graphics Cards
 \end_layout
 
 \begin_layout Abstract
-Abstract
+A computer simulation is presented which implements a Smoothed-Particle
+ Hydrodynamics model through the use of CUDA.
+ CUDA is a library developed by Nvidia to allow arbitrary computation to
+ be performed by the company's Graphical Processing Units: a cheap, massively
+ parallel hardware architecture.
+ The SPH model was chosen as an example of a non-trivial application, and
+ an emphasis was placed on producing reusable, generic algorithms and code.
+ Whilst the difficulties of parallel programming were taken into account
+ from the start, throughout the implementation lessons were learned about
+ the abilities and limitations of CUDA and how best to utilise the technology.
+ These are discussed along with the results of the effort, which produced
+ a simulation 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+give some stats
+\end_layout
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Section
@@ -65,18 +86,14 @@ Physics, indeed the whole of science, is the attempt to describe the world
  Not only through the secondary, Model Theoretic, semantic interpretation
  of the side-effects caused by their programs: results to calculations,
  instant communication between collaborators around the world, mass storage
- and retrieval of knowledge on a scale much grander than the human brain
- and observations from experiments beyond the microscopic and macroscopic,
- impossible to percieve manually.
+ and retrieval of knowledge and observations from experiments impossible
+ to percieve manually.
  At a much more fundamental level, the principle of operation of a computing
  device, the syntactic manipulation of symbols, is isomorphic to the application
  of Proof Theory to a deductive system
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Curry-Howard isomorphism
-\end_layout
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Curry1934,Curry1958,Howard1969"
 
 \end_inset
 
@@ -86,60 +103,44 @@ Curry-Howard isomorphism
 \begin_layout Standard
 Since the defining characteristic of Mathematics is the discovery and proof
  of theorems, by their very existence computers provide the Scientist with
- a physical manifestation of Mathematics, in fact the most powerful there
- can be
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Church-Turing thesis
-\end_layout
+ a physical manifestation of Mathematics, in fact the most powerful known
+ to exist
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Church1936,Turing1936,Turing1938"
 
 \end_inset
 
 , and thus the most useful tool there is in the endeavour to formalise the
  Universe.
  This is especially elegant for the Physicist, who's attempts to describe
- reality with Mathematical laws are thus enabled by the exploitation of
- those laws in their own derivation.
- Despite the ultimate limitations to Science formalised in this way
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Godel's second incompleteness theorem
-\end_layout
+ reality with Mathematical laws are enabled by the exploitation of those
+ laws in their own derivation
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Goedel1931"
 
 \end_inset
 
-, there is still far more we have yet to discover, and with the aid of computers
- we can advance our understanding at an unprecedented rate.
+.
 \end_layout
 
 \begin_layout Standard
-With the mechanisation of proof, the role of the Scientist is now solely
- that of the discoverer.
- The exploration space is theorems and the goal is surprise.
- Since a Mathematical truth is a logical consequence of its axioms and rules,
- the machine's operation makes no distinction between proving theorems and
- proving tautologies, since they are the same concept and contain no more
- information than their axioms.
- Whilst there are formalisms for beauty and interestingness built on Information
- Theory
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Cite compression guy
-\end_layout
+With the mechanisation of proof, the role of the Scientist has shifted towards
+ that of the programmer: the discoverer of algorithms.
+ The space being explored for this discovery is that of provably true theorems
+ and the goal is interestingness and surprise
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Schmidhuber2009"
 
 \end_inset
 
-, these are not part of the inherent syntactic nature of computation, and
- can only ever exist in the secondary, Model Theory realm built atop it.
- Until we mechanise the limits of semantics, as we have done syntactically
- with the Turing machine, humans will have a definite role to play in Science:
- as the all-important heuristic which guides the search.
+.
+ No more information is contained in a theorem than already exists in its
+ axioms, but only through term-rewriting can we see this information in
+ new ways and thus gain insights into the models with which we describe
+ reality.
 \end_layout
 
 \begin_layout Subsection
@@ -161,7 +162,7 @@ program
 high-level
 \emph default
  (bearing little relation to the machine, requiring pattern matching to
- implement) such 
+ implement) such as (redundantly named) 
 \begin_inset Quotes eld
 \end_inset
 
@@ -169,15 +170,27 @@ interactive theorem provers
 \begin_inset Quotes erd
 \end_inset
 
- (, virtual machines and functional to low-level machine instructions.
- Of course all are isomorphic, but are necessarily distinct in order to
- minimise the transformation from our mental model to the programming paradigm.
- In this project the simulation approach is taken, which is a 
+, virtual machines and pure functional languages; and 
 \emph on
 low-level
 \emph default
- (complementary to the circuitry) implementation that uses machine components
- to numerically approximate the objects described by the model.
+, which describes direct use of a machine's instructions or components,
+ or simple abstractions based on them such as macros.
+ Of course all are equivalent in computational power
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Turing1936,Turing1938"
+
+\end_inset
+
+, but are necessarily distinct in order to minimise the transformation from
+ our mental model to the programming paradigm.
+ In this project the simulation approach is taken, which is a
+\emph on
+ 
+\emph default
+low-level implementation that uses machine components to numerically approximate
+ the objects described by the model.
 \end_layout
 
 \begin_layout Standard
@@ -197,24 +210,59 @@ The main advantage to simulations is the lack of abstractions such as sets,
  of fast mechanical computers before it could tackle systems of similar
  complexity.
  Despite the inefficiency of the technique, being able to act relatively
- safely at a low level keeps overhead low, such that few resources are wasted.
- From a more practical point of view, being able to perform this mapping
- manually at a low level is an advantage considering that language development
- and pattern matching are still in their infancy as Mathematical disciplines.
+ safely at a low level keeps overhead low, such that few resources are wasted,
+ and from a more practical point of view being able to perform this mapping
+ manually at a low level gives a performance advantage considering that
+ language development and pattern matching are still in their infancy as
+ Mathematical disciplines.
 \end_layout
 
 \begin_layout Standard
-Another disadvantage is the error introduced by numerically approximating
- Real values of a model with the Rational values of the computer, requiring
- extra care to be taken to ensure that the rules are being applied appropriately.
- The magnitude of these errors is usually insignificant, however but the
- magnitude of these errors depend on the resolution of the simulation which,
- for each spacetime dimension, linearly affects the amount of computation
- to perform.
+Another disadvantage to simulations is the error introduced by numerically
+ approximating Real values of a model with the Rational values of the computer,
+ requiring extra care to be taken to ensure that the rules are being applied
+ appropriately.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+For example this project makes extensive use of 
+\emph on
+assertions
+\emph default
+: statements placed strategically throughout the code which explicitly state
+ the assumptions required for that code to work (eg.
+ a function given a pointer may assume that the pointer is not null), which
+ terminate the program if false.
+ The algorithm to assign particles to grid cells suffered a bug which caused
+ the program to abort, since the assertion ensuring that the given particle
+ has been assigned to the correct cell occasionally failed.
+ Upon investigation, all of the failures showed the particle to be outside
+ the cell by a distance on the order of 
+\begin_inset Formula $10^{-5}$
+\end_inset
+
+, which is the (arbitrarily chosen) precision of the position values.
+ Thus claiming these particles are inside a cell and outside a cell is valid,
+ as long as they are consistently assigned.
+ A modification of 
+\begin_inset Formula $\pm3\times10^{-6}$
+\end_inset
+
+ to the assertions stopped these false-positives from aborting the program,
+ and no more issues were encountered with the cell assignment code.
+\end_layout
+
+\end_inset
+
+ The magnitude of these errors is usually insignificant, however they can
+ depend on the resolution of the simulation which, for each spacetime dimension,
+ linearly affects the amount of computation to perform.
  High resolution is important for Physics simulations, as many Physical
  laws are defined as differential equations, and thus simulation becomes
  discrete summation as an approximation to the continuous integration of
  the system under these laws.
+ The smaller the summation steps, the closer the approximation becomes.
 \end_layout
 
 \begin_layout Standard
@@ -226,23 +274,21 @@ The chosen resolution also depends on the physical properties of the intended
 \begin_inset Formula $x\geq10^{1000000}+1$
 \end_inset
 
+ (decimal 
+\begin_inset Formula $2^{64}+1$
+\end_inset
 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Cite
-\end_layout
+) 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "C99"
 
 \end_inset
 
-, and similarly machines following the IEEE 754-2008 floating point standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Cite
-\end_layout
+, and similarly machines following floating point standards
+\begin_inset CommandInset citation
+LatexCommand cite
+key "IEEE754"
 
 \end_inset
 
@@ -267,25 +313,23 @@ bignum
 \begin_inset Formula $O\left(1\right)$
 \end_inset
 
- (for machine numbers pipelined through the CPU's Arithmetic Logic Unit)
- to 
+ (usually very fast due to 
+\emph on
+pipelining
+\emph default
+ in the CPU) to 
 \begin_inset Formula $O\left(N_{bits}\right)$
 \end_inset
 
  for addition and subtraction, whilst efficient multiplication algorithms
  are still a research topic (for example the 
-\begin_inset Formula $O(N_{bits}\cdot\log N_{bits}\cdot2^{O(\log^{*}N_{bits})})$
+\begin_inset Formula $O(N_{bits}\log N_{bits}2^{O(\log^{*}N_{bits})})$
 \end_inset
 
- algorithm from
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Anindya De, Piyush P Kurur, Chandan Saha, Ramprasad Saptharishi.
- Fast Integer Multiplication Using Modular Arithmetic.
- Symposium on Theory of Computation (STOC) 2008.
-\end_layout
+ algorithm from 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "AnindyaDe2008"
 
 \end_inset
 
@@ -298,7 +342,7 @@ y intensive programs with practical use (it is common for worthwhile programs
  to be limited by I/O rather than available cycles, and it is of course
  trivial to make intensive programs which derive no meaningful results).
  This project aims to research the computational potential of graphics rendering
- hardware to this expensive task, rather than more traditional (and costly)
+ hardware for this expensive task, rather than more traditional (and costly)
  alternatives such as supercomputers and clusters.
 \end_layout
 
@@ -390,12 +434,9 @@ cores
 \begin_layout Standard
 The processing capabilities of GPUs have been considered for scientific
  computing for several years 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Cite something
-\end_layout
+\begin_inset CommandInset citation
+LatexCommand cite
+key "ESLarsen2001"
 
 \end_inset
 
@@ -406,12 +447,9 @@ Cite something
  card and the motherboard made this approach too inefficient for practical
  use, and the numerical precision of GPUs was insufficient to make large
  calculations worthwhile
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Cite that paper which sent calculations back and forth
-\end_layout
+\begin_inset CommandInset citation
+LatexCommand cite
+key "KFatahalian2004"
 
 \end_inset
 
@@ -427,9 +465,8 @@ ecific OpenCL, have become available for accessing the cards from mainstream
  programming languages like C, and with this integration the device specificatio
 ns have been brought up to meet the precision standards required by these
  language's compilers.
- This has spurred a stream of researchers to offload their intensive computation
-s to graphics cards as a more cost-effective alternative to clusters and
- conventional supercomputers.
+ This has made them an attractive target on which researchers can offload
+ their intensive computations, and this project is no different.
 \end_layout
 
 \begin_layout Section
@@ -444,8 +481,16 @@ Parallel programming has existed for decades, but outside the realms of
 threads
 \emph default
  of execution has become well established in areas such as interactive (includin
-g graphical) programs and networked software, however this is mainly for
- stylistic reasons rather than raw performance.
+g graphical) programs and networked software, however this is not 
+\begin_inset Quotes eld
+\end_inset
+
+true
+\begin_inset Quotes erd
+\end_inset
+
+ parallel programming and is mainly used for stylistic reasons rather than
+ raw performance.
  Rather than combining all of the program logic into a 
 \begin_inset Quotes eld
 \end_inset
@@ -456,13 +501,32 @@ main loop
 
 , different subsystems are segregated to their own functions to keep down
  code complexity.
- To prevent blocking (waiting for a function to finish) these are then further
- segregated to their own threads.
- Calls to these subsystems then become asynchronous, the next instruction
- is carried out without waiting for the call to finish.
- The reason for this being stylistic is that the main targets for such software
- are microcomputers, which until recently only had one processing core and
- thus only run one thread at a time, interleaving instructions by 
+ To prevent 
+\emph on
+blocking
+\emph default
+ (waiting for a function to finish) these are then further segregated to
+ their own threads, so that calls to these subsystems then become 
+\emph on
+asynchronous
+\emph default
+ (non-blocking, the next instruction is carried out without waiting for
+ the call to finish).
+ The reason for this not being 
+\begin_inset Quotes eld
+\end_inset
+
+truly
+\begin_inset Quotes erd
+\end_inset
+
+ parallel is that the main targets for such software are microcomputers,
+ which until recently only had one processing core.
+ Thus only one thread runs at a time, rather than all of them running 
+\emph on
+concurrently
+\emph default
+, and the instructions are interleaved by 
 \emph on
 context switching
 \emph default
@@ -489,28 +553,30 @@ preemptive multitasking
 \end_inset
 
 .
- Thus there is no direct gain in performance between multiple threads and
- one main loop, it is merely simpler and more scalable to implement multiple
- blocking services via threads.
+ There is therefore no increase in the theoretical maximum performance between
+ multiple threads and one main loop on one core
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Amdahl1967"
+
+\end_inset
+
+, it is merely simpler and more scalable to implement multiple blocking
+ services via threads.
  In fact the overhead of context switching may even incur a performance
- penalty for the threaded approach, but only if the main loop implementation
- were near-optimal (which is usually not the case).
+ penalty in edge cases.
 \end_layout
 
 \begin_layout Standard
-This simple use of threads is still a useful way to express the difficulties
- in parallel programming.
- The major obstacle is that very few assumptions can be made about a parallel
- program: the interleaving of threads (or equivalent) is completely nondetermini
-stic, so definitions and values may be changed by another thread at any
- point, and the granularity of this interleaving can be incredibly fine.
- A classic example to demonstrate this can be seen in 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-where
-\end_layout
+The major obstacle to parallel programming, especially when executed concurrentl
+y, is that very few assumptions can be made about program state: the interleavin
+g and relative speeds of threads (or equivalent) are completely nondeterministic
+, so definitions and values may be changed by another thread at any point,
+ and the granularity of this interleaving can be incredibly fine.
+ A classic example to demonstrate this can be seen in Algorithm 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "alg:A-subtley-flawed"
 
 \end_inset
 
@@ -523,10 +589,21 @@ where
 atomic transactions
 \emph default
 .
- An atomic transaction is an instruction which cannot be divided into further
- instructions, hence it is atomic in the democratic sense, and it is a transacti
-on since it will either be carried out or not, it cannot fail at a half-complete
-d stage (otherwise it would not be atomic).
+\end_layout
+
+\begin_layout Standard
+An atomic transaction is an instruction which cannot be divided into further
+ instructions, hence it is 
+\emph on
+atomic
+\emph default
+ in the democratic sense, and it is a 
+\emph on
+transaction
+\emph default
+ since it will either be carried out or not, it cannot fail at a half-completed
+ stage (since that would imply that the atomic instruction can be split
+ into two).
  The implementation of high-level atomic transactions (such as atomic functions)
  is an area of parallel programming research, although is difficult to realise
  due to the Two Generals problem
@@ -542,59 +619,513 @@ cite
 .
  Atomic transactions are thus usually very low level and reflect the architectur
 e of the machine.
- The reason this becomes problematic is that if this banking system were
- compiled into machine code then the atomic transactions can not be found
- anywhere in the source code: to spot them requires knowledge of how it
- will compile!
+ The reason this becomes problematic is that atomic transactions are often
+ at a much lower level than the source language of the system, making them
+ invisible to someone without knowledge of the compiler.
 \end_layout
 
 \begin_layout Standard
-In this example, the most damning flaws are the balance modifications.
+In this example, the most damning flaws are the balance modifications which
+ suffer from 
+\emph on
+race conditions
+\emph default
+ (non-deterministic output depending on how the threads are interleaved,
+ which is undefined).
  The reassignment of the balance by the ATM looks straighforward: the new
  balance is the old balance minus the amount withdrawn.
- However, that is certainly not what this line of code actually means.
+ However, that is certainly not what this line of code actually means to
+ the machine.
  This becomes clearer when we see it in terms of the equivalent atomic transacti
-ons, which look something like 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-what
-\end_layout
+ons, which look something like Algorithm 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "alg:A-deconstruction-of"
 
 \end_inset
 
 .
- All values must be loaded into registers inside the CPU before they can
+\end_layout
+
+\begin_layout Standard
+All values must be loaded into registers inside the CPU before they can
  be processed, but by copying the values in this way we destroy their meaning
  within our program.
- The value of 
+ 
+\family typewriter
+balance
+\family default
+ is data stored in a memory location; the copy in the register is not stored
+ at that location, thus the value of 
 \family typewriter
 registerA
 \family default
- is not the account balance, it is the account balance 
+ is not the account balance.
+ It is a number which happened to equal the account balance 
 \emph on
 at the time it was loaded
 \emph default
-.
- It is perfectly acceptable for the server to modify the balance half-way
- through an ATM withdrawal, since that's the whole point of parallel, concurrent
- execution; yet that modification will be lost when the ATM finishes the
- withdrawal, as it will set the balance to the new contents of 
+, but we can assume nothing more about it.
+ It is perfectly acceptable for the server to modify the balance (the value
+ stored at the defined location in memory) half-way through an ATM withdrawal,
+ since that's the whole point of parallel, concurrent execution; yet that
+ modification will be lost when the ATM finishes the withdrawal, as the
+ new contents of 
 \family typewriter
 registerA
 \family default
-, which has been calculated with no knowledge of the interest payment.
- Thus a possible execution of these threads may be: The ATM loads the current
- balance in preparation for a deduction, the server sends a £200 rent payment
- to the account-holder's landlord, the ATM takes £10 from its copy of the
- balance, the server loads the account balance, takes £200 from it and stores
- the new value, the ATM stores its value then gives out £10.
- In this scenario there has been £210 taken out of the account, but only
+ will overwrite whatever changes have been made.
+ Thus a possible execution of these threads may look like the following:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Tabular
+<lyxtabular version="3" rows="9" columns="5">
+<features>
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+t
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Instruction
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Balance
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+ATM
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Server
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+ATM loads balance
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+£500
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+£500
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Server sends £200 payment
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+£500
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+£500
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+ATM deducts £10
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+£500
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+£490
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+4
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Server loads balance
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+£500
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+£490
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+£500
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+5
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Server deducts £200
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+£500
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+£490
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+£300
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+6
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Server stores its value
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+£300
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+£490
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+£300
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+7
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+ATM stores its value
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+£490
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+£490
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+£300
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+8
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+ATM gives out a £10 note
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+£490
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+£490
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+£300
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In this scenario there has been £210 taken out of the account, but only
  £10 has been deducted from the balance.
- For the computer this is perfectly valid code, however our assumptions
- about what it proves are severely at fault: the system modelled by the
- program's algebra is not isomorphic to a banking system.
+ For the computer this is perfectly valid code, however 
+\emph on
+our assumptions about what it proves
+\emph default
+ are severely at fault: the system modelled by the program's algebra is
+ not isomorphic to a banking system, but we thought it was.
 \end_layout
 
 \begin_layout Standard
@@ -606,19 +1137,45 @@ x++
  actually decompose into multiple statements, any of which can be preempted
  (and invalidated) by another thread; and why parallel programming with
  mutable, shared memory is a hard problem with hidden pitfalls.
- This is of course not the only way to program in parallel.
- Other approaches include: Software Transactional Memory, which abstracts
- memory accesses through a software library to facilitate high-level transaction
-s; Actor models, which extend the Object Oriented paradigm of message passing
- to make each object a standalone Actor, which all run in parallel; Dataflow
- languages, where computations are built as networks of operations through
- which data is passed; Concurrent Functional Programming, which exploits
- pure functional programming's lack of mutability and execution order to
- distribute programs without the need for synchronisation; and Futures (or
- Promises), where values can be used in calculations even if they haven't
- been worked out yet (a kind of explicit lazy evaluation).
- The model adopted by CUDA, which will be used in this project, is threaded,
- although its usage is similar to a dataflow language.
+\end_layout
+
+\begin_layout Standard
+This is of course not the only way to program in parallel.
+ Other approaches include:
+\end_layout
+
+\begin_layout Itemize
+Software Transactional Memory, which abstracts memory accesses through a
+ software library to facilitate high-level transactions.
+\end_layout
+
+\begin_layout Itemize
+Actor models, which extend the Object Oriented paradigm of message passing
+ to make each object a standalone Actor, which all run in parallel.
+\end_layout
+
+\begin_layout Itemize
+Dataflow languages, where computations are built as networks of operations
+ through which data is passed.
+\end_layout
+
+\begin_layout Itemize
+Concurrent Functional Programming, which exploits pure functional programming's
+ lack of mutability and execution order to distribute programs without the
+ need for synchronisation.
+\end_layout
+
+\begin_layout Itemize
+Futures (or Promises), where values can be used in calculations even if
+ they haven't been worked out yet.
+\end_layout
+
+\begin_layout Standard
+The model adopted by CUDA is threaded, so none of the above systems can
+ help us write correct concurrent programs.
+ In fact many uses of CUDA are similar in principle to a dataflow language,
+ but if this is desired then it must still be enforced manually on top of
+ the threaded interface.
 \end_layout
 
 \begin_layout Standard
@@ -770,6 +1327,12 @@ end{program}
 \begin_inset Caption
 
 \begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "alg:A-subtley-flawed"
+
+\end_inset
+
 A subtley flawed banking system, with simple algorithms for the server and
  ATM 
 \end_layout
@@ -844,15 +1407,17 @@ end{program}
 \begin_inset Caption
 
 \begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "alg:A-deconstruction-of"
+
+\end_inset
+
 A deconstruction of the ATM's balance update line.
 \end_layout
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Plain Layout
 
 \end_layout
 
@@ -867,18 +1432,26 @@ The CUDA Model
 
 \begin_layout Standard
 Since this project focuses specifically on the use of Nvidia's CUDA (Compute
- Unified Device Architecture
-\begin_inset Note Note
-status open
+ Unified Device Architecture) interface, a more specific description of
+ its operation and use from C is given here.
+ There are many conflicting constraints which must be juggled to obtain
+ the highest throughput, however we will follow Hoare's Dictum 
+\begin_inset Quotes eld
+\end_inset
 
-\begin_layout Plain Layout
-is that right?
-\end_layout
+Premature optimization is the root of all evil.
+\begin_inset Quotes erd
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Knuth1974"
 
 \end_inset
 
-) interface, a more specific description of its operation and use from C
- is given here.
+ and only concern ourselves with those large-scale optimisations relevant
+ for the implementation.
 \end_layout
 
 \begin_layout Subsection
@@ -886,14 +1459,79 @@ Memory Hierarchy
 \end_layout
 
 \begin_layout Standard
-CUDA is an interface to Nvidia graphics cards, a topological overview of
- which can be seen in
-\begin_inset Note Note
+\begin_inset Float figure
+wide false
+sideways false
 status open
 
 \begin_layout Plain Layout
-add figure
+\begin_inset space \hfill{}
+\end_inset
+
+
+\begin_inset Graphics
+	filename grid-block-memory.gif
+	height 45theight%
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+\end_inset
+
+
 \end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:CUDA-memory-hierarchy."
+
+\end_inset
+
+CUDA memory hierarchy.
+ The Grid represents the GPU and each Block represents a multiprocessor
+ (see section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Code-Hierarchy"
+
+\end_inset
+
+).
+ From 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kanter2008"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+CUDA is an interface to Nvidia graphics cards, a topological overview of
+ which can be seen in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:CUDA-memory-hierarchy."
 
 \end_inset
 
@@ -903,17 +1541,8 @@ add figure
 \emph on
 global memory
 \emph default
-) is the root of the tree, globally accessible but relatively slow 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-quote a number
-\end_layout
-
-\end_inset
-
-.
+) is the root of the tree, globally accessible but relatively slow (400-600
+ clock cycles per access).
  Below this is the 
 \emph on
 shared memory
@@ -927,27 +1556,25 @@ registers
 \emph default
 , directly read from and written to by the Arithmetic Logic Units (the mathemati
 cal circuitry) of each core.
- Although important to keep in mind, registers will not be explicitly used
- in the project as the access times are not too dissimilar to shared memory
- access times
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-cite
 \end_layout
 
+\begin_layout Standard
+Although important to keep in mind, registers will not be explicitly used
+ in the project as the access times are comparable to those for shared memory
+ (as long as concurrent reads access different 
+\begin_inset Quotes eld
 \end_inset
 
-.
- However, the difference in lookup time between shared and global memory
- can be as much as 15,000%
-\begin_inset Note Note
-status open
+banks
+\begin_inset Quotes erd
+\end_inset
 
-\begin_layout Plain Layout
-cite
-\end_layout
+, an optimisation which we will not be concerned with here).
+ In contrast, the difference in lookup time between shared memory (4 clock
+ cycles) and global memory (up to 600 clock cycles) is significant
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Farber2008"
 
 \end_inset
 
@@ -967,6 +1594,12 @@ Host memory
 \end_layout
 
 \begin_layout Subsection
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Code-Hierarchy"
+
+\end_inset
+
 Code Hierarchy
 \end_layout
 
@@ -1047,13 +1680,10 @@ __device__
 __global__
 \family default
  respectively.
- In listing 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-what
-\end_layout
+ In Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Definition-of-four"
 
 \end_inset
 
@@ -1075,14 +1705,9 @@ baz
 \family default
 .
  Figure 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-
-\family typewriter
-what
-\end_layout
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Function-hierarchy:-host"
 
 \end_inset
 
@@ -1100,7 +1725,11 @@ baz
  To initiate computation on the GPU requires calling a kernel function from
  some host code, which uses its own syntax of the form 
 \family typewriter
-function_name<<<dimGrid, dimBlock>>>(arguments);
+
+\begin_inset Formula $\text{{functionName<<<dimGrid,dimBlock>>>(arguments);}}$
+\end_inset
+
+
 \family default
  where 
 \family typewriter
@@ -1115,7 +1744,14 @@ dimGrid
 \family typewriter
 dimBlock
 \family default
- will be explained in the next section.
+ are explained in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Thread-Hierarchy"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -1178,6 +1814,12 @@ end{lstlisting}
 \begin_inset Caption
 
 \begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Definition-of-four"
+
+\end_inset
+
 Definition of four CUDA functions: main is a host function, foo is a kernel
  function whilst bar and baz are device functions.
  Return and argument types are arbitrary, except that kernel functions must
@@ -1210,8 +1852,8 @@ status open
 
 
 \begin_inset Graphics
-	filename device_kernel_host_reachability.svg
-	height 25pheight%
+	filename device_kernel_host_reachability.png
+	height 25theight%
 
 \end_inset
 
@@ -1226,6 +1868,12 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Function-hierarchy:-host"
+
+\end_inset
+
 Function hierarchy: host code can call kernel functions, kernel functions
  can call device functions and device functions can call each other (non-recursi
 vely)
@@ -1247,10 +1895,79 @@ vely)
 
 \begin_layout Subsection
 Thread Hierarchy
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Thread-Hierarchy"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-CUDA has several layers of organisation for threads.
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset space \hfill{}
+\end_inset
+
+
+\begin_inset Graphics
+	filename execution-model.gif
+	height 45theight%
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:CUDA-thread-hierarchy."
+
+\end_inset
+
+CUDA thread hierarchy.
+ From 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kanter2008"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+CUDA has several layers of organisation for threads, shown in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:CUDA-thread-hierarchy."
+
+\end_inset
+
+.
  Each 
 \emph on
 thread
@@ -1297,20 +2014,14 @@ blockDim.y
 \family default
 .
  Thus 
-\begin_inset Formula $\text{{threadIdx.x}+\left(\text{{blockDim.x}\times}\text{{threadIdx.y}}\right)}$
+\family typewriter
+
+\begin_inset Formula $\text{{threadIdx.x} + \left(\text{{blockDim.x} \times\ }\text{{threadIdx.y}}\right)}$
 \end_inset
 
-is unique to each thread
-\begin_inset Note Note
-status open
 
-\begin_layout Plain Layout
-right way around?
-\end_layout
-
-\end_inset
-
-.
+\family default
+is unique to each thread.
  Similarly in three dimensions there is a 
 \family typewriter
 threadIdx.z
@@ -1322,29 +2033,40 @@ blockDim.z
  which can give a unique ID via
 \family typewriter
  
-\begin_inset Formula $\text{{threadIdx.x}+\left(\text{{blockDim.x}\times}\text{{threadIdx.y}}\right)+\left(\text{\left(\text{{blockDim.x}\times}\text{{blockDim.y}}\right)\times}\text{{threadIdx.z}}\right)}$
+\begin_inset Formula $\text{{threadIdx.x}+\text{{blockDim.x}\times}\text{\left(\text{{threadIdx.y}+\text{{blockDim.y}\times\text{{threadIdx.z}}}}\right)}}$
 \end_inset
 
 
 \family default
 .
  Note that these values are always defined, but are set to 1 if not used
- (for example in a one dimensional block, 
-\begin_inset Formula $\text{{threadIdx.y}}=\text{{threadIdx.z}=\text{{blockDim.y}=\text{{blockDim.z}=}}}1$
+ (for example in a one dimensional block 
+\family typewriter
+threadIdx.y
+\family default
+, 
+\family typewriter
+threadIdx.z
+\family default
+, 
+\family typewriter
+blockDim.y
+\family default
+ and 
+\family typewriter
+blockDim.z
+\family default
+ are all 1).
+ The same is true for a grid of blocks, except it can only be one or two
+ dimensional 
+\begin_inset CommandInset citation
+LatexCommand cite
+after "B.12"
+key "Nvidia2009"
+
 \end_inset
 
 .
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-is there a fourth?
-\end_layout
-
-\end_inset
-
- The same is true for a grid of blocks, except it can only be one or two
- dimensional.
  The equivalent bindings are 
 \family typewriter
 gridDim.x
@@ -1362,7 +2084,56 @@ blockIdx.x
 blockIdx.y
 \family default
 .
- There are no grid index (Idx) bindings since there is only ever one grid.
+ There are no grid index (
+\family typewriter
+Idx
+\family default
+) bindings since there is only ever one grid.
+\end_layout
+
+\begin_layout Standard
+The unique IDs defined in this way are very useful for distributing a workload,
+ as they allow unique indexing of an array.
+ For example, consider the simple kernel function in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Simple-CUDA-kernel"
+
+\end_inset
+
+ for summing two vectors.
+ It calculates the vector 
+\begin_inset Formula $C$
+\end_inset
+
+ from the relationship 
+\begin_inset Formula $A_{i}+B_{i}=C_{i}$
+\end_inset
+
+, using the mapping 
+\begin_inset Formula $i\equiv\text{{threadIdx.x}}$
+\end_inset
+
+ to ensure that every element is calculated exactly once.
+ When invoked by a host function with a call such as 
+\family typewriter
+
+\begin_inset Formula $\text{{foo<<<1,N>>>(A,B,C);}}$
+\end_inset
+
+
+\family default
+, each element of 
+\begin_inset Formula $C$
+\end_inset
+
+ will be calculated in its own thread (with N threads in total, requiring
+ at least N elements following the pointers).
+ This usage of CUDA is typical, and allows a stream processing/dataflow
+ style within the threaded model.
+ Moreover, allowing threads to obtain unique indices prevents conflicts,
+ since there is a simple way to ensure threads are accessing different areas
+ of memory and thus not overwriting each other.
 \end_layout
 
 \begin_layout Standard
@@ -1370,20 +2141,62 @@ To specify these dimensions, the extended syntax for the kernel function
  invocation is used.
  The first argument gives the grid dimensions and the second gives the block
  dimensions.
- These have the type dim3 (part of the CUDA libraries) and unspecified dimension
-s default to 1.
+ These have the type 
+\family typewriter
+dim3
+\family default
+ (part of the CUDA libraries) and unspecified dimensions default to 1.
  Thus a single integer specifies a one-dimensional structure, whilst a call
- such as dim3(x,y) specifies a two dimensional 
-\begin_inset Formula $x\times y$
+ such as 
+\family typewriter
+dim3(x,y)
+\family default
+ specifies a two dimensional 
+\begin_inset Formula $x\times y\times1$
 \end_inset
 
- structure and dim3(x,y,z) gives a three dimensional 
+ structure and 
+\family typewriter
+dim3(x,y,z)
+\family default
+ gives a three dimensional 
 \begin_inset Formula $x\times y\times z$
 \end_inset
 
  structure.
- These can be used within the triple arrows, but remember that grids (the
- first argument) can be a maximum of two dimensional.
+ These can be used within the triple arrows and implicitly contain the number
+ of threads to run, along with two optional arguments dealing with external
+ definitions in shared memory and 
+\begin_inset Quotes eld
+\end_inset
+
+streams
+\begin_inset Quotes erd
+\end_inset
+
+ which are not covered here.
+\end_layout
+
+\begin_layout Standard
+It is important to be aware of the limits imposed on blocks and grids (especiall
+y since no bound checking is performed and no errors are given): block dimension
+s are limited to 
+\begin_inset Formula $512\times512\times64$
+\end_inset
+
+ threads and each block can contain at most 512 threads (ie.
+ 
+\begin_inset Formula $x\times y\times z\leq512$
+\end_inset
+
+).
+ The dimensions of a grid are limited to 
+\begin_inset Formula $65535\times65535\times1$
+\end_inset
+
+, with no mention other than this of an explicit limit on the number of
+ blocks in a grid; although only 8 can run on each multiprocessor at a time,
+ this is managed automatically by CUDA.
 \end_layout
 
 \begin_layout Standard
@@ -1441,6 +2254,12 @@ end{lstlisting}
 \begin_inset Caption
 
 \begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Simple-CUDA-kernel"
+
+\end_inset
+
 Simple CUDA kernel function to add two vectors in parallel.
 \end_layout
 
@@ -1452,50 +2271,6 @@ Simple CUDA kernel function to add two vectors in parallel.
 \end_inset
 
 
-\end_layout
-
-\begin_layout Standard
-The unique IDs defined in this way are very useful for distributing a workload,
- as they allow unique indexing of an array.
- For example, consider the simple kernel function in
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-what
-\end_layout
-
-\end_inset
-
- for summing two vectors.
- It calculates the vector 
-\begin_inset Formula $C$
-\end_inset
-
- from the relationship 
-\begin_inset Formula $A_{i}+B_{i}=C_{i}$
-\end_inset
-
-, using the mapping 
-\begin_inset Formula $i\equiv\text{{threadIdx.x}}$
-\end_inset
-
- to ensure that every element is calculated exactly once.
- When invoked by a host function with a call such as 
-\family typewriter
-foo<<<1,N>>>(A, B, C);
-\family default
-, each element of 
-\begin_inset Formula $C$
-\end_inset
-
- will be calculated in its own thread (with N threads in total, requiring
- at least N elements).
- This usage of CUDA is typical, and allows a stream processing/dataflow
- style within the threaded model.
- Moreover, allowing threads to obtain unique indices prevents conflicts,
- since there is a simple way to ensure threads are accessing different areas
- of memory and thus not overwriting each other.
 \end_layout
 
 \begin_layout Section
@@ -1675,7 +2450,9 @@ mbox{Parallel SPH algorithm for NxN threads with sequential IDs}
 
 \begin_layout Plain Layout
 
-|sync|()
+|__syncthreads|() 
+\backslash
+rcomment{waits for all threads to catch up}
 \end_layout
 
 \begin_layout Plain Layout
@@ -1980,6 +2757,194 @@ reference "sec:Unworkable-Solutions"
 \end_inset
 
 .
+ Full source code listings can be found in Appendix 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Source-Code-Listings"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Common Code
+\end_layout
+
+\begin_layout Standard
+All implementations have code in common.
+ For the sentinel, pair-array and padded implementations these are shared
+ at the include level, whilst the linked lists implementation has slight
+ incompatibilities which prevents its complete integration.
+\end_layout
+
+\begin_layout Standard
+Aside from file reading (file_reading.c), which is trivial from a CSV spreadsheet
+, the common code is kept in datatypes.c and common_functions.c.
+ Functions specific to an implementation are in cuda_functions.cu, sentinel_funct
+ions.c and pair_array_functions.c whilst the entry points for each are cuda_tests.c
+u, sentinel_tests.c and pair_array_tests.c.
+ An attempt was made to combine the front-ends but it proved difficult to
+ include the CUDA parts due to GCC's rejection of the non-standard syntax
+ (Nvidia supplies a modified compiler), so this was abandoned.
+\end_layout
+
+\begin_layout Standard
+Common functionality is limited to high-level grid operations, such as getting
+ the largest numbers of particles in a cell, or else nothing to do with
+ the grid, such as numerical conveniences.
+ This is because the particle pointer (array) in the grid behaves in different
+ ways for each implementation.
+\end_layout
+
+\begin_layout Subsection
+Linked Lists
+\end_layout
+
+\begin_layout Standard
+A linked list is a simple data structure built from 
+\emph on
+nodes
+\emph default
+.
+ Each node stores some data and a pointer to the next node in the list.
+ This means that data can be spread throughout the memory, nodes can be
+ added and removed from a linked list in constant time and the length is
+ not fixed or bounded (except by available RAM).
+ Linked lists are powerful, for example much of the functionality in the
+ LISP and Scheme languages rely on recursive use of linked lists, but they
+ do have some disadvantages.
+ For example, getting the length of a linked list is 
+\begin_inset Formula $O\left(N_{nodes}\right)$
+\end_inset
+
+ and, if it's a singly linked list, there is no way to go backwards through
+ the nodes.
+\end_layout
+
+\begin_layout Standard
+The Linked Lists grid implementation is a serial algorithm which has a grid
+ implementation and a brute force implementation.
+ Inside the grid is an array of particles in arbitrary order and an array
+ of 
+\emph on
+cells
+\emph default
+ in row-major order (go through every z before increasing y, go through
+ every y before increasing x).
+ Each cell is the start of a linked list since they each store a pointer
+ to one particle in the grid's particle array.
+ The particles themselves have a next member which allows continuation of
+ the list and the end is marked by a null pointer.
+\end_layout
+
+\begin_layout Standard
+Processing particle interactions via the grid is achieved by following the
+ particle's container pointer to reach the cell; walking the linked list
+ from that cell; then visiting the nearest neighbour cells and walking their
+ linked lists.
+ To process interactions via brute force can be done simply by looping through
+ the particles array.
+ Unfortunately, despite many changes to facilitate it, this is not a suitable
+ implementation for CUDA, since linked lists can be spread all over the
+ RAM and thus are inefficient to transfer to multiprocessor shared memory,
+ whilst an unsorted particle array cannot be loaded efficiently without
+ searching it for relevant particles first.
+\end_layout
+
+\begin_layout Subsection
+Sentinels
+\end_layout
+
+\begin_layout Standard
+A sentinel is a dummy value.
+ The sentinels in this SPH implementation mark the boundaries between cells
+ from within the particle array itself.
+ No secondary datastructures like lists are involved, the particles are
+ grouped by cell and there is a simple way to get all of the particles of
+ a cell as an 
+\begin_inset Quotes eld
+\end_inset
+
+array
+\begin_inset Quotes erd
+\end_inset
+
+ (ie.
+ just take a pointer, since they're grouped).
+\end_layout
+
+\begin_layout Standard
+The problem with the sentinels approach is that many common operations become
+ dependent on larger powers of 
+\begin_inset Formula $N_{particles}$
+\end_inset
+
+.
+ For example to look up a specific cell requires traversing the array and
+ counting the sentinels on the way, which is 
+\begin_inset Formula $O\left(N\right)$
+\end_inset
+
+.
+ Also, whilst grouped into cells and sorted into grid-order, the particles
+ are not in the best state to be loaded by CUDA.
+ To efficiently copy data to shared memory with CUDA requires a thread for
+ every element, the elements to be arranged contiguously in RAM and for
+ the number to be known in advance.
+ There is no way for a thread which just loaded a sentinel to tell those
+ threads further on that they should stop, since they may have already finished
+ loading particles from the wrong cell.
+ These inefficiencies make this solution undesirable, but it was useful
+ to implement as a simple testbed.
+\end_layout
+
+\begin_layout Subsection
+Pair Arrays
+\end_layout
+
+\begin_layout Standard
+Rather than keep dummies spread throughout the particle array, in this implement
+ation they are coalesced into a complementary array, stored at the start
+ of the particles array.
+ Each dummy/sentinel contains (as the negation of it's ID) the index of
+ the array where it's particles start.
+\end_layout
+
+\begin_layout Standard
+This is much more efficient than the sentinel implementation, since cell
+ lookups only require 2 dereferences (ie.
+ constant time) and cell lengths can be found by subtracting the index stored
+ in the current dummy with that in the next dummy.
+ After the array of dummies, all of the particles are contiguous and grouped
+ by cell, which is better for use by CUDA but still not perfect.
+ A simple transformation can be used, however, to obtain the padded implementati
+on below.
+\end_layout
+
+\begin_layout Subsection
+Padded
+\end_layout
+
+\begin_layout Standard
+The best implementation for CUDA is to group the particles by cell, then
+ pad out each of these with non-interacting particles so that they all end
+ up the same length.
+ This is wasteful in terms of space, but means we can use the maximum cell
+ size as our thread block size and drag entire cells worth of particles
+ into shared memory at a time.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "references"
+options "plain"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -2273,6 +3238,16 @@ Having such a general coordinate system would be a useful property for the
  data structures would be of little use; certainly not worth the added complexit
 y in addressing for the small memory footprints it would see on an Nvidia
  GPU.
+\end_layout
+
+\begin_layout Section
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Source-Code-Listings"
+
+\end_inset
+
+Source Code Listings
 \end_layout
 
 \end_body
