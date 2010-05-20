@@ -39,7 +39,7 @@ int main() {
 	// Clean up
 	free(p_array);
 
-	//int index1;		// Used for indexing the "true" array
+	int index1;		// Used for indexing the "true" array
 	//int index2;		// Used for indexing the "brute" array
 	//int found;		// 0 means no match yet, 1 means match found
 	int test_x, test_y, test_z;
@@ -106,6 +106,11 @@ int main() {
 		
 		get_true_neighbours_for_particle(&the_grid, test_particle,
 			&true_neighbour_array, &true_neighbour_number);
+
+		// INTERACT
+		for (index1 = 0; index1 < true_neighbour_number; index1++) {
+			interact(test_particle, &(true_neighbour_array[index1]));
+		}
 	
 		//fprintf(stderr, "True neighhbours: %i\n", true_neighbour_number);
 
