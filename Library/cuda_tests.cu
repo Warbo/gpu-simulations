@@ -11,7 +11,7 @@ int main() {
 	 */
 
 	// How many cycles to perform
-	int interaction_number = 10;
+	int interaction_number = 0;
 	
 	// Read in our particles
 	int particle_number;
@@ -69,12 +69,12 @@ int main() {
 	int index;
 	for (index=0; index < interaction_number; index++) {
 		// Calculate the interactions using the grid
-		//do_cell<<<dimGrid, CELLSIZE>>>(all_particles_device, CELLSIZE,
-		//	the_grid.x_size, the_grid.y_size, the_grid.z_size);
+		do_cell<<<dimGrid, CELLSIZE>>>(all_particles_device, CELLSIZE,
+			the_grid.x_size, the_grid.y_size, the_grid.z_size);
 
 		// Brute force interactions
-		brute_force<<<dimGrid, CELLSIZE>>>(all_particles_device, CELLSIZE,
-			the_grid.x_size, the_grid.y_size, the_grid.z_size);
+		//brute_force<<<dimGrid, CELLSIZE>>>(all_particles_device, CELLSIZE,
+		//	the_grid.x_size, the_grid.y_size, the_grid.z_size);
 	}
 
 	// Get results back
