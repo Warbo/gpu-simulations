@@ -88,12 +88,12 @@ int main() {
 	cudaFree(all_particles_device);
 
 	// DEBUG
-	for (index=0; index <
+	/*for (index=0; index <
 		(the_grid.x_size * the_grid.y_size * the_grid.z_size) * CELLSIZE;
 	index++) {
 		printf("%G\n", padded_particles[index].x_acc);
 	}
-	printf("%G\n", padded_particles[0].x_acc);
+	printf("%G\n", padded_particles[0].x_acc);*/
 
 	// Exit
 	return 0;
