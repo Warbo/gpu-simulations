@@ -1948,7 +1948,7 @@ There are many ways to implement the gridding algorithm for Smoothed-Particle
  Hydrodynamics.
  It was important to keep the solutions general, such that any datastructures
  and algorithms could be used to model the particles and interactions, so
- no assumptions could be made about either except that the particles contain
+ no assumptions could be made about either, except that the particles contain
  three-dimensional Cartesian coordinates and a size.
 \end_layout
 
@@ -1973,12 +1973,9 @@ padded
  implementations.
  Other possibilities were investigated but ultimately abandoned, the reasons
  for this are explored in Appendix 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-what
-\end_layout
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Unworkable-Solutions"
 
 \end_inset
 
@@ -1987,6 +1984,12 @@ what
 
 \begin_layout Section
 \start_of_appendix
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Unworkable-Solutions"
+
+\end_inset
+
 Unworkable Solutions
 \end_layout
 
@@ -2008,11 +2011,25 @@ In C the physical location of data is reified into data itself through the
 \emph on
 pointers
 \emph default
-, invoked by the address-of operator &.
+, invoked by the address-of operator 
+\family typewriter
+&
+\family default
+.
  Pointers are pervasive in the C approach to programming, as they are the
- only way to achieve certain tasks (short of Godel numbering).
- A pointer is a positive (unsigned) integer which is an address in RAM which
- holds a certain piece of data.
+ only way to achieve certain tasks (short of Godel numbering
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+cite
+\end_layout
+
+\end_inset
+
+).
+ A pointer is a positive (unsigned) integer which for an address in RAM
+ that holds a certain piece of data.
  Pointers also have a 
 \emph on
 type
@@ -2022,13 +2039,41 @@ type
 \emph on
 dereference
 \emph default
-, written foo[index] where foo is a pointer and index an integer offset,
- an amount of data is fetched from RAM starting at the location 
+, written 
+\family typewriter
+foo[index]
+\family default
+ where 
+\family typewriter
+foo
+\family default
+ is a pointer and 
+\family typewriter
+index
+\family default
+ an integer offset, an amount of data is fetched from RAM starting at the
+ location
+\family typewriter
+ 
 \begin_inset Formula $\text{{foo}}+\left(\text{{sizeof}}\left(\text{{foo's}type}\right)\times\text{{index}}\right)$
 \end_inset
 
- and of length sizeof(foo's type).
- A shorthand for foo[0] is *foo.
+
+\family default
+ and of length 
+\family typewriter
+sizeof(foo's type)
+\family default
+.
+ A shorthand for 
+\family typewriter
+foo[0]
+\family default
+ is 
+\family typewriter
+*foo
+\family default
+.
 \end_layout
 
 \begin_layout Standard
@@ -2040,11 +2085,21 @@ The direct manipulation of memory in this way allows an instantiation of
  the grid: namely, how to specify the contents of a cell with as little
  overhead as possible.
  For zero- and one-dimensional grids, the implementation using an array
- abstraction was obvious, along the lines of [cell 0, cell 1, cell 2, ...,
- cell N], but the problem of unequal numbers of particles in each cell would
- cause either an extra dimension to be used, which although conceptually
- close would in fact cause non-contiguous storage in memory, or the loss
- of constant-time lookups (by reading through the array).
+ abstraction was obvious, along the lines of 
+\family typewriter
+[cell 0, cell 1, cell 2, ..., cell N]
+\family default
+, but the problem of unequal numbers of particles in each cell would cause
+ either an extra dimension to be used, which although conceptually 
+\begin_inset Quotes eld
+\end_inset
+
+close
+\begin_inset Quotes erd
+\end_inset
+
+ would in fact use a non-contiguous area of memory, or the loss of constant-time
+ lookups (caused by reading through the array).
  The use of pointer arithmetic on 
 \begin_inset Quotes eld
 \end_inset
@@ -2065,19 +2120,27 @@ arrays
 Unfortunately the main advantage of this method is lost when higher dimensions
  are modelled, since contemporary RAM is one-dimensional which is insufficient
  to represent cell boundaries of two or more dimensions.
- Rather than achieving everything with fast ++ and -- operators on the grid
- metadata, discontinuities would have to be taken into account when mutating
- cell contents in a higher dimension, and even worse it would be necessary
- to touch the particle data as it is shuffled from one cell (array) to another
- (since the arrays cannot shuffle around the particles in more than the
- x dimension).
+ Rather than achieving everything with fast 
+\family typewriter
+++
+\family default
+ and 
+\family typewriter
+--
+\family default
+ operators on the grid metadata, discontinuities would have to be taken
+ into account when mutating cell contents in a higher dimension, and even
+ worse it would be necessary to touch the particle data as it is shuffled
+ from one cell (array) to another (since the arrays cannot shuffle around
+ the particles in more than the x dimension).
 \end_layout
 
 \begin_layout Standard
 This approach was therefore abandoned, despite the obvious simplicity and
  performance gains it would bring.
- However, it is certainly a worthy option to consider for one-dimensional
- models and machines with higher-dimensional memory.
+ However unsuitable as it was for this problem, it is certainly a worthy
+ option to consider for one-dimensional models and machines with higher-dimensio
+nal memory.
 \end_layout
 
 \begin_layout Subsection
@@ -2088,9 +2151,12 @@ Boundless Grids
 A simplistic mapping of higher dimensions to one dimensional memory turns
  spaces into planes by tiling the slices, and turns planes into lines by
  concatenating the rows.
- An example used throughout this project looks like [(0,0,0), (0,0,1), ...,
- (0,0,z_max), (0,1,0), (0,1,1), ..., (0,y_max,z_max), (1,0,0), (1,0,1), ..., (x_max,y_
-max,z_max)].
+ An example used throughout this project looks like 
+\family typewriter
+[(0,0,0), (0,0,1), ..., (0,0,z_max), (0,1,0), (0,1,1), ..., (0,y_max,z_max), (1,0,0),
+ (1,0,1), ..., (x_max,y_max,z_max)]
+\family default
+.
 \end_layout
 
 \begin_layout Standard
@@ -2100,7 +2166,11 @@ A problem inherent in this, however, is the requirement to bound the space.
 \begin_inset Quotes eld
 \end_inset
 
+
+\family typewriter
 x_max
+\family default
+
 \begin_inset Quotes erd
 \end_inset
 
@@ -2108,7 +2178,11 @@ x_max
 \begin_inset Quotes eld
 \end_inset
 
+
+\family typewriter
 y_max
+\family default
+
 \begin_inset Quotes erd
 \end_inset
 
@@ -2116,7 +2190,11 @@ y_max
 \begin_inset Quotes eld
 \end_inset
 
+
+\family typewriter
 z_max
+\family default
+
 \begin_inset Quotes erd
 \end_inset
 
@@ -2126,13 +2204,16 @@ z_max
  would not be unique and could not therefore be dereferenced or used as
  identifiers.
 \begin_inset Foot
-status open
+status collapsed
 
 \begin_layout Plain Layout
 Negative particle positions are of course allowed in the four final implementati
 ons, and are accounted for by giving the grid an offset from the particles;
- essentially locating the (0,0,0) cell such that its position is less than
- those of every particle.
+ essentially locating the
+\family typewriter
+ (0,0,0)
+\family default
+ cell such that its position is less than those of every particle.
  The existence of these offsets makes explicit the fact that we've artificially
  truncated the lower bounds of the system.
 \end_layout
@@ -2143,10 +2224,8 @@ ons, and are accounted for by giving the grid an offset from the particles;
 \end_layout
 
 \begin_layout Standard
-An attempt was made to overcome these limitations by using a diagonal method
- for addressing every coordinate in a countably infinite space.
- The method is similar to the construction in Cantor's diagonal argument
- for showing the different cardinalities of the Naturals and the Reals.
+An attempt was made to overcome these limitations by using a space-filling
+ method for addressing every coordinate in a countably infinite space.
  Rather than progressing solely in one dimension, reaching the 
 \begin_inset Quotes eld
 \end_inset
@@ -2164,11 +2243,15 @@ start
 \end_inset
 
 , in this construction the array stores successive diagonal slices through
- the octants of the space, enumerating the nodes of a space-filling tree.
- An example would be [(0,0,0), (0,0,1), (0,1,0), (1,0,0), (0,0,2), (0,1,1),
- (0,2,0), (1,0,1), (1,1,0), (2,0,0), ...] which includes three diagonal slices
- through the positive octant, or equivalently the first three layers of
- a space-filling tree with positive branches.
+ the octants of the space, effectively enumerating the nodes of a space-filling
+ tree.
+ An example would be 
+\family typewriter
+[(0,0,0), (0,0,1), (0,1,0), (1,0,0), (0,0,2), (0,1,1), (0,2,0), (1,0,1),
+ (1,1,0), (2,0,0), ...]
+\family default
+ which includes three diagonal slices through the positive octant, or equivalent
+ly the first three layers of a space-filling tree with positive branches.
  Since the number of octants making up the whole of a space is finite (8)
  we can represent them all in a linear array by simply interleaving the
  elements.
@@ -2186,9 +2269,9 @@ This approach allows any cell coordinates to be addressed, thus there is
 
 \begin_layout Standard
 Having such a general coordinate system would be a useful property for the
- grid, however the constraints imposed by CUDA on memory make access to
- infinite data structures a low priority; certainly not worth the added
- complexity in addressing for the limited uses it would see on an Nvidia
+ grid, however given the constraints already imposed by CUDA such infinite
+ data structures would be of little use; certainly not worth the added complexit
+y in addressing for the small memory footprints it would see on an Nvidia
  GPU.
 \end_layout
 

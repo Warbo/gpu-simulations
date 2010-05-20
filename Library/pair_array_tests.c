@@ -43,12 +43,10 @@ int main() {
 	//int index2;		// Used for indexing the "brute" array
 	//int found;		// 0 means no match yet, 1 means match found
 	int test_x, test_y, test_z;
-	//particle* neighbour_array;
-	particle* true_neighbour_array;
-	//int neighbour_number = -1;
-	//particle* brute_force_neighbours;
-	//int total_neighbours = -1;
-	int true_neighbour_number = -1;
+	//particle* true_neighbour_array;
+	particle* brute_force_neighbours;
+	int total_neighbours = -1;
+	//int true_neighbour_number = -1;
 	//float delta_x, delta_y, delta_z;
 	
 	particle* test_particle = NULL;
@@ -91,37 +89,31 @@ int main() {
 
 		// Find its neighbours through the grid
 		// This will point to an array of neighbours
-		
-		// This will tell us how long the array is
-		
-		//get_potential_neighbours_for_particle(&the_grid, test_particle,
-		//	&neighbour_array, &neighbour_number);
-		
-		// DEBUGGING
-		//assert(neighbour_number >= 0);
-
-		//fprintf(stderr, "Potentials found: %i\n", neighbour_number);
 	
 		// Now find which of those are true neighbours
 		
-		get_true_neighbours_for_particle(&the_grid, test_particle,
-			&true_neighbour_array, &true_neighbour_number);
+		//get_true_neighbours_for_particle(&the_grid, test_particle,
+		//	&true_neighbour_array, &true_neighbour_number);
 
 		// INTERACT
-		for (index1 = 0; index1 < true_neighbour_number; index1++) {
-			interact(test_particle, &(true_neighbour_array[index1]));
-		}
+		//for (index1 = 0; index1 < true_neighbour_number; index1++) {
+		//	interact(test_particle, &(true_neighbour_array[index1]));
+		//}
 	
 		//fprintf(stderr, "True neighhbours: %i\n", true_neighbour_number);
 
 		
-		//get_neighbours_brute_force(&the_grid, test_particle,
-		//&(brute_force_neighbours), &total_neighbours);
+		get_neighbours_brute_force(&the_grid, test_particle,
+			&(brute_force_neighbours), &total_neighbours);
+
+		// INTERACT
+		for (index1 = 0; index1 < total_neighbours; index1++) {
+			interact(test_particle, &(brute_force_neighbours[index1]));
+		}
 	
 		//fprintf(stderr, "True neighbours from all: %i\n", total_neighbours);
 
 		//assert(total_neighbours == true_neighbour_number);
-		//assert(total_neighbours < neighbour_number);
 
 		// Check every particle found
 	
@@ -179,10 +171,11 @@ int main() {
 			assert(found == 1);
 		
 		}
-*/
+		*/
+		
 		// Clean up
-		free(true_neighbour_array);
-		//free(brute_force_neighbours);
+		//free(true_neighbour_array);
+		free(brute_force_neighbours);
 		
 	}
 	// Success
