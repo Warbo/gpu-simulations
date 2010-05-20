@@ -40,7 +40,7 @@ int main() {
 	free(p_array);
 
 	int index1;		// Used for indexing the "true" array
-	//int index2;		// Used for indexing the "brute" array
+	int index2;		// Used for indexing the "brute" array
 	//int found;		// 0 means no match yet, 1 means match found
 	int test_x, test_y, test_z;
 	particle* true_neighbour_array;
@@ -51,6 +51,10 @@ int main() {
 	
 	particle* test_particle = NULL;
 	int test_particle_index;
+
+	// Run multiple interactions
+	for (index2=0; index2<10; index2++) {
+
 	for (test_particle_index=(
 			the_grid.x_size * the_grid.y_size * the_grid.z_size
 		); test_particle_index < particle_number+(
@@ -178,6 +182,7 @@ int main() {
 		//free(brute_force_neighbours);
 		
 	}
+}
 	// Success
 	return 0;
 	

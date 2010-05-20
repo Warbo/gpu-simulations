@@ -11,7 +11,7 @@ int main() {
 	 */
 
 	// How many cycles to perform
-	int interaction_number = 1;
+	int interaction_number = 10;
 	
 	// Read in our particles
 	int particle_number;
