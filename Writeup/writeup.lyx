@@ -2805,10 +2805,18 @@ sideways false
 status open
 
 \begin_layout Plain Layout
+\begin_inset space \hfill{}
+\end_inset
+
+
 \begin_inset Graphics
 	filename linkedlist_grid.png
 	width 80col%
 
+\end_inset
+
+
+\begin_inset space \hfill{}
 \end_inset
 
 
@@ -2830,7 +2838,7 @@ Diagram of the grid datastructure in the linked lists implementation.
  or particle pointing to it.
  Processing each particle in a cell means following the arrows until they
  stop.
- Construction of these lists is very simple, as it using them, but passing
+ Construction of these lists is very simple, as is using them, but passing
  the data around is more complex than using a pointer (array).
  Empty cells point to null, and every particle contains a pointer to its
  cell (so that the start of its list can be reached).
@@ -2918,10 +2926,18 @@ sideways false
 status open
 
 \begin_layout Plain Layout
+\begin_inset space \hfill{}
+\end_inset
+
+
 \begin_inset Graphics
 	filename sentinels_grid.png
 	width 80col%
 
+\end_inset
+
+
+\begin_inset space \hfill{}
 \end_inset
 
 
@@ -3020,10 +3036,18 @@ sideways false
 status open
 
 \begin_layout Plain Layout
+\begin_inset space \hfill{}
+\end_inset
+
+
 \begin_inset Graphics
 	filename pair_array_grid.png
 	width 80col%
 
+\end_inset
+
+
+\begin_inset space \hfill{}
 \end_inset
 
 
@@ -3122,7 +3146,7 @@ The overhead from setting up the grid follows a power law of
 \end_inset
 
  operation and thus of less significance than the interaction calculations.
- 
+ The mostly-overhead initial data points have not been used for the fit.
 \end_layout
 
 \end_inset
@@ -3173,7 +3197,7 @@ pair arrays
 \begin_inset Quotes erd
 \end_inset
 
- grid implementation compared to brute force.
+ grid implementation (red) compared to brute force (green).
  The power laws are 
 \begin_inset Formula $1.997\approx2$
 \end_inset
@@ -3191,6 +3215,8 @@ pair arrays
 \end_inset
 
  performance.
+ The first three data points of each have been neglected, as this is mostly
+ constant overhead.
 \end_layout
 
 \end_inset
