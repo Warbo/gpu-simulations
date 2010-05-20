@@ -87,7 +87,7 @@ int main() {
 	for (index=0; index <
 		(the_grid.x_size * the_grid.y_size * the_grid.z_size) * CELLSIZE;
 	index++) {
-		printf("%G\n", all_particles_host[index].x_acc);
+		printf("%G\n", padded_particles[index].x_acc);
 	}
 	printf("%G\n", padded_particles[0].x_acc);
 
