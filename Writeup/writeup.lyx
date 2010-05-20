@@ -607,12 +607,9 @@ transaction
  The implementation of high-level atomic transactions (such as atomic functions)
  is an area of parallel programming research, although is difficult to realise
  due to the Two Generals problem
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-cite
-\end_layout
+\begin_inset CommandInset citation
+LatexCommand cite
+key "L.Lamport1982"
 
 \end_inset
 
@@ -2702,7 +2699,7 @@ on radius becomes large (this is due to overcrowded cells, where most of
  It is important at this point to note the difference between a grid of
  cell containing particles, decribed in this paragraph, and CUDA's grid
  of blocks containing threads, described previously.
- They have no relation in this implementation
+ They have no relation in this implementation.
 \begin_inset Foot
 status open
 
@@ -2713,7 +2710,7 @@ An attempt was made to model the SPH grid directly with a CUDA grid, but
 
 \end_inset
 
-.
+
 \end_layout
 
 \begin_layout Section
@@ -2802,6 +2799,58 @@ Linked Lists
 \end_layout
 
 \begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename linkedlist_grid.png
+	width 80col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:DiagramLinked"
+
+\end_inset
+
+Diagram of the grid datastructure in the linked lists implementation.
+ Each cell points to one of its particles, and each particle points to another
+ particle from the same cell, such that every particle has exactly one cell
+ or particle pointing to it.
+ Processing each particle in a cell means following the arrows until they
+ stop.
+ Construction of these lists is very simple, as it using them, but passing
+ the data around is more complex than using a pointer (array).
+ Empty cells point to null, and every particle contains a pointer to its
+ cell (so that the start of its list can be reached).
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 A linked list is a simple data structure built from 
 \emph on
 nodes
@@ -2823,19 +2872,25 @@ nodes
 \end_layout
 
 \begin_layout Standard
-The Linked Lists grid implementation is a serial algorithm which has a grid
- implementation and a brute force implementation.
+The Linked Lists grid implementation is a serial algorithm which has a branch
+ for the grid and a branch for brute force.
  Inside the grid is an array of particles in arbitrary order and an array
  of 
 \emph on
 cells
 \emph default
- in row-major order (go through every z before increasing y, go through
+ in column-major order (go through every z before increasing y, go through
  every y before increasing x).
- Each cell is the start of a linked list since they each store a pointer
- to one particle in the grid's particle array.
- The particles themselves have a next member which allows continuation of
- the list and the end is marked by a null pointer.
+ Each cell is the first node of a linked list and, if it contains any particles,
+ is followed by them in the chain of pointers, as shown in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:DiagramLinked"
+
+\end_inset
+
+.
+ The end is marked by a null pointer.
 \end_layout
 
 \begin_layout Standard
@@ -2857,9 +2912,64 @@ Sentinels
 \end_layout
 
 \begin_layout Standard
-A sentinel is a dummy value.
- The sentinels in this SPH implementation mark the boundaries between cells
- from within the particle array itself.
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename sentinels_grid.png
+	width 80col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:DiagramSentinel"
+
+\end_inset
+
+Diagram of the grid datastructure in the sentinels implementation.
+ Each dark entry in the particles array is a dummy (with an ID of -1) which
+ marks the start of a new cell, and thus the particles between two sentinels
+ are from the same cell.
+ Cells are stored in column-major order.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+A sentinel is a dummy value, used to represent the end of a datastructure.
+ In this SPH implementation the sentinels mark the boundaries between cells,
+ and are thus distributed through the particle array itself as shown in
+ figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:DiagramSentinel"
+
+\end_inset
+
+.
  No secondary datastructures like lists are involved, the particles are
  grouped by cell and there is a simple way to get all of the particles of
  a cell as an 
@@ -2904,6 +3014,200 @@ Pair Arrays
 \end_layout
 
 \begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename pair_array_grid.png
+	width 80col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:DiagramPair"
+
+\end_inset
+
+Diagram of the grid datastructure in the 
+\begin_inset Quotes eld
+\end_inset
+
+pair-array
+\begin_inset Quotes erd
+\end_inset
+
+ implementation.
+ The array of particles stores two distinct arrays: the first particles
+ (dark) each represent a cell in column-major order, the rest are the actual
+ particles grouped by cell and once again stored in column-major order.
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+cells
+\begin_inset Quotes erd
+\end_inset
+
+ in the first part of the array point to the start of their members in the
+ second part.
+ They store these indices as their particle ID, but negated so they cannot
+ be confused with real particles (who's IDs go up from zero).
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset space \hfill{}
+\end_inset
+
+
+\begin_inset Graphics
+	filename /home/chris/Files/Work/Project/gridding-serial/Results/pair-array_setup.png
+	width 60col%
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:The-overhead-from"
+
+\end_inset
+
+The overhead from setting up the grid follows a power law of 
+\begin_inset Formula $1.03\approx1$
+\end_inset
+
+, making this an 
+\begin_inset Formula $O\left(N_{particles}\right)$
+\end_inset
+
+ operation and thus of less significance than the interaction calculations.
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename /home/chris/Files/Work/Project/gridding-serial/Results/pairs_grid-brute-force_times.png
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Performance-of-pair"
+
+\end_inset
+
+Performance of 
+\begin_inset Quotes eld
+\end_inset
+
+pair arrays
+\begin_inset Quotes erd
+\end_inset
+
+ grid implementation compared to brute force.
+ The power laws are 
+\begin_inset Formula $1.997\approx2$
+\end_inset
+
+ for brute force, making it 
+\begin_inset Formula $O\left(N_{particles}^{2}\right)$
+\end_inset
+
+, whilst the grid follows 
+\begin_inset Formula $1.05\approx1$
+\end_inset
+
+ to give 
+\begin_inset Formula $O\left(N_{particles}\right)$
+\end_inset
+
+ performance.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 Rather than keep dummies spread throughout the particle array, in this implement
 ation they are coalesced into a complementary array, stored at the start
  of the particles array.
@@ -2919,21 +3223,110 @@ This is much more efficient than the sentinel implementation, since cell
  After the array of dummies, all of the particles are contiguous and grouped
  by cell, which is better for use by CUDA but still not perfect.
  A simple transformation can be used, however, to obtain the padded implementati
-on below.
+on of section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Padded"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Performance-of-pair"
+
+\end_inset
+
+ shows the power laws of the pair-array grid compared to brute force on
+ the same data.
+ The power of 1.05 is near-optimal in terms of scaling, clearly demonstrating
+ the grid's performance advantage over comparing every particle.
+ We can see the overhead caused by setting up the grid in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:The-overhead-from"
+
+\end_inset
+
+, which scales as 
+\begin_inset Formula $N^{1.03}$
+\end_inset
+
+ which is, once again, near-optimal.
+ This is the most sensible implementation to use in serial, and it is thus
+ used to initialise the CUDA calculations.
 \end_layout
 
 \begin_layout Subsection
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Padded"
+
+\end_inset
+
 Padded
 \end_layout
 
 \begin_layout Standard
-The best implementation for CUDA is to group the particles by cell, then
- pad out each of these with non-interacting particles so that they all end
- up the same length.
- This is wasteful in terms of space, but means we can use the maximum cell
- size as our thread block size and drag entire cells worth of particles
- into shared memory at a time.
+The simplest implementation for CUDA is to group the particles by cell,
+ then pad out each group until they are all the same length.
+ This makes the implementation similar to the N-body simulation in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Prins"
+
+\end_inset
+
+, but with the complication of not knowing the required number of threads,
+ etc.
  
+\emph on
+a priori
+\emph default
+.
+ Padding in this way wastes memory, but allows every cell to be handled
+ in an identical way, which makes life easier when spawning thousands of
+ instances of the same code.
+ Also, having contiguous groups lets the memory accesses be coalesced (the
+ whole group can be transferred at once, this is handled automatically by
+ CUDA), resulting in higher performance.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Nvidia2009"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The difficulty with the padded approach is that the largest number of particles
+ in a cell needs to be known before any memory allocation can take place.
+ We get around this in two ways: firstly we reuse the pair-array implementation
+ on the host, so that we can read in particles straight away without performing
+ any padding.
+ We then find the largest cell size and allocate based on that.
+ The second branch for 
+\begin_inset Quotes eld
+\end_inset
+
+handling
+\begin_inset Quotes erd
+\end_inset
+
+ this has roots in CUDA's memory model: each thread block can only have
+ one array in shared memory, which must be declared with a constant (ie.
+ a raw number) size.
+ A simple preprocessor macro lets us explicitly define this size, but since
+ this happens at compile-time it is possible that the input data contains
+ a cell larger than this compiled-in limit.
+ In this case we simply print a warning and the calculation is aborted,
+ which is not an elegant way to handle the scenario but allows us to keep
+ clear of metaprogramming (which is often more trouble than it's worth).
 \end_layout
 
 \begin_layout Standard
@@ -2983,12 +3376,9 @@ pointers
 .
  Pointers are pervasive in the C approach to programming, as they are the
  only way to achieve certain tasks (short of Godel numbering
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-cite
-\end_layout
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Goedel1931"
 
 \end_inset
 
