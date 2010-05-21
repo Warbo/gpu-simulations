@@ -51,28 +51,24 @@ Physics Simulations on Graphics Cards
 \end_layout
 
 \begin_layout Abstract
-A computer simulation is presented which implements a Smoothed-Particle
- Hydrodynamics model through the use of CUDA.
+A collection of computer simulations is presented which implements a Smoothed-Pa
+rticle Hydrodynamics model through the use of CUDA.
  CUDA is a library developed by Nvidia to allow arbitrary computation to
- be performed by the company's Graphical Processing Units: a cheap, massively
+ be performed by the company's Graphics Processing Units: a cheap, massively
  parallel hardware architecture.
  The SPH model was chosen as an example of a non-trivial application, and
  an emphasis was placed on producing reusable, generic algorithms and code.
  Whilst the difficulties of parallel programming were taken into account
  from the start, throughout the implementation lessons were learned about
- the abilities and limitations of CUDA and how best to utilise the technology.
- These are discussed along with the results of the effort, which produced
- a simulation 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-give some stats
-\end_layout
-
-\end_inset
-
-.
+ the abilities and limitations of CUDA and how best to utilise this new
+ technology.
+ After an extensive introduction to the difficulties of parallel programming,
+ these implementation details are presented in the hope that they prove
+ useful to future coding projects.
+ Finally the results of the effort are discussed which, averaged over the
+ measurements taken, show the CUDA code to be 23 times faster than the CPU
+ at the naive brute force model and 4 times faster than the CPU at the optimised
+ grid model.
 \end_layout
 
 \begin_layout Section
@@ -161,8 +157,7 @@ program
 \emph on
 high-level
 \emph default
- (bearing little relation to the machine, requiring pattern matching to
- implement) such as (redundantly named) 
+ (bearing little relation to the machine) such as 
 \begin_inset Quotes eld
 \end_inset
 
@@ -185,7 +180,11 @@ key "Turing1936,Turing1938"
 
 , but are necessarily distinct in order to minimise the transformation from
  our mental model to the programming paradigm.
- In this project the simulation approach is taken, which is a
+ In this project the 
+\emph on
+simulation
+\emph default
+ approach is taken, which is a
 \emph on
  
 \emph default
@@ -199,13 +198,16 @@ The main advantage to simulations is the lack of abstractions such as sets,
  which are often used to model the behaviour of large systems.
  In a simulation, a (usually) simple correspondance is made between the
  physical system of the model and the physical system of the machine.
- This makes programming a simulation a relatively straightforward affair,
+ This makes programming simulations a relatively straightforward affair,
  and the results contain much more information than the existential and
  aggregate output obtained from more abstract models.
  The proof is also stronger as it depends on the validity of fewer assumptions.
  However, this inevitably leads to the biggest problem of simulations: their
  consumption of resources.
- Less intensive symbol manipulation, such as statistical mechanics, is simple
+\end_layout
+
+\begin_layout Standard
+Less intensive symbol manipulation, such as statistical mechanics, is simple
  enough to perform manually, whereas simulation had to wait for the advent
  of fast mechanical computers before it could tackle systems of similar
  complexity.
@@ -231,26 +233,13 @@ For example this project makes extensive use of
 assertions
 \emph default
 : statements placed strategically throughout the code which explicitly state
- the assumptions required for that code to work (eg.
- a function given a pointer may assume that the pointer is not null), which
- terminate the program if false.
- The algorithm to assign particles to grid cells suffered a bug which caused
- the program to abort, since the assertion ensuring that the given particle
- has been assigned to the correct cell occasionally failed.
- Upon investigation, all of the failures showed the particle to be outside
- the cell by a distance on the order of 
-\begin_inset Formula $10^{-5}$
-\end_inset
-
-, which is the (arbitrarily chosen) precision of the position values.
- Thus claiming these particles are inside a cell and outside a cell is valid,
- as long as they are consistently assigned.
- A modification of 
-\begin_inset Formula $\pm3\times10^{-6}$
-\end_inset
-
- to the assertions stopped these false-positives from aborting the program,
- and no more issues were encountered with the cell assignment code.
+ the assumptions being made and abort the execution if they are not valid.
+ Due to the limited precision of the input, perfectly valid actions were
+ being flagged as inappropriate since the decision to take the action was
+ rounding a different way than the sanity check afterwards.
+ By giving the assertions a safe margin of precision the problem of false
+ positives was eliminated.
+ 
 \end_layout
 
 \end_inset
@@ -393,9 +382,19 @@ locks
 \emph on
 deadlock
 \emph default
- (where two machines require two locks before accessing memory, one machine
- holds one lock, the other machine holds the other lock and neither is capable
- of proceeding).
+
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Deadlock describes a situation where two machines require two locks before
+ accessing memory; one machine holds one lock, the other machine holds the
+ other lock and neither is capable of proceeding.
+\end_layout
+
+\end_inset
+
+.
  A trivial method, such as an optimisation pass in a compiler, for effectively
  utilising resources in parallel is a much sought-after goal in many research
  groups.
@@ -512,7 +511,10 @@ asynchronous
 \emph default
  (non-blocking, the next instruction is carried out without waiting for
  the call to finish).
- The reason for this not being 
+\end_layout
+
+\begin_layout Standard
+The reason for this not being 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1179,7 +1181,7 @@ The model adopted by CUDA is threaded, so none of the above systems can
 \begin_inset Float algorithm
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset ERT
@@ -1348,7 +1350,7 @@ A subtley flawed banking system, with simple algorithms for the server and
 \begin_inset Float algorithm
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset ERT
@@ -1459,7 +1461,7 @@ Memory Hierarchy
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset space \hfill{}
@@ -1468,7 +1470,7 @@ status open
 
 \begin_inset Graphics
 	filename grid-block-memory.gif
-	height 45theight%
+	height 40theight%
 
 \end_inset
 
@@ -1544,7 +1546,7 @@ global memory
 \emph on
 shared memory
 \emph default
- of the multiprocessors, connected to global memory through a cache.
+ of the multiprocessors.
  This memory is accessible to every core in its multiprocessor, and this
  ultimately determines the coarse-grain structure of the algorithms used.
  Finally each core in a multiprocessor (there are 8) has its own 
@@ -1553,6 +1555,11 @@ registers
 \emph default
 , directly read from and written to by the Arithmetic Logic Units (the mathemati
 cal circuitry) of each core.
+ We will neglect local memory, since it is as slow as global memory and
+ its usage is seen as a bad idea (although to spot this requires trawling
+ through object code).
+ Texture memory is only useful for integrating rendering in a program, and
+ we don't have enough constants to make use of constant memory.
 \end_layout
 
 \begin_layout Standard
@@ -1720,15 +1727,19 @@ baz
 \family default
  must be mutually exclusive.
  To initiate computation on the GPU requires calling a kernel function from
- some host code, which uses its own syntax of the form 
-\family typewriter
-
-\begin_inset Formula $\text{{functionName<<<dimGrid,dimBlock>>>(arguments);}}$
+ some host code, which uses its own syntax of the form
+\begin_inset Newline newline
 \end_inset
 
 
+\family typewriter
+ 
+\lang british
+functionName<<<dimGrid,dimBlock>>>(arguments);
+\lang english
+ 
 \family default
- where 
+where 
 \family typewriter
 arguments
 \family default
@@ -1755,7 +1766,7 @@ reference "sub:Thread-Hierarchy"
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset ERT
@@ -1817,9 +1828,9 @@ name "fig:Definition-of-four"
 
 \end_inset
 
-Definition of four CUDA functions: main is a host function, foo is a kernel
+Declaration of four CUDA functions: main is a host function, foo is a kernel
  function whilst bar and baz are device functions.
- Return and argument types are arbitrary, except that kernel functions must
+ Returns and arguments are arbitrary, except that kernel functions must
  return void.
 \end_layout
 
@@ -1841,7 +1852,7 @@ Definition of four CUDA functions: main is a host function, foo is a kernel
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset space \hfill{}
@@ -1905,7 +1916,7 @@ name "sub:Thread-Hierarchy"
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset space \hfill{}
@@ -1951,6 +1962,10 @@ key "Kanter2008"
 
 \end_layout
 
+\begin_layout Plain Layout
+
+\end_layout
+
 \end_inset
 
 
@@ -1983,8 +1998,25 @@ grid
 dimensions
 \emph default
 , similar to an array; purportedly for convienience reasons, but actually
- a necessity due to CUDA's in-built limitations.
- The idea of block dimensions is to give each thread a location is a space.
+ a necessity due to CUDA's in-built limitations
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Initial attempts at implementing this project tried to avoid blocks and
+ grids, instead opting for a simple array (a single one-dimensional block
+ in a zero-dimensional grid) of threads.
+ However this had to be abandoned since such arrays can only be 512 threads
+ long.
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The idea of block dimensions is to give each thread a location in a space.
  For a one-dimensional block, each thread can get its location via the name
  
 \family typewriter
@@ -2012,13 +2044,17 @@ blockDim.y
 .
  Thus 
 \family typewriter
-
-\begin_inset Formula $\text{{threadIdx.x} + \left(\text{{blockDim.x} \times\ }\text{{threadIdx.y}}\right)}$
+threadIdx.x 
+\begin_inset Formula $+$
 \end_inset
 
+ (blockDim.x 
+\begin_inset Formula $\times$
+\end_inset
 
+ threadIdx.y)
 \family default
-is unique to each thread.
+ is unique to each thread.
  Similarly in three dimensions there is a 
 \family typewriter
 threadIdx.z
@@ -2027,13 +2063,25 @@ threadIdx.z
 \family typewriter
 blockDim.z
 \family default
- which can give a unique ID via
+ which can give a unique ID via 
 \family typewriter
- 
-\begin_inset Formula $\text{{threadIdx.x}+\text{{blockDim.x}\times}\text{\left(\text{{threadIdx.y}+\text{{blockDim.y}\times\text{{threadIdx.z}}}}\right)}}$
+threadIdx.x 
+\begin_inset Formula $+$
 \end_inset
 
+ blockDim.x 
+\begin_inset Formula $\times$
+\end_inset
 
+ (threadIdx.y 
+\begin_inset Formula $+$
+\end_inset
+
+ blockDim.y 
+\begin_inset Formula $\times$
+\end_inset
+
+ threadIdx.z)
 \family default
 .
  Note that these values are always defined, but are set to 1 if not used
@@ -2058,7 +2106,6 @@ blockDim.z
  dimensional 
 \begin_inset CommandInset citation
 LatexCommand cite
-after "B.12"
 key "Nvidia2009"
 
 \end_inset
@@ -2108,36 +2155,42 @@ reference "fig:Simple-CUDA-kernel"
 \end_inset
 
 , using the mapping 
-\begin_inset Formula $i\equiv\text{{threadIdx.x}}$
+\begin_inset Formula $i\equiv$
 \end_inset
 
- to ensure that every element is calculated exactly once.
- When invoked by a host function with a call such as 
+
 \family typewriter
-
-\begin_inset Formula $\text{{foo<<<1,N>>>(A,B,C);}}$
-\end_inset
-
-
+threadIdx.x 
 \family default
+to ensure that every element is calculated exactly once.
+ When invoked by a host function with a call such as
+\family typewriter
+ 
+\lang british
+foo<<<1,N>>>(A,B,C);
+\family default
+\lang english
 , each element of 
 \begin_inset Formula $C$
 \end_inset
 
  will be calculated in its own thread (with N threads in total, requiring
  at least N elements following the pointers).
- This usage of CUDA is typical, and allows a stream processing/dataflow
- style within the threaded model.
+\end_layout
+
+\begin_layout Standard
+This usage of CUDA is typical, and allows a stream processing/dataflow style
+ within the threaded model.
  Moreover, allowing threads to obtain unique indices prevents conflicts,
  since there is a simple way to ensure threads are accessing different areas
  of memory and thus not overwriting each other.
 \end_layout
 
 \begin_layout Standard
-To specify these dimensions, the extended syntax for the kernel function
- invocation is used.
- The first argument gives the grid dimensions and the second gives the block
- dimensions.
+To specify the dimensions of the blocks and grid, the extended syntax for
+ the kernel function invocation is used.
+ The first argument in the triple angle brackets gives the grid dimensions
+ and the second gives the block dimensions.
  These have the type 
 \family typewriter
 dim3
@@ -2162,16 +2215,9 @@ dim3(x,y,z)
 
  structure.
  These can be used within the triple arrows and implicitly contain the number
- of threads to run, along with two optional arguments dealing with external
- definitions in shared memory and 
-\begin_inset Quotes eld
-\end_inset
-
-streams
-\begin_inset Quotes erd
-\end_inset
-
- which are not covered here.
+ of threads to run.
+ Two more optional arguments won't be covered here as they have very specific
+ uses (externally defined shared memory and data streams).
 \end_layout
 
 \begin_layout Standard
@@ -2192,15 +2238,32 @@ s are limited to
 \end_inset
 
 , with no mention other than this of an explicit limit on the number of
- blocks in a grid; although only 8 can run on each multiprocessor at a time,
- this is managed automatically by CUDA.
+ blocks in a grid (although only 8 can run at once on each multiprocessor,
+ but CUDA manages this).
+\end_layout
+
+\begin_layout Standard
+A final consideration to be aware of is that the shared memory in a block
+ is accessed in a perculiar way: firstly, if a kernel function allocates
+ an array in shared memory then only one array gets created, even if 512
+ running threads pass the line which does the allocation.
+ Secondly there can only ever be one array in shared memory: if you want
+ more than one then they will have to be concatenated together, and the
+ types cast appropriately for every access.
+ Thirdly the size of the array must be a raw number (using a preprocessor
+ macro to write this is fine); there is no way to specify a shared memory
+ array without compiling in the length.
+ These requirements deserve special attention since the shared memory of
+ a block/multiprocessor should be the main hub of activity in a suitably
+ parallel algorithm.
+ 
 \end_layout
 
 \begin_layout Standard
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset ERT
@@ -2265,6 +2328,10 @@ Simple CUDA kernel function to add two vectors in parallel.
 
 \end_layout
 
+\begin_layout Plain Layout
+
+\end_layout
+
 \end_inset
 
 
@@ -2278,7 +2345,7 @@ Smoothed-Particle Hydrodynamics
 \begin_inset Float algorithm
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset ERT
@@ -2408,7 +2475,7 @@ Naive serial implementation of Smoothed-Particle Hydrodynamics
 \begin_inset Float algorithm
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset ERT
@@ -2520,8 +2587,9 @@ particles
  with a much larger spatial extent.
  These particles carry various bulk properties in their representation of
  the fluid, which are mutated over time.
- For this computational problem will only concern ourselves with the spatial
- properties: the coordinates and the characteristic size, known as the 
+ For this computational problem we will only concern ourselves with the
+ spatial properties: the coordinates and the characteristic size, known
+ as the 
 \emph on
 smoothing length
 \emph default
@@ -2568,8 +2636,63 @@ reference "alg:Naive-parallel-implementation"
 \end_layout
 
 \begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset space \hfill{}
+\end_inset
+
+
+\begin_inset Graphics
+	filename particle_functions.png
+	width 70col%
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Gaussian-kernel-functions"
+
+\end_inset
+
+Gaussian kernel functions for particles in a one-dimensional Smoothed-Particle
+ Hydrodynamics system.
+ Every particle interacts with every other particle, but after a distance
+ the contributions become negligible.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 This is still incredibly wasteful, and we can trim down the calculations
- to perform considerably by exploiting the nature of the model.
+ to perform considerably fewer comparisons by exploiting the nature of the
+ model.
  In SPH each particle has a 
 \begin_inset Quotes eld
 \end_inset
@@ -2583,7 +2706,14 @@ shape
 kernel function
 \emph default
  (not to be confused with the concept of a kernel function in CUDA!), which
- governs the amplitude of particle interactions.
+ governs the amplitude of particle interactions, as shown in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Gaussian-kernel-functions"
+
+\end_inset
+
+.
  Typical functions are Gaussians and cubic splines, but can be anything
  which falls off over distance.
  The rate of fall off is governed by the smoothing length, but in the case
@@ -2681,6 +2811,56 @@ The Gridding Algorithm
 \end_layout
 
 \begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset space \hfill{}
+\end_inset
+
+
+\begin_inset Graphics
+	filename sph_grid.png
+	width 45col%
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+A two-dimensional SPH system.
+ Blue dots are particle positions and the radii of the red circles are equal
+ to the distance beyond which interactions are deemed negligible.
+ The introduction of a grid with said distance as its cell size captures
+ all meaningful interactions within a particle's cell or those adjacent
+ & diagonal.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 It would seem useful to keep track of each particle's nearest neighbours
  once they've been identified, but this would not help us since the particles
  move between time steps, which changes their neighbours from step to step.
@@ -2696,12 +2876,15 @@ It would seem useful to keep track of each particle's nearest neighbours
 on radius becomes large (this is due to overcrowded cells, where most of
  the particles in neighbouring cells are not nearest neighbours and are
  thus wasted comparisons), in other words when the density is highly non-uniform.
- It is important at this point to note the difference between a grid of
- cell containing particles, decribed in this paragraph, and CUDA's grid
- of blocks containing threads, described previously.
+\end_layout
+
+\begin_layout Standard
+It is also worth explicitly contrasting a grid of cells containing particles,
+ decribed in this paragraph, and CUDA's grid of blocks containing threads,
+ described previously.
  They have no relation in this implementation.
 \begin_inset Foot
-status open
+status collapsed
 
 \begin_layout Plain Layout
 An attempt was made to model the SPH grid directly with a CUDA grid, but
@@ -3094,10 +3277,6 @@ cells
 
 \end_layout
 
-\begin_layout Plain Layout
-
-\end_layout
-
 \end_inset
 
 
@@ -3107,7 +3286,7 @@ cells
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset space \hfill{}
@@ -3116,7 +3295,7 @@ status open
 
 \begin_inset Graphics
 	filename /home/chris/Files/Work/Project/gridding-serial/Results/pair-array_setup.png
-	width 60col%
+	width 100col%
 
 \end_inset
 
@@ -3137,16 +3316,25 @@ name "fig:The-overhead-from"
 
 \end_inset
 
-The overhead from setting up the grid follows a power law of 
+The overhead from setting up a grid follows a power law of 
 \begin_inset Formula $1.03\approx1$
 \end_inset
 
-, making this an 
+ in serial and 
+\begin_inset Formula $0.99\approx1$
+\end_inset
+
+ in parallel, making this an 
 \begin_inset Formula $O\left(N_{particles}\right)$
 \end_inset
 
- operation and thus of less significance than the interaction calculations.
- The mostly-overhead initial data points have not been used for the fit.
+ operation.
+ The lower data points are mainly constant overhead, bias the trend line
+ and thus the most pronounced have been discarded during the fit.
+ It is important to note that the CUDA initialisation is done with serial
+ code on the host, and does all of the work of the serial code before constructi
+ng padded arrays and sending them to the device and back, hence why the
+ parallel points are always above the serial.
 \end_layout
 
 \end_inset
@@ -3167,7 +3355,7 @@ The overhead from setting up the grid follows a power law of
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset Graphics
@@ -3189,7 +3377,7 @@ name "fig:Performance-of-pair"
 
 \end_inset
 
-Performance of 
+Comparison between 
 \begin_inset Quotes eld
 \end_inset
 
@@ -3197,34 +3385,35 @@ pair arrays
 \begin_inset Quotes erd
 \end_inset
 
- grid implementation (red) compared to brute force (green).
- The power laws are 
-\begin_inset Formula $1.997\approx2$
+ serial grid implementation (red), brute force serial implementation (green),
+ 
+\begin_inset Quotes eld
 \end_inset
 
- for brute force, making it 
-\begin_inset Formula $O\left(N_{particles}^{2}\right)$
+padded
+\begin_inset Quotes erd
 \end_inset
 
-, whilst the grid follows 
-\begin_inset Formula $1.05\approx1$
+ parallel grid implementation (blue) and brute force parallel implementation
+ (purple).
+ The power laws governing the scaling for each line as it tends to infinity
+ are arranged anticlockwise from the bottom.
+ The brute force methods have powers 
+\begin_inset Formula $\sim2$
 \end_inset
 
- to give 
-\begin_inset Formula $O\left(N_{particles}\right)$
+ and the grids have powers 
+\begin_inset Formula $\sim1$
 \end_inset
 
- performance.
- The first three data points of each have been neglected, as this is mostly
- constant overhead.
+, where serial algorithms are slightly higher and parallel algorithms are
+ slightly lower.
+ The serial grid implementation reached the most particles without failure,
+ although its speed became impractical to test any further.
 \end_layout
 
 \end_inset
 
-
-\end_layout
-
-\begin_layout Plain Layout
 
 \end_layout
 
@@ -3298,8 +3487,75 @@ Padded
 \end_layout
 
 \begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset space \hfill{}
+\end_inset
+
+
+\begin_inset Graphics
+	filename padded_grid.png
+	width 80col%
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:DiagramPadded"
+
+\end_inset
+
+Diagram of the grid datastructure in the 
+\begin_inset Quotes eld
+\end_inset
+
+padded
+\begin_inset Quotes erd
+\end_inset
+
+ implementation used by CUDA.
+ Particles are stored in column-major order, with each cell taking up the
+ same amount of room.
+ Here there are three cells of seven particles, although the left two need
+ some dummies to make sure they pad out to the right length.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 The simplest implementation for CUDA is to group the particles by cell,
- then pad out each group until they are all the same length.
+ then pad out each group until they are all the same length, as seen in
+ figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:DiagramPadded"
+
+\end_inset
+
+.
  This makes the implementation similar to the N-body simulation in 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -3353,6 +3609,193 @@ handling
  In this case we simply print a warning and the calculation is aborted,
  which is not an elegant way to handle the scenario but allows us to keep
  clear of metaprogramming (which is often more trouble than it's worth).
+\end_layout
+
+\begin_layout Standard
+The padded approach is parallel and shown in algorithm 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "alg:CUDA-sph"
+
+\end_inset
+
+.
+ This corresponds closely to the C code in appendix 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Source-Code-Listings"
+
+\end_inset
+
+, except for the usual boilerplate to implement these high-level concepts.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float algorithm
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{program}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+mbox{Parallel SPH grid, to be run concurrently by one thread per particle}
+\end_layout
+
+\begin_layout Plain Layout
+
+|localparticles| := |particle|[2*|cellsize|] 
+\backslash
+rcomment{define shared array}
+\end_layout
+
+\begin_layout Plain Layout
+
+|localparticles|[|ID|
+\backslash
+%|cellsize|] = |allparticles|[|ID|]
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+FOR |n | in | neighbours| 
+\backslash
+DO
+\end_layout
+
+\begin_layout Plain Layout
+
+ |localparticles|[|cellsize|+|ID| 
+\backslash
+% |cellsize|] = |n|[|ID|
+\backslash
+%|cellsize|]
+\end_layout
+
+\begin_layout Plain Layout
+
+ |syncthreads|()
+\end_layout
+
+\begin_layout Plain Layout
+
+ 
+\backslash
+FOR |p | in | localparticles|[|cellsize|:] 
+\backslash
+DO
+\end_layout
+
+\begin_layout Plain Layout
+
+  
+\backslash
+IF |p|=|localparticles|[|ID| 
+\backslash
+% |cellsize|]
+\end_layout
+
+\begin_layout Plain Layout
+
+   
+\backslash
+rcomment{Do nothing}
+\end_layout
+
+\begin_layout Plain Layout
+
+  
+\backslash
+ELSE
+\end_layout
+
+\begin_layout Plain Layout
+
+   |interact|(|p|, |localparticles|[|ID| 
+\backslash
+% |cellsize|])
+\end_layout
+
+\begin_layout Plain Layout
+
+  
+\backslash
+FI
+\end_layout
+
+\begin_layout Plain Layout
+
+ 
+\backslash
+OD
+\end_layout
+
+\begin_layout Plain Layout
+
+ |syncthreads|()
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+OD
+\end_layout
+
+\begin_layout Plain Layout
+
+|allparticles|[|ID|] = |localparticles|[|ID| 
+\backslash
+% |cellsize|]
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{program}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "alg:CUDA-sph"
+
+\end_inset
+
+CUDA implementation of SPH grid
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard

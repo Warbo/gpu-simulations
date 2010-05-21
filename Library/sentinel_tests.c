@@ -23,10 +23,7 @@ int main() {
 
 	// Clean up
 	free(p_array);
-	
-	return 0;
-}
-/*
+
 	// Choose a particle randomly from the group
 	particle* test_particle = NULL;
 	int test_probe;
@@ -149,4 +146,4 @@ int main() {
 	return 0;
 	
 }
-*/
+

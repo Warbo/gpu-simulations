@@ -557,7 +557,7 @@ void get_neighbours_brute_force(grid* the_grid, particle* the_particle,
 	// Now populate the array
 	int position = 0;
 	for (index = 0; index < all_count; index++) {
-		if ((the_grid->particles[index].id >= -1) &&
+		if ((the_grid->particles[index].id >= 0) &&
 				   (get_distance(&(the_grid->particles[index]), the_particle) <=
 				   the_grid->dx) &&
 				   (the_particle->id != the_grid->particles[index].id)) {
