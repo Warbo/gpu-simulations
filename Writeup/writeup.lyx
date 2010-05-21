@@ -6,6 +6,10 @@
 \begin_preamble
 \usepackage{program}
 \usepackage{listings}
+\usepackage{color}                                                                                                                                                            
+\usepackage{alltt}                                                                                                                                                            
+%\usepackage[latin9,latin1]{inputenc}                                                                                                                                                 
+                                                                                                                                                                            \input {highlight.sty}                                                                                                                                                        
 \end_preamble
 \use_default_options true
 \language english
@@ -24,12 +28,16 @@
 \spacing single
 \use_hyperref false
 \papersize default
-\use_geometry false
+\use_geometry true
 \use_amsmath 1
 \use_esint 1
 \cite_engine basic
 \use_bibtopic false
 \paperorientation portrait
+\leftmargin 2cm
+\topmargin 2cm
+\rightmargin 2cm
+\bottommargin 2cm
 \secnumdepth 3
 \tocdepth 3
 \paragraph_separation indent
@@ -48,6 +56,14 @@
 
 \begin_layout Title
 Physics Simulations on Graphics Cards
+\end_layout
+
+\begin_layout Author
+Christopher Warbuton
+\begin_inset Newline newline
+\end_inset
+
+supervisors Dr Simon Goodwin & Dr David Hubber
 \end_layout
 
 \begin_layout Abstract
@@ -2929,22 +2945,7 @@ padded
 \emph default
  implementations.
  Other possibilities were investigated but ultimately abandoned, the reasons
- for this are explored in Appendix 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "sec:Unworkable-Solutions"
-
-\end_inset
-
-.
- Full source code listings can be found in Appendix 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "sec:Source-Code-Listings"
-
-\end_inset
-
-.
+ for this are explored in their relevant sections.
 \end_layout
 
 \begin_layout Subsection
@@ -2985,7 +2986,7 @@ Linked Lists
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset space \hfill{}
@@ -3091,11 +3092,26 @@ Processing particle interactions via the grid is achieved by following the
  linked lists.
  To process interactions via brute force can be done simply by looping through
  the particles array.
- Unfortunately, despite many changes to facilitate it, this is not a suitable
- implementation for CUDA, since linked lists can be spread all over the
- RAM and thus are inefficient to transfer to multiprocessor shared memory,
- whilst an unsorted particle array cannot be loaded efficiently without
- searching it for relevant particles first.
+ Unfortunately, despite many changes to facilitate it (notably replacing
+ arrays of neighbour pointers in each cell with on-the-fly calculation of
+ neighbours), this is not a suitable implementation for CUDA, since linked
+ lists can be spread all over the RAM and thus are inefficient to transfer
+ to multiprocessor shared memory, whilst an unsorted particle array cannot
+ be loaded efficiently without searching it for relevant particles first.
+\end_layout
+
+\begin_layout Standard
+The code is included for historical significance, even though it is not
+ integrated with the rest of the code in this section (due to the slightly
+ different 
+\family typewriter
+particle
+\family default
+ and 
+\family typewriter
+grid
+\family default
+ implementations from those used by all of the rest).
 \end_layout
 
 \begin_layout Subsection
@@ -3106,7 +3122,7 @@ Sentinels
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset space \hfill{}
@@ -3206,6 +3222,14 @@ The problem with the sentinels approach is that many common operations become
  loading particles from the wrong cell.
  These inefficiencies make this solution undesirable, but it was useful
  to implement as a simple testbed.
+ Performance can be seen in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Results"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsection
@@ -3216,7 +3240,7 @@ Pair Arrays
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset space \hfill{}
@@ -3283,146 +3307,6 @@ cells
 \end_layout
 
 \begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status collapsed
-
-\begin_layout Plain Layout
-\begin_inset space \hfill{}
-\end_inset
-
-
-\begin_inset Graphics
-	filename /home/chris/Files/Work/Project/gridding-serial/Results/pair-array_setup.png
-	width 100col%
-
-\end_inset
-
-
-\begin_inset space \hfill{}
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:The-overhead-from"
-
-\end_inset
-
-The overhead from setting up a grid follows a power law of 
-\begin_inset Formula $1.03\approx1$
-\end_inset
-
- in serial and 
-\begin_inset Formula $0.99\approx1$
-\end_inset
-
- in parallel, making this an 
-\begin_inset Formula $O\left(N_{particles}\right)$
-\end_inset
-
- operation.
- The lower data points are mainly constant overhead, bias the trend line
- and thus the most pronounced have been discarded during the fit.
- It is important to note that the CUDA initialisation is done with serial
- code on the host, and does all of the work of the serial code before constructi
-ng padded arrays and sending them to the device and back, hence why the
- parallel points are always above the serial.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status collapsed
-
-\begin_layout Plain Layout
-\begin_inset Graphics
-	filename /home/chris/Files/Work/Project/gridding-serial/Results/pairs_grid-brute-force_times.png
-	width 100col%
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption
-
-\begin_layout Plain Layout
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:Performance-of-pair"
-
-\end_inset
-
-Comparison between 
-\begin_inset Quotes eld
-\end_inset
-
-pair arrays
-\begin_inset Quotes erd
-\end_inset
-
- serial grid implementation (red), brute force serial implementation (green),
- 
-\begin_inset Quotes eld
-\end_inset
-
-padded
-\begin_inset Quotes erd
-\end_inset
-
- parallel grid implementation (blue) and brute force parallel implementation
- (purple).
- The power laws governing the scaling for each line as it tends to infinity
- are arranged anticlockwise from the bottom.
- The brute force methods have powers 
-\begin_inset Formula $\sim2$
-\end_inset
-
- and the grids have powers 
-\begin_inset Formula $\sim1$
-\end_inset
-
-, where serial algorithms are slightly higher and parallel algorithms are
- slightly lower.
- The serial grid implementation reached the most particles without failure,
- although its speed became impractical to test any further.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
 Rather than keep dummies spread throughout the particle array, in this implement
 ation they are coalesced into a complementary array, stored at the start
  of the particles array.
@@ -3473,7 +3357,14 @@ reference "fig:The-overhead-from"
 
  which is, once again, near-optimal.
  This is the most sensible implementation to use in serial, and it is thus
- used to initialise the CUDA calculations.
+ used to initialise the CUDA calculations in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Padded"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsection
@@ -3620,21 +3511,14 @@ reference "alg:CUDA-sph"
 \end_inset
 
 .
- This corresponds closely to the C code in appendix 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "sec:Source-Code-Listings"
-
-\end_inset
-
-, except for the usual boilerplate to implement these high-level concepts.
+ This corresponds closely to the C code of the project.
 \end_layout
 
 \begin_layout Standard
 \begin_inset Float algorithm
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \begin_inset ERT
@@ -3798,25 +3682,7 @@ CUDA implementation of SPH grid
 
 \end_layout
 
-\begin_layout Standard
-\begin_inset CommandInset bibtex
-LatexCommand bibtex
-bibfiles "references"
-options "plain"
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Section
-\start_of_appendix
-\begin_inset CommandInset label
-LatexCommand label
-name "sec:Unworkable-Solutions"
-
-\end_inset
-
+\begin_layout Subsection
 Unworkable Solutions
 \end_layout
 
@@ -3828,7 +3694,7 @@ There were several approaches to the gridding algorithm considered but never
  to take when modelling parallel software in C and CUDA.
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Subsubsection
 Pure Pointer Arithmetic
 \end_layout
 
@@ -3967,7 +3833,7 @@ This approach was therefore abandoned, despite the obvious simplicity and
 nal memory.
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Subsubsection
 Boundless Grids
 \end_layout
 
@@ -3977,8 +3843,8 @@ A simplistic mapping of higher dimensions to one dimensional memory turns
  concatenating the rows.
  An example used throughout this project looks like 
 \family typewriter
-[(0,0,0), (0,0,1), ..., (0,0,z_max), (0,1,0), (0,1,1), ..., (0,y_max,z_max), (1,0,0),
- (1,0,1), ..., (x_max,y_max,z_max)]
+[(0, 0, 0), (0, 0, 1), ..., (0, 0, z_max), (0, 1, 0), (0, 1, 1), ..., (0, y_max,
+ z_max), (1, 0, 0), (1, 0, 1), ..., (x_max, y_max, z_max)]
 \family default
 .
 \end_layout
@@ -4071,8 +3937,8 @@ start
  tree.
  An example would be 
 \family typewriter
-[(0,0,0), (0,0,1), (0,1,0), (1,0,0), (0,0,2), (0,1,1), (0,2,0), (1,0,1),
- (1,1,0), (2,0,0), ...]
+[(0, 0, 0), (0, 0, 1), (0, 1, 0), (1, 0, 0), (0, 0, 2), (0, 1, 1), (0, 2,
+ 0), (1, 0, 1), (1, 1, 0), (2, 0, 0), ...]
 \family default
  which includes three diagonal slices through the positive octant, or equivalent
 ly the first three layers of a space-filling tree with positive branches.
@@ -4100,13 +3966,394 @@ y in addressing for the small memory footprints it would see on an Nvidia
 \end_layout
 
 \begin_layout Section
+Results
 \begin_inset CommandInset label
 LatexCommand label
-name "sec:Source-Code-Listings"
+name "sec:Results"
 
 \end_inset
 
-Source Code Listings
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename /home/chris/Files/Work/Project/gridding-serial/Results/pairs_grid-brute-force_times.png
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Performance-of-pair"
+
+\end_inset
+
+Comparison between 
+\begin_inset Quotes eld
+\end_inset
+
+pair arrays
+\begin_inset Quotes erd
+\end_inset
+
+ serial grid implementation (red), brute force serial implementation (green),
+ 
+\begin_inset Quotes eld
+\end_inset
+
+padded
+\begin_inset Quotes erd
+\end_inset
+
+ parallel grid implementation (blue) and brute force parallel implementation
+ (purple).
+ The power laws governing the scaling for each line as it tends to infinity
+ are arranged anticlockwise from the bottom.
+ The brute force methods have powers 
+\begin_inset Formula $\sim2$
+\end_inset
+
+ and the grids have powers 
+\begin_inset Formula $\sim1$
+\end_inset
+
+, where serial algorithms are slightly higher and parallel algorithms are
+ slightly lower.
+ The serial grid implementation reached the most particles without failure,
+ although its speed became impractical to test any further.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The main results for this project are shown in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Performance-of-pair"
+
+\end_inset
+
+.
+ This clearly shows the grid approach working (the power of 
+\begin_inset Formula $N_{particles}$
+\end_inset
+
+ is 
+\begin_inset Formula $\sim1$
+\end_inset
+
+) and beating the brute force everything-compared-with-everything-else method.
+ It also shows the parallel implementations beating the serial ones, especially
+ in the brute force method where the serial code takes 23 times as long
+ as the parallel code, which makes the effort worth it.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset space \hfill{}
+\end_inset
+
+
+\begin_inset Graphics
+	filename /home/chris/Files/Work/Project/gridding-serial/Results/sentinel_particle.png
+	width 80col%
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:The-sentinels-implementation"
+
+\end_inset
+
+The sentinels implementation is highly inefficient, scaling as 
+\begin_inset Formula $O\left(N_{particles}^{2}\right)$
+\end_inset
+
+, and thus was superceded by the other implementations.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+It comes as no surprise that the brute force algorithm would be well suited
+ to a GPU, since there is no clever logic to perform; just raw, repetitive
+ number crunching.
+ The brute force results go up in stages, an indicator of parallel execution
+ as the number of threads reaches and surpasses certain conditions useful
+ in optimising them (for example coalescing memory access if it's a multiple
+ of 4 bytes).
+ At around 700 particles the parallel implementations manage to overcome
+ their large overhead and become the fastest, and for more than 2000 particles
+ the parallel grid is clearly seen to be the best method, as it was expected
+ to be.
+\end_layout
+
+\begin_layout Standard
+The sentinels are not shown on this graph since that implementation, although
+ correct and simple, runs with 
+\begin_inset Formula $O\left(N^{2}\right)$
+\end_inset
+
+ performance (see figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:The-sentinels-implementation"
+
+\end_inset
+
+).
+ Thus it was left out of the serial-to-parallel comparison.
+\end_layout
+
+\begin_layout Standard
+All show deviation from their large-N scaling behaviour as the constant
+ overheads become dominant.
+ A closer inspection of this is shown in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:The-overhead-from"
+
+\end_inset
+
+.
+ The comparison there is rather unfair since the CUDA initialisation includes
+ the pair-array initialisation, thus guaranteeing worse performance, but
+ the worry over memory bandwidth seems unnecessary as the two paths approach
+ each other for high N (which would not be expected if bandwidth were a
+ bottleneck, as large N would make the system go slower and diverge).
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset space \hfill{}
+\end_inset
+
+
+\begin_inset Graphics
+	filename /home/chris/Files/Work/Project/gridding-serial/Results/pair-array_setup.png
+	width 80col%
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:The-overhead-from"
+
+\end_inset
+
+The overhead from setting up a grid follows a power law of 
+\begin_inset Formula $1.03\approx1$
+\end_inset
+
+ in serial and 
+\begin_inset Formula $0.99\approx1$
+\end_inset
+
+ in parallel, making this an 
+\begin_inset Formula $O\left(N_{particles}\right)$
+\end_inset
+
+ operation.
+ The lower data points are mainly constant overhead, bias the trend line
+ and thus the most pronounced have been discarded during the fit.
+ It is important to note that the CUDA initialisation is done with serial
+ code on the host, and does all of the work of the serial code before constructi
+ng padded arrays and sending them to the device and back, hence why the
+ parallel points are always above the serial.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+A lot of optimisation work could be done on this code base, but doing so
+ would over-complicate the pedagogical nature of the code.
+ Two immediate examples worth mentioning are directly building a padded
+ array based on the 
+\family typewriter
+CELLSIZE
+\family default
+ definition, rather than building a pair-array first then converting it;
+ and using the shared memory in the brute force approach so that collections
+ of particles can fill their shared memory, process the contents then empty
+ it.
+ As it stands the kernel function for brute force simply walks through the
+ global memory and reads each particle (to ensure a realistic speed despite
+ not doing anything with the particle).
+\end_layout
+
+\begin_layout Section
+Conclusion & Future Work
+\end_layout
+
+\begin_layout Standard
+The difficulties of parallel programming in general, let alone in a low-level
+ language, can be overwhelming at times, and CUDA is both a help and a hindrance
+ to this: whilst relieving the drudgery of managing the graphics card, CUDA
+ still has many shortcomings which crop up over and again such as the limits
+ on block sizes, the requirement to read assembler to check for access to
+ local memory, the fact that manual loop unrolling gives a performance advantage
+, and so on.
+ CUDA is begging to be abstracted over, but all current bindings are simply
+ foreign function interfaces or just help to manage writing C source code;
+ a far cry from abstraction.
+ On the other hand, getting one's hands dirty to implement these simulations
+ does make the operations of the hardware more intuitive.
+ Whether that's a good thing or an incidental thing remains to be seen.
+\end_layout
+
+\begin_layout Standard
+CUDA is certainly a promising technology, however it is still a new system
+ and is currently in the limbo between being released and having convenient,
+ high-level libraries.
+ There are some emerging projects like Thrust
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Hoberock"
+
+\end_inset
+
+ for C++, but it is still not possible to do anything truly interesting
+ with CUDA without interacting with it at a very low level.
+ However, the more generic algorithms like those implemented in this project
+ there are, the easier the task to construct such libraries and high-level
+ languages.
+ These seem like low priorities for Nvidia though, since by its very nature
+ CUDA has attracted those in need of speed and optimisation, rather than
+ simplicity and understandability, so CUDA looks set to remain close to
+ the metal for the foreseeable future.
+\end_layout
+
+\begin_layout Standard
+The biggest drawback with the system is the lack of feedback on errors,
+ making debugging particlarly difficult.
+ For example if too many threads are started, the GPU will appear to be
+ working, yet all of the memory copied out of it will be zeros.
+ The inability to printf debug is frustrating, requiring an awful lot of
+ checks in the code to make sure everything is doing what is assumed of
+ it, and the general inability to use regular debugging tools all has a
+ detrimental impact on productivity.
+ Until this is addressed it is doubtful that GPGPU programming will catch
+ on outside the high-performance crowd, and if it does then Nvidia's CUDA
+ Programming Guide
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Nvidia2009"
+
+\end_inset
+
+ will be a ubiquitous resource, as its casual allusion to most of the various
+ gotchas and bizarre behaviour of CUDA is all of the documentation these
+ issues seem to have.
+\end_layout
+
+\begin_layout Standard
+It would be interesting to contrast these experiences with OpenCL, the standardi
+sed competitor to CUDA, and see what techniques are useful in that paradigm.
+ The lack of vendor control over OpenCL makes it promising, but without
+ much real implementation outside Apple it still has a lot of catching up
+ to CUDA to do.
+ Hopefully the algorithms implemented here are generic enough to easily
+ port to other systems like OpenCL, the Cell broadband engine, etc.
+ and parallel enough to distribute across clusters and networks such that
+ they are not tied irreversibly tied to Nvidia's technology.
+ At the very least it is hoped that by providing these resources it will
+ be of use to those experimenting with CUDA for themselves.
+\end_layout
+
+\begin_layout Standard
+\align center
+
+\shape smallcaps
+\size large
+The full source code for every part of this project, including this document,
+ as well as its entire revision history, is in the Public Domain and can
+ be cloned from http://gitorious.org/gpu-simulations
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "references"
+options "plain"
+
+\end_inset
+
+
 \end_layout
 
 \end_body

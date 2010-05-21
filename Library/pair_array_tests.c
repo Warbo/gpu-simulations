@@ -39,6 +39,8 @@ int main() {
 	// Clean up
 	free(p_array);
 
+	// We need to declare things outside the loop
+	
 	int index1;		// Used for indexing the "true" array
 	int index2;		// Used for indexing the "brute" array
 	//int found;		// 0 means no match yet, 1 means match found
@@ -52,7 +54,7 @@ int main() {
 	particle* test_particle = NULL;
 	int test_particle_index;
 
-	// Run multiple interactions
+	// Run multiple interactions (10)
 	for (index2=0; index2<10; index2++) {
 
 	for (test_particle_index=(
@@ -94,8 +96,7 @@ int main() {
 		// Find its neighbours through the grid
 		// This will point to an array of neighbours
 	
-		// Now find which of those are true neighbours
-		
+		// Now find true neighbours
 		get_true_neighbours_for_particle(&the_grid, test_particle,
 			&true_neighbour_array, &true_neighbour_number);
 
@@ -103,7 +104,9 @@ int main() {
 		for (index1 = 0; index1 < true_neighbour_number; index1++) {
 			interact(test_particle, &(true_neighbour_array[index1]));
 		}
-	
+
+		// Below is debugging
+		
 		//fprintf(stderr, "True neighhbours: %i\n", true_neighbour_number);
 
 		

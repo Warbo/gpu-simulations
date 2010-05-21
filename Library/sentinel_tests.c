@@ -40,7 +40,7 @@ int main() {
 	// Clean up
 	free(p_array);
 
-	// Choose a particle randomly from the group
+	// Swap comments to switch between brute-force and grid
 	particle* test_particle = NULL;
 	//int test_x, test_y, test_z;
 	//int neighbour_number = -1;
@@ -54,10 +54,12 @@ int main() {
 	//int index2;		// Used for indexing the "brute" array
 	//int found;		// 0 means no match yet, 1 means match found
 	int particle_index;
-	
+
+	// Loop through every particle
 	for (particle_index=0; particle_index < the_grid.particle_number + (
 		the_grid.x_size * the_grid.y_size * the_grid.z_size
 	); particle_index++) {
+	// Only act if we're not on a sentinel
 	if (the_grid.particles[particle_index].id >= 0) {
 
 		test_particle = &(the_grid.particles[particle_index]);
@@ -94,15 +96,16 @@ int main() {
 		//fprintf(stderr, "Potentials found: %i\n", neighbour_number);
 	
 		// Now find which of those are true neighbours
-		
-		
 		get_true_neighbours_for_particle(&the_grid, test_particle,
 			&true_neighbour_array, &true_neighbour_number);
 
+		// Interact with neighbours
 		for (index1=0; index1<true_neighbour_number; index1++) {
 			interact(test_particle, &(true_neighbour_array[index1]));
 		}
-	
+
+		// Everything below is debugging
+		
 		//fprintf(stderr, "True neighhbours: %i\n", true_neighbour_number);
 
 		
